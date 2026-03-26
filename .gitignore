@@ -1,0 +1,33 @@
+# Dependencies and build
+node_modules/
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Resource files (reference only, not part of the product)
+resource/
+
+# Reveal.js source & project files (only dist/plugin/fonts needed)
+lib/js/
+lib/test/
+lib/examples/
+lib/css/
+lib/.github/
+lib/.codespellrc
+lib/.gitignore
+lib/.npmignore
+lib/LICENSE
+lib/README.md
+lib/gulpfile.js
+lib/demo.html
+lib/index.html
+lib/package.json
+lib/package-lock.json
+
+# OS files
+Thumbs.db
+*.swp
+*.swo
+

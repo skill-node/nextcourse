@@ -1,0 +1,87 @@
+/* ===================================
+   Standard 模板 - 默认配色方案
+   全屏画布风格，简洁活泼
+   =================================== */
+
+:root {
+    /* ===== 主色系 ===== */
+    --primary: #2563eb;
+    /* 核心蓝 */
+    --primary-dark: #1e3a8a;
+    /* 深蓝 */
+    --secondary: #0f172a;
+    /* 深色字 */
+    --accent: #f59e0b;
+    /* 强调黄 */
+    --success: #10b981;
+    /* 成功绿 */
+    --danger: #ef4444;
+    /* 危险红 */
+
+    /* ===== 模块封面颜色（10套） ===== */
+    --module-1: #2563eb;
+    /* 蓝色 - Primary Blue */
+    --module-2: #0f172a;
+    /* 深灰 - Dark Slate */
+    --module-3: #059669;
+    /* 绿色 - Emerald */
+    --module-4: #f59e0b;
+    /* 橙色 - Amber */
+    --module-5: #8b5cf6;
+    /* 紫色 - Violet */
+    --module-6: #ec4899;
+    /* 粉色 - Pink */
+    --module-7: #14b8a6;
+    /* 青色 - Teal */
+    --module-8: #ef4444;
+    /* 红色 - Red */
+    --module-9: #6366f1;
+    /* 靛蓝 - Indigo */
+    --module-10: #84cc16;
+    /* 黄绿 - Lime */
+
+    /* ===== 背景 ===== */
+    --bg-page: #f1f5f9;
+    /* 页面背景 */
+    --bg-slide: #ffffff;
+    /* 幻灯片背景 */
+    --bg-card: #ffffff;
+    /* 卡片背景 */
+    --bg-highlight: #fffbeb;
+    /* 高亮框背景（暖黄） */
+    --bg-vs-good: #f0fdf4;
+    /* 对比好背景 */
+    --bg-vs-bad: #fef2f2;
+    /* 对比坏背景 */
+    --bg-code: #f1f5f9;
+    /* 代码块背景 */
+    --bg-tag: #dbeafe;
+    /* 标签背景 */
+
+    /* ===== 边框 ===== */
+    --border-card: #e2e8f0;
+    /* 卡片边框 */
+    --border-vs-good: #bbf7d0;
+    /* 对比好边框 */
+    --border-vs-bad: #fecaca;
+    /* 对比坏边框 */
+
+    /* ===== 文字 ===== */
+    --text-heading: #0f172a;
+    /* 标题 */
+    --text-body: #475569;
+    /* 正文 */
+    --text-muted: #64748b;
+    /* 次要文字 */
+    --text-inverse: #ffffff;
+    /* 反色文字 */
+    --text-tag: #1e3a8a;
+    /* 标签文字 */
+
+    /* ===== 阴影 ===== */
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    /* ===== 布局变量 ===== */
+    --footer-height: 60px;
+}

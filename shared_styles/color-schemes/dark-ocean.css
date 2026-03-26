@@ -1,0 +1,122 @@
+/* ===================================
+   深海配色方案 (Dark Ocean Color Scheme)
+   适用于：投影仪暗场、低光环境
+   可通过 data-color-scheme="dark-ocean" 激活
+   =================================== */
+
+:root,
+[data-color-scheme="dark-ocean"] {
+    /* 主色调 */
+    --primary: #a5b4fc;
+    /* 淡紫 - 主色（调亮） */
+    --primary-dark: #1e293b;
+    /* 深灰蓝 */
+    --secondary: #5eead4;
+    /* 青绿 - 辅助色（调亮） */
+    --accent: #fcd34d;
+    /* 金黄 - 强调色（调亮） */
+    --danger: #fda4af;
+    /* 粉红 - 警示色（调亮） */
+
+    /* 背景色 - 纯色 */
+    --bg-page: #1e293b;
+    /* 页面背景 - 深灰蓝纯色 */
+    --bg-card: #334155;
+    /* 卡片背景 - 中灰蓝 */
+    --bg-code: #0f172a;
+    /* 代码块背景 */
+    --bg-header: #0f172a;
+    /* 顶部导航栏纯色 */
+
+    /* 卡片背景色（带色调）- 深色模式下更透明 */
+    --bg-card-primary: rgba(165, 180, 252, 0.08);
+    --bg-card-secondary: rgba(94, 234, 212, 0.08);
+    --bg-card-accent: rgba(252, 211, 77, 0.08);
+    --bg-card-danger: rgba(253, 164, 175, 0.08);
+
+    /* 文字色 - 深色模式全部使用浅色 */
+    --text-heading: #f8fafc;
+    /* 标题文字 - 近白 */
+    --text-body: rgba(248, 250, 252, 0.9);
+    /* 正文文字 */
+    --text-muted: rgba(248, 250, 252, 0.6);
+    /* 弱化文字 */
+    --text-inverse: #f8fafc;
+    /* 反色文字 - 深色模式下也用浅色 */
+    --text-code: #e2e8f0;
+    --text-code-accent: #5eead4;
+
+    /* 边框色 */
+    --border-card: rgba(255, 255, 255, 0.15);
+    --border-primary: var(--primary);
+    --border-secondary: var(--secondary);
+    --border-accent: var(--accent);
+    --border-danger: var(--danger);
+
+    /* 阴影 - 深色模式下减弱 */
+    --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    --shadow-hover: none;
+
+    /* 玻璃效果 */
+    --glass-bg: rgba(51, 65, 85, 0.95);
+    --glass-border: rgba(165, 180, 252, 0.3);
+}
+
+/* ===== 深色模式下的样式覆盖 ===== */
+
+/* 强制覆盖 body 背景为纯色 */
+body {
+    background: #1e293b !important;
+}
+
+/* 顶部导航栏文字颜色 */
+.header-bar {
+    color: #f8fafc !important;
+}
+
+.header-bar .title {
+    color: #f8fafc !important;
+}
+
+/* 卡片内所有标题和文字 */
+.card-primary h3,
+.card-indigo h3,
+.card-secondary h3,
+.card-teal h3,
+.card-accent h3,
+.card-amber h3,
+.card-danger h3,
+.card-coral h3 {
+    color: #f8fafc !important;
+}
+
+/* 课程目标卡片的标签文字 */
+.icon-card h3,
+.icon-card p,
+.icon-card span {
+    color: #f8fafc !important;
+}
+
+/* 结语页的大标题 */
+.reveal section h1.closing-title,
+.reveal section .closing-title {
+    color: #f8fafc !important;
+}
+
+/* 通用强调文字 - 确保可见 */
+.text-indigo,
+.text-teal,
+.text-amber,
+.text-coral {
+    filter: brightness(1.3);
+}
+
+/* 引用文字 */
+.quote {
+    color: rgba(248, 250, 252, 0.8) !important;
+}
+
+/* 分隔线 */
+.divider {
+    background: var(--secondary) !important;
+}

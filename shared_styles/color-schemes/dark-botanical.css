@@ -1,0 +1,130 @@
+/* ===================================
+   Dark Botanical — 深色 + 暖色调
+   灵感来源: frontend-slides Dark Botanical preset
+   适用于: 高端场合、优雅主题、品牌展示
+   字体: Cormorant (Display serif) + IBM Plex Sans (Body)
+   =================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+:root {
+    /* ===== 主色系 ===== */
+    --primary: #d4a574;
+    --primary-dark: #c9956a;
+    --secondary: #e8b4b8;
+    --accent: #c9b896;
+    --success: #8fbc8f;
+    --danger: #cd5c5c;
+
+    /* ===== 模块封面颜色（10套）— 暖色调 ===== */
+    --module-1: #d4a574;
+    --module-2: #2a2520;
+    --module-3: #8fbc8f;
+    --module-4: #c9b896;
+    --module-5: #b088a5;
+    --module-6: #e8b4b8;
+    --module-7: #7da58f;
+    --module-8: #cd5c5c;
+    --module-9: #6b7b8d;
+    --module-10: #a5946b;
+
+    /* ===== 背景 ===== */
+    --bg-page: #0f0f0f;
+    --bg-slide: #0f0f0f;
+    --bg-card: rgba(255, 255, 255, 0.04);
+    --bg-highlight: rgba(212, 165, 116, 0.08);
+    --bg-vs-good: rgba(143, 188, 143, 0.08);
+    --bg-vs-bad: rgba(205, 92, 92, 0.08);
+    --bg-code: #050505;
+    --bg-tag: rgba(212, 165, 116, 0.15);
+
+    /* ===== 边框 ===== */
+    --border-card: rgba(255, 255, 255, 0.08);
+    --border-vs-good: rgba(143, 188, 143, 0.2);
+    --border-vs-bad: rgba(205, 92, 92, 0.2);
+
+    /* ===== 文字 ===== */
+    --text-heading: #e8e4df;
+    --text-body: rgba(232, 228, 223, 0.85);
+    --text-muted: #9a9590;
+    --text-inverse: #0f0f0f;
+    --text-tag: #d4a574;
+
+    /* ===== 阴影 ===== */
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+    /* ===== 布局变量 ===== */
+    --footer-height: 60px;
+
+    /* ===== 字体 ===== */
+    --font-display: 'Cormorant', serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+}
+
+/* ===== 字体覆盖 ===== */
+body {
+    font-family: var(--font-body);
+    font-weight: 300;
+    background: #0f0f0f !important;
+}
+
+.reveal h1 {
+    font-family: var(--font-display) !important;
+    font-weight: 600 !important;
+    font-style: italic;
+    letter-spacing: 0.02em;
+}
+
+.reveal h2 {
+    font-family: var(--font-display) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+}
+
+.reveal h3 {
+    color: #d4a574 !important;
+}
+
+/* ===== 封面页 — 优雅感 ===== */
+.cover-slide .divider {
+    background: linear-gradient(90deg, #d4a574, #e8b4b8, #c9b896) !important;
+    height: 2px !important;
+    width: 120px !important;
+}
+
+/* ===== 卡片暖色边框 ===== */
+.card {
+    border-color: rgba(212, 165, 116, 0.15) !important;
+}
+
+.card-primary {
+    background: linear-gradient(135deg, #d4a574, #c9956a) !important;
+}
+
+/* ===== 模块封面 ===== */
+.module-cover h1,
+.module-cover p {
+    color: #e8e4df !important;
+}
+
+/* ===== 页码暖色调 ===== */
+.footer-nav .slide-num {
+    color: #9a9590 !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ===== 背景装饰 — 柔和光晕 ===== */
+.reveal .slides>section::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(212, 165, 116, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}

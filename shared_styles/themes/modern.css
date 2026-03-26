@@ -1,0 +1,467 @@
+/* ===================================
+   Modern 风格主题
+   精致、现代、卡片化设计
+   =================================== */
+
+/* ===== 全局背景 ===== */
+body {
+    background: radial-gradient(circle at center, var(--bg-card-primary) 0%, var(--bg-page) 100%) !important;
+    font-family: 'PingFang SC', 'SF Pro Display', -apple-system, sans-serif;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* ===== Reveal.js 容器调整 ===== */
+.reveal {
+    top: var(--header-height) !important;
+    height: calc(100vh - var(--header-height) - var(--footer-height)) !important;
+}
+
+.reveal .slides {
+    text-align: left;
+}
+
+.reveal .slides>section {
+    background: var(--bg-card) !important;
+    border-radius: 20px !important;
+    box-shadow: var(--shadow-card) !important;
+    border-top: 6px solid var(--secondary) !important;
+    padding: 3rem !important;
+    max-width: 1100px;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+}
+
+/* ===== 顶部导航栏 ===== */
+.header-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--header-height);
+    background: var(--bg-header);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 2.5rem;
+    color: var(--text-inverse);
+    z-index: 100;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.header-bar .logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-bar .logo-icon {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 1.2rem;
+}
+
+.header-bar .title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: -0.02em;
+}
+
+/* ===== 底部控制器 ===== */
+.footer-nav {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    background: var(--glass-bg);
+    padding: 0.75rem 2rem;
+    border-radius: 999px;
+    color: var(--text-heading);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    z-index: 100;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.footer-nav .btn-nav {
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s;
+    color: var(--primary);
+    border: none;
+    background: transparent;
+    font-size: 1rem;
+}
+
+.footer-nav .btn-nav:hover {
+    background: var(--primary);
+    color: var(--text-inverse);
+}
+
+.footer-nav .slide-num {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+}
+
+/* ===== 标题样式 ===== */
+.reveal h1 {
+    color: var(--text-heading) !important;
+    font-weight: 800 !important;
+    font-size: 2.8em !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.5em !important;
+}
+
+.reveal h2 {
+    color: var(--secondary) !important;
+    font-weight: 700 !important;
+    font-size: 1.8em !important;
+    margin-bottom: 1rem !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.reveal h2::before {
+    content: "";
+    width: 6px;
+    height: 28px;
+    background: var(--accent);
+    margin-right: 0.8rem;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.reveal h3 {
+    color: var(--text-heading) !important;
+    font-weight: 700 !important;
+    font-size: 1.2em !important;
+    margin-bottom: 0.5em !important;
+}
+
+.reveal p,
+.reveal li {
+    color: var(--text-body) !important;
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+/* ===== 彩色边框卡片 ===== */
+.card-primary,
+.card-indigo {
+    padding: 1.5rem;
+    background: var(--bg-card-primary);
+    border-left: 4px solid var(--primary);
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 1rem;
+}
+
+.card-secondary,
+.card-teal {
+    padding: 1.5rem;
+    background: var(--bg-card-secondary);
+    border-left: 4px solid var(--secondary);
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 1rem;
+}
+
+.card-accent,
+.card-amber {
+    padding: 1.5rem;
+    background: var(--bg-card-accent);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 1rem;
+}
+
+.card-danger,
+.card-coral {
+    padding: 1.5rem;
+    background: var(--bg-card-danger);
+    border-left: 4px solid var(--danger);
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 1rem;
+}
+
+/* ===== 图标卡片网格 ===== */
+.icon-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.icon-card {
+    padding: 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 16px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.icon-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.icon-card .icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.icon-card .icon.primary,
+.icon-card .icon.indigo {
+    color: var(--primary);
+}
+
+.icon-card .icon.secondary,
+.icon-card .icon.teal {
+    color: var(--secondary);
+}
+
+.icon-card .icon.accent,
+.icon-card .icon.amber {
+    color: var(--accent);
+}
+
+.icon-card .icon.danger,
+.icon-card .icon.coral {
+    color: var(--danger);
+}
+
+/* ===== 两栏布局 ===== */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    align-items: start;
+}
+
+/* ===== 图片样式 ===== */
+.reveal figure {
+    margin: 0 0 1.5rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+.reveal figure img {
+    max-width: 100%;
+    max-height: 35vh;
+    object-fit: contain;
+    border-radius: 16px;
+    box-shadow: var(--shadow-hover);
+}
+
+/* 图片自适应填充容器 */
+.figure-fill {
+    margin: 0;
+    height: 100%;
+    display: flex;
+    align-items: stretch;
+}
+
+.figure-fill img {
+    max-height: none;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+    box-shadow: var(--shadow-hover);
+}
+
+/* ===== 步骤流程 ===== */
+.workflow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem 0;
+}
+
+.workflow-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+}
+
+.workflow-node .node-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-inverse);
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.workflow-node .node-icon.primary,
+.workflow-node .node-icon.indigo {
+    background: var(--primary);
+}
+
+.workflow-node .node-icon.secondary,
+.workflow-node .node-icon.teal {
+    background: var(--secondary);
+}
+
+.workflow-node .node-icon.accent,
+.workflow-node .node-icon.amber {
+    background: var(--accent);
+}
+
+.workflow-node .node-icon.danger,
+.workflow-node .node-icon.coral {
+    background: var(--danger);
+}
+
+.workflow-node .node-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-heading);
+}
+
+.workflow-line {
+    flex-grow: 1;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    margin: 0 -10px;
+}
+
+/* ===== 封面页特殊样式 ===== */
+.cover-slide {
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.cover-slide h1 {
+    font-size: 3.2em !important;
+}
+
+.cover-slide .gradient-text {
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.cover-slide .tagline {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.cover-slide .tagline .line {
+    width: 40px;
+    height: 1px;
+    background: rgba(79, 70, 229, 0.3);
+}
+
+/* ===== 结语页特殊样式 ===== */
+.ending-slide {
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.ending-slide h1 {
+    color: var(--text-heading) !important;
+}
+
+.ending-slide .highlight-text {
+    color: var(--accent) !important;
+    text-decoration: underline;
+    text-decoration-color: var(--secondary);
+    text-underline-offset: 8px;
+}
+
+.ending-slide .quote {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.3rem;
+    font-style: italic;
+    max-width: 600px;
+    line-height: 1.8;
+}
+
+.ending-slide .divider {
+    width: 60px;
+    height: 4px;
+    background: var(--danger);
+    margin: 2rem 0;
+}
+
+/* ===== 代码块样式 ===== */
+.code-block {
+    background: var(--bg-code);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 6px solid var(--secondary);
+}
+
+.code-block pre {
+    color: var(--text-code);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9rem;
+    margin: 0;
+    overflow-x: auto;
+}
+
+.code-block .tip {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(13, 148, 136, 0.1);
+    border: 1px solid rgba(13, 148, 136, 0.2);
+    border-radius: 8px;
+    color: var(--text-code-accent);
+    font-size: 0.8rem;
+}
+
+/* ===== 高亮文字 ===== */
+.text-primary,
+.text-indigo {
+    color: var(--primary) !important;
+}
+
+.text-secondary,
+.text-teal {
+    color: var(--secondary) !important;
+}
+
+.text-accent,
+.text-amber {
+    color: var(--accent) !important;
+}
+
+.text-danger,
+.text-coral {
+    color: var(--danger) !important;
+}
+
+.font-bold {
+    font-weight: 700 !important;
+}
+
+/* ===== 隐藏 Reveal 默认控件 ===== */
+.reveal .controls,
+.reveal .progress {
+    display: none !important;
+}

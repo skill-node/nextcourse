@@ -1,0 +1,105 @@
+/* ===================================
+   Bold Signal — 高对比深色 + 亮色卡片
+   灵感来源: frontend-slides Bold Signal preset
+   适用于: 高管演讲、影响力展示
+   字体: Archivo Black (Display) + Space Grotesk (Body)
+   =================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap');
+
+:root {
+    /* ===== 主色系 ===== */
+    --primary: #FF5722;
+    --primary-dark: #E64A19;
+    --secondary: #ffffff;
+    --accent: #FF5722;
+    --success: #4CAF50;
+    --danger: #F44336;
+
+    /* ===== 模块封面颜色（10套）===== */
+    --module-1: #FF5722;
+    --module-2: #1a1a1a;
+    --module-3: #2196F3;
+    --module-4: #FF9800;
+    --module-5: #9C27B0;
+    --module-6: #E91E63;
+    --module-7: #009688;
+    --module-8: #F44336;
+    --module-9: #3F51B5;
+    --module-10: #8BC34A;
+
+    /* ===== 背景 ===== */
+    --bg-page: #1a1a1a;
+    --bg-slide: #1a1a1a;
+    --bg-card: #2d2d2d;
+    --bg-highlight: rgba(255, 87, 34, 0.1);
+    --bg-vs-good: rgba(76, 175, 80, 0.1);
+    --bg-vs-bad: rgba(244, 67, 54, 0.1);
+    --bg-code: #0d0d0d;
+    --bg-tag: rgba(255, 87, 34, 0.2);
+
+    /* ===== 边框 ===== */
+    --border-card: rgba(255, 255, 255, 0.1);
+    --border-vs-good: rgba(76, 175, 80, 0.3);
+    --border-vs-bad: rgba(244, 67, 54, 0.3);
+
+    /* ===== 文字 ===== */
+    --text-heading: #ffffff;
+    --text-body: rgba(255, 255, 255, 0.85);
+    --text-muted: rgba(255, 255, 255, 0.5);
+    --text-inverse: #1a1a1a;
+    --text-tag: #FF5722;
+
+    /* ===== 阴影 ===== */
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.5);
+
+    /* ===== 布局变量 ===== */
+    --footer-height: 60px;
+
+    /* ===== 字体 ===== */
+    --font-display: 'Archivo Black', sans-serif;
+    --font-body: 'Space Grotesk', sans-serif;
+}
+
+/* ===== 字体覆盖 ===== */
+body {
+    font-family: var(--font-body);
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%) !important;
+}
+
+.reveal h1 {
+    font-family: var(--font-display) !important;
+}
+
+.reveal h2 {
+    font-family: var(--font-display) !important;
+}
+
+/* ===== 封面页增强 ===== */
+.cover-slide {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+}
+
+/* ===== 模块封面文字覆盖 ===== */
+.module-cover h1,
+.module-cover p {
+    color: #ffffff !important;
+}
+
+/* ===== 卡片主色增强 ===== */
+.card-primary {
+    background: #FF5722 !important;
+    color: #1a1a1a !important;
+}
+
+.card-primary h3,
+.card-primary p {
+    color: #1a1a1a !important;
+}
+
+/* ===== 页码增强 ===== */
+.footer-nav .slide-num {
+    color: rgba(255, 255, 255, 0.5) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}

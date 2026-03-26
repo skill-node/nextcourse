@@ -1,0 +1,108 @@
+/* ===================================
+   Notebook Tabs — 纸质 + 彩色标签页
+   灵感来源: frontend-slides Notebook Tabs preset
+   适用于: 工作坊、互动培训、笔记风格
+   字体: Bodoni Moda (Display) + DM Sans (Body)
+   =================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap');
+
+:root {
+    /* ===== 主色系 ===== */
+    --primary: #1a1a1a;
+    --primary-dark: #0d0d0d;
+    --secondary: #2d2d2d;
+    --accent: #c7b8ea;
+    --success: #98d4bb;
+    --danger: #f4b8c5;
+
+    /* ===== 模块封面颜色（10套）— 柔和色调 ===== */
+    --module-1: #98d4bb;
+    --module-2: #c7b8ea;
+    --module-3: #f4b8c5;
+    --module-4: #a8d8ea;
+    --module-5: #ffe6a7;
+    --module-6: #b8d4e3;
+    --module-7: #d4c7ea;
+    --module-8: #eab8b8;
+    --module-9: #98c7d4;
+    --module-10: #c7d498;
+
+    /* ===== 背景 ===== */
+    --bg-page: #2d2d2d;
+    --bg-slide: #f8f6f1;
+    --bg-card: #ffffff;
+    --bg-highlight: #fff8e1;
+    --bg-vs-good: #e8f5e9;
+    --bg-vs-bad: #fce4ec;
+    --bg-code: #2d2d2d;
+    --bg-tag: rgba(199, 184, 234, 0.2);
+
+    /* ===== 边框 ===== */
+    --border-card: #e0ddd5;
+    --border-vs-good: #c8e6c9;
+    --border-vs-bad: #f8bbd0;
+
+    /* ===== 文字 ===== */
+    --text-heading: #1a1a1a;
+    --text-body: #3d3d3d;
+    --text-muted: #6b6b6b;
+    --text-inverse: #1a1a1a;
+    --text-tag: #5b4a8a;
+
+    /* ===== 阴影 ===== */
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
+    --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.08);
+
+    /* ===== 布局变量 ===== */
+    --footer-height: 60px;
+
+    /* ===== 字体 ===== */
+    --font-display: 'Bodoni Moda', serif;
+    --font-body: 'DM Sans', sans-serif;
+}
+
+/* ===== 字体覆盖 ===== */
+body {
+    font-family: var(--font-body);
+    background: #2d2d2d !important;
+}
+
+.reveal h1 {
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.02em;
+}
+
+.reveal h2 {
+    font-family: var(--font-display) !important;
+    font-weight: 700 !important;
+}
+
+/* ===== 幻灯片纸质感 ===== */
+.reveal .slides>section {
+    background-color: #f8f6f1 !important;
+    border-radius: 4px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== 封面页优雅感 ===== */
+.cover-slide .divider {
+    background: #c7b8ea !important;
+    height: 3px !important;
+    width: 80px !important;
+}
+
+/* ===== 模块封面白色文字 ===== */
+.module-cover h1,
+.module-cover p {
+    color: #1a1a1a !important;
+    text-shadow: none;
+}
+
+/* ===== 页码增强 ===== */
+.footer-nav .slide-num {
+    color: #6b6b6b !important;
+    background: #f8f6f1 !important;
+    border: 1px solid #e0ddd5 !important;
+}

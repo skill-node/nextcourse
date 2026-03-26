@@ -1,0 +1,111 @@
+/* ===================================
+   Swiss Modern — 极简黑白 + 红色强调
+   灵感来源: frontend-slides Swiss Modern preset
+   适用于: 专业技术培训、数据驱动型展示
+   字体: Archivo (Display) + Nunito (Body)
+   =================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Nunito:wght@400;500;700&display=swap');
+
+:root {
+    /* ===== 主色系 ===== */
+    --primary: #ff3300;
+    --primary-dark: #cc2900;
+    --secondary: #000000;
+    --accent: #ff3300;
+    --success: #00cc66;
+    --danger: #ff3300;
+
+    /* ===== 模块封面颜色（10套）— 极简配色 ===== */
+    --module-1: #ff3300;
+    --module-2: #000000;
+    --module-3: #333333;
+    --module-4: #ff3300;
+    --module-5: #666666;
+    --module-6: #cc2900;
+    --module-7: #1a1a1a;
+    --module-8: #ff5533;
+    --module-9: #444444;
+    --module-10: #ff3300;
+
+    /* ===== 背景 ===== */
+    --bg-page: #ffffff;
+    --bg-slide: #ffffff;
+    --bg-card: #ffffff;
+    --bg-highlight: rgba(255, 51, 0, 0.04);
+    --bg-vs-good: #f0fff4;
+    --bg-vs-bad: #fff5f5;
+    --bg-code: #0a0a0a;
+    --bg-tag: rgba(255, 51, 0, 0.08);
+
+    /* ===== 边框 ===== */
+    --border-card: #e5e5e5;
+    --border-vs-good: #c6f6d5;
+    --border-vs-bad: #fed7d7;
+
+    /* ===== 文字 ===== */
+    --text-heading: #000000;
+    --text-body: #1a1a1a;
+    --text-muted: #666666;
+    --text-inverse: #ffffff;
+    --text-tag: #ff3300;
+
+    /* ===== 阴影 ===== */
+    --shadow-card: none;
+    --shadow-hover: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    /* ===== 布局变量 ===== */
+    --footer-height: 60px;
+
+    /* ===== 字体 ===== */
+    --font-display: 'Archivo', sans-serif;
+    --font-body: 'Nunito', sans-serif;
+}
+
+/* ===== 字体覆盖 ===== */
+body {
+    font-family: var(--font-body);
+}
+
+.reveal h1 {
+    font-family: var(--font-display) !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+}
+
+.reveal h2 {
+    font-family: var(--font-display) !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em;
+}
+
+/* ===== 极简风格卡片 ===== */
+.card {
+    border: 2px solid #000000 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* ===== 封面红色强调线 ===== */
+.cover-slide .divider {
+    background: #ff3300 !important;
+    height: 8px !important;
+    width: 60px !important;
+    border-radius: 0 !important;
+}
+
+/* ===== 高亮框红色边框 ===== */
+.highlight-box {
+    border-left-color: #ff3300 !important;
+    border-radius: 0 !important;
+}
+
+/* ===== 页码极简 ===== */
+.footer-nav .slide-num {
+    color: #666666 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-family: var(--font-display) !important;
+    font-weight: 800;
+}

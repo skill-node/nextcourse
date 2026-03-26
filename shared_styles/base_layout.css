@@ -1,0 +1,110 @@
+/* ===================================
+   通用基础布局 (Base Layout)
+   适用于所有模板风格
+   集成 viewport-base.css 响应式规则
+   =================================== */
+
+/* ===== 基础重置 ===== */
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    /* ===== 布局变量 ===== */
+    --header-height: 64px;
+    --footer-height: 60px;
+
+    /* ===== Viewport 响应式排版（来源：viewport-base.css）===== */
+    --title-size: clamp(1.5rem, 5vw, 4rem);
+    --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+    --h3-size: clamp(1rem, 2.5vw, 1.75rem);
+    --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
+    --small-size: clamp(0.65rem, 1vw, 0.875rem);
+
+    /* ===== Viewport 响应式间距 ===== */
+    --slide-padding: clamp(1rem, 4vw, 4rem);
+    --content-gap: clamp(0.5rem, 2vw, 2rem);
+    --element-gap: clamp(0.25rem, 1vw, 1rem);
+}
+
+/* ===== 隐藏 Reveal 默认控件 ===== */
+.reveal .controls,
+.reveal .progress {
+    display: none !important;
+}
+
+/* ===== Viewport 锁定 ===== */
+html, body {
+    height: 100%;
+    overflow-x: hidden;
+}
+
+/* ===== 图片全局约束 ===== */
+img {
+    max-width: 100%;
+    max-height: min(50vh, 400px);
+    object-fit: contain;
+}
+
+/* ===================================
+   响应式断点
+   处理短 viewport、窄屏等场景
+   =================================== */
+
+/* 短 viewport (< 700px 高度) */
+@media (max-height: 700px) {
+    :root {
+        --slide-padding: clamp(0.75rem, 3vw, 2rem);
+        --content-gap: clamp(0.4rem, 1.5vw, 1rem);
+        --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+        --h2-size: clamp(1rem, 3vw, 1.75rem);
+    }
+}
+
+/* 特别短的 viewport (< 600px 高度) */
+@media (max-height: 600px) {
+    :root {
+        --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+        --content-gap: clamp(0.3rem, 1vw, 0.75rem);
+        --title-size: clamp(1.1rem, 4vw, 2rem);
+        --body-size: clamp(0.7rem, 1.2vw, 0.95rem);
+    }
+
+    /* 隐藏装饰性元素 */
+    .decorative {
+        display: none;
+    }
+}
+
+/* 极短 viewport (横屏手机 < 500px 高度) */
+@media (max-height: 500px) {
+    :root {
+        --slide-padding: clamp(0.4rem, 2vw, 1rem);
+        --title-size: clamp(1rem, 3.5vw, 1.5rem);
+        --h2-size: clamp(0.9rem, 2.5vw, 1.25rem);
+        --body-size: clamp(0.65rem, 1vw, 0.85rem);
+    }
+}
+
+/* 窄 viewport (< 600px 宽度) */
+@media (max-width: 600px) {
+    :root {
+        --title-size: clamp(1.25rem, 7vw, 2.5rem);
+    }
+
+    /* 网格改为单列 */
+    .grid-2,
+    .grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===================================
+   减少动画偏好（无障碍）
+   =================================== */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+}

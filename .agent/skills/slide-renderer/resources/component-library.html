@@ -1,0 +1,356 @@
+<!--
+==========================================================
+  CourseFlow 白名单组件库 (Component Library)
+  
+  本文件为 slide-renderer Skill 提供 HTML 模板参考。
+  生成课件时，根据 script.md 中的视觉组件字段，
+  从下方选择对应的 HTML 结构进行数据填充。
+==========================================================
+-->
+
+<!-- ============================================
+     通用组件 (Common Components)
+     适用于 Standard 和 Modern 两种模板
+     ============================================ -->
+
+<!-- ===== 封面页 (.cover-slide) ===== -->
+<!--
+  用途：课程首页
+  数据：标题、副标题、描述文字、演讲备注
+-->
+<section class="cover-slide">
+    <h1>{{title}}</h1>
+    <h2>{{subtitle}}</h2>
+    <p>{{description}}</p>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>
+
+
+<!-- ===== 结语页 (.ending-slide) ===== -->
+<!--
+  用途：课程结束页 / Q&A 页
+  数据：标题、金句/描述
+-->
+<section class="ending-slide">
+    <h1>{{title}}</h1>
+    <p>{{quote_or_description}}</p>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>
+
+
+<!-- ===== 两栏布局 (.grid-2) ===== -->
+<!--
+  用途：左右对比、并列内容
+  数据：页面标题、左右两部分内容
+  注意：内部可嵌套 .card / .vs-good / .vs-bad 等组件
+-->
+<section>
+    <h2>{{title}}</h2>
+    <div class="grid-2">
+        <div>
+            <!-- 左侧内容 -->
+            {{left_content}}
+        </div>
+        <div>
+            <!-- 右侧内容 -->
+            {{right_content}}
+        </div>
+    </div>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>
+
+
+<!-- ===== 三栏布局 (.grid-3) ===== -->
+<!--
+  用途：三步流程、三要素展示
+  数据：页面标题、三个内容块
+  注意：内部通常与 .card / .card-primary 组合使用
+-->
+<section>
+    <h2>{{title}}</h2>
+    <div class="grid-3">
+        <div class="card">
+            <h3>{{card_1_title}}</h3>
+            <p>{{card_1_content}}</p>
+        </div>
+        <div class="card">
+            <h3>{{card_2_title}}</h3>
+            <p>{{card_2_content}}</p>
+        </div>
+        <div class="card">
+            <h3>{{card_3_title}}</h3>
+            <p>{{card_3_content}}</p>
+        </div>
+    </div>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>
+
+
+<!-- ===== 高亮框 (.highlight-box) ===== -->
+<!--
+  用途：重点强调、关键提示
+  数据：强调内容文本
+  注意：通常嵌套在其他布局组件内
+-->
+<div class="highlight-box">
+    <p>{{highlight_content}}</p>
+</div>
+
+
+<!-- ===== 代码块 (.code-block) ===== -->
+<!--
+  用途：代码展示
+  数据：代码内容
+-->
+<section>
+    <h2>{{title}}</h2>
+    <pre class="code-block"><code>{{code_content}}</code></pre>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>
+
+
+<!-- ============================================
+     Standard 模板专属组件 (Canvas Style)
+     ============================================ -->
+
+<!-- ===== 模块封面 (.module-cover) ===== -->
+<!--
+  用途：模块/章节分隔页
+  颜色：.module-1 至 .module-10 自动轮换
+  数据：模块标题、模块说明
+-->
+<section class="module-cover module-{{N}}">
+    <h1>{{module_title}}</h1>
+    <p>{{module_description}}</p>
+</section>
+
+
+<!-- ===== 左图右文 (.layout-img-left) ===== -->
+<!--
+  用途：图片在左、文字在右
+  数据：页面标题、图片路径、内容标题、内容描述
+-->
+<section>
+    <h2>{{title}}</h2>
+    <div class="layout-img-left">
+        <div class="img-container">
+            <img src="{{img_path}}" alt="{{img_alt}}">
+        </div>
+        <div>
+            <h3>{{content_title}}</h3>
+            <p>{{content_description}}</p>
+        </div>
+    </div>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>
+
+
+<!-- ===== 右图左文 (.layout-img-right) ===== -->
+<!--
+  用途：文字在左、图片在右
+  数据：同上
+-->
+<section>
+    <h2>{{title}}</h2>
+    <div class="layout-img-right">
+        <div>
+            <h3>{{content_title}}</h3>
+            <p>{{content_description}}</p>
+        </div>
+        <div class="img-container">
+            <img src="{{img_path}}" alt="{{img_alt}}">
+        </div>
+    </div>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>
+
+
+<!-- ===== 上图下文 (.layout-img-top) ===== -->
+<!--
+  用途：图片在上、文字在下
+  数据：同上
+-->
+<section>
+    <h2>{{title}}</h2>
+    <div class="layout-img-top">
+        <div class="img-container">
+            <img src="{{img_path}}" alt="{{img_alt}}">
+        </div>
+        <div>
+            <h3>{{content_title}}</h3>
+            <p>{{content_description}}</p>
+        </div>
+    </div>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>
+
+
+<!-- ===== 主色卡片 (.card-primary) ===== -->
+<!--
+  用途：用主色背景突出的内容卡片
+  注意：.card-primary 内文字颜色自动反转
+-->
+<div class="card-primary">
+    <h3>{{card_title}}</h3>
+    <p>{{card_content}}</p>
+</div>
+
+
+<!-- ===== 对比：正面 (.vs-good) ===== -->
+<!--
+  用途：正面对比（绿色）
+  通常与 .vs-bad 配对，放在 .grid-2 内
+-->
+<div class="vs-good">
+    <h3>{{good_title}}</h3>
+    <ul>
+        <li>{{point_1}}</li>
+        <li>{{point_2}}</li>
+    </ul>
+</div>
+
+
+<!-- ===== 对比：反面 (.vs-bad) ===== -->
+<!--
+  用途：反面对比（红色）
+  通常与 .vs-good 配对，放在 .grid-2 内
+-->
+<div class="vs-bad">
+    <h3>{{bad_title}}</h3>
+    <ul>
+        <li>{{point_1}}</li>
+        <li>{{point_2}}</li>
+    </ul>
+</div>
+
+
+<!-- ===== 勾选列表 (.check-list) ===== -->
+<!--
+  用途：带 ✓ 前缀的列表
+  注意：是 <ul> 的 class，不是单独组件
+-->
+<ul class="check-list">
+    <li>{{item_1}}</li>
+    <li>{{item_2}}</li>
+    <li>{{item_3}}</li>
+</ul>
+
+
+<!-- ===== 标签 (.tag) ===== -->
+<!--
+  用途：圆角小标签
+  注意：通常用于标注分类、级别
+-->
+<span class="tag">{{tag_text}}</span>
+
+
+<!-- ============================================
+     Modern 模板专属组件 (Card Style)
+     ============================================ -->
+
+<!-- ===== 彩色边框卡片组合 ===== -->
+<!--
+  用途：用不同颜色区分内容优先级
+  可用类名：.card-primary, .card-secondary, .card-accent, .card-danger
+-->
+<section>
+    <h2>{{title}}</h2>
+    <div class="grid-2">
+        <div class="card-primary">
+            <h3>{{card_title}}</h3>
+            <p>{{card_content}}</p>
+        </div>
+        <div class="card-secondary">
+            <h3>{{card_title}}</h3>
+            <p>{{card_content}}</p>
+        </div>
+    </div>
+</section>
+
+
+<!-- ===== 图标卡片网格 (.icon-card-grid) ===== -->
+<!--
+  用途：特性展示、功能列表
+  数据：每张卡片含图标（FontAwesome）、标题、描述
+  注意：最多 6 张卡片（2x3 或 3x2）
+-->
+<section>
+    <h2>{{title}}</h2>
+    <div class="icon-card-grid">
+        <div class="icon-card">
+            <i class="fas fa-{{icon_name}}"></i>
+            <h4>{{card_title}}</h4>
+            <p>{{card_description}}</p>
+        </div>
+        <div class="icon-card">
+            <i class="fas fa-{{icon_name}}"></i>
+            <h4>{{card_title}}</h4>
+            <p>{{card_description}}</p>
+        </div>
+        <!-- 最多 6 张 -->
+    </div>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>
+
+
+<!-- ===== 工作流 (.workflow) ===== -->
+<!--
+  用途：流程图、步骤展示
+  数据：每个节点含图标、标题、描述
+  注意：节点之间用 .workflow-line 连接
+-->
+<section>
+    <h2>{{title}}</h2>
+    <div class="workflow">
+        <div class="workflow-node">
+            <i class="fas fa-{{icon_name}}"></i>
+            <h4>{{step_title}}</h4>
+            <p>{{step_description}}</p>
+        </div>
+        <div class="workflow-line"></div>
+        <div class="workflow-node">
+            <i class="fas fa-{{icon_name}}"></i>
+            <h4>{{step_title}}</h4>
+            <p>{{step_description}}</p>
+        </div>
+        <div class="workflow-line"></div>
+        <div class="workflow-node">
+            <i class="fas fa-{{icon_name}}"></i>
+            <h4>{{step_title}}</h4>
+            <p>{{step_description}}</p>
+        </div>
+    </div>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>
+
+
+<!-- ===== 图片填充 (.figure-fill) ===== -->
+<!--
+  用途：图片自适应容器高度
+  注意：图片会自动填满容器
+-->
+<div class="figure-fill">
+    <img src="{{img_path}}" alt="{{img_alt}}">
+</div>
+
+
+<!-- ============================================
+     内容列表页（通用纯文字页面）
+     ============================================ -->
+
+<!-- ===== 标准内容页 ===== -->
+<!--
+  用途：标题 + 要点列表（最常用的页面类型）
+  数据：标题、4~6 个内容要点
+  注意：要点控制在 4~6 个以内
+-->
+<section>
+    <h2>{{title}}</h2>
+    <ul>
+        <li><strong>{{key_term}}</strong>：{{description}}</li>
+        <li><strong>{{key_term}}</strong>：{{description}}</li>
+        <li><strong>{{key_term}}</strong>：{{description}}</li>
+        <li><strong>{{key_term}}</strong>：{{description}}</li>
+    </ul>
+    <aside class="notes">{{speaker_notes}}</aside>
+</section>

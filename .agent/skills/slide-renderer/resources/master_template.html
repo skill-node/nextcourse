@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{COURSE_TITLE}}</title>
+
+    <!-- ===== Reveal.js 核心 ===== -->
+    <link rel="stylesheet" href="../../lib/dist/reveal.css">
+
+    <!-- ===== 基础布局 ===== -->
+    <link rel="stylesheet" href="../../shared_styles/base_layout.css">
+
+    <!-- ===== 配色方案（由 {{COLOR_SCHEME}} 指定） ===== -->
+    <link rel="stylesheet" href="../../shared_styles/color-schemes/{{COLOR_SCHEME}}.css">
+
+    <!-- ===== 主题样式（由 {{TEMPLATE}} 指定：standard / modern） ===== -->
+    <link rel="stylesheet" href="../../shared_styles/themes/{{TEMPLATE}}.css">
+
+    <!-- ===== 图标字体（本地化） ===== -->
+    <link rel="stylesheet" href="../../lib/fonts/fontawesome/css/all.min.css">
+
+    <!-- ===== 动画工具库 ===== -->
+    <link rel="stylesheet" href="../../shared_styles/animations.css">
+
+    <!-- ===== 视觉预设增强样式（如有 style-preset，在此处内联） ===== -->
+    {{STYLE_PRESET_CSS}}
+</head>
+
+<body>
+
+    <!-- ===== Reveal.js 容器 ===== -->
+    <div class="reveal">
+        <div class="slides">
+            {{SLIDES_CONTENT}}
+        </div>
+    </div>
+
+    <!-- ===== 底部页码 ===== -->
+    <div class="footer-nav">
+        <span class="slide-num" id="slide-num">01</span>
+    </div>
+
+    <!-- ===== Reveal.js 核心脚本 ===== -->
+    <script src="../../lib/dist/reveal.js"></script>
+    <script>
+        // 初始化 Reveal.js
+        let deck = new Reveal({
+            center: false,
+            hash: true,
+            progress: false,
+            controls: false,
+            overview: true,
+            transition: 'fade',
+            width: '100%',
+            height: '100%',
+            margin: 0
+        });
+        deck.initialize();
+
+        // 更新 slide 页码
+        function updateSlideInfo() {
+            const current = deck.getIndices().h + 1;
+            document.getElementById('slide-num').textContent = current.toString().padStart(2, '0');
+        }
+
+        deck.on('slidechanged', updateSlideInfo);
+        deck.on('ready', updateSlideInfo);
+    </script>
+</body>
+
+</html>

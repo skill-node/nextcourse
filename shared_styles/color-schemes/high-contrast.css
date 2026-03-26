@@ -1,0 +1,69 @@
+/* ===================================
+   高对比配色方案 (High Contrast Color Scheme)
+   适用于：强光环境、视觉清晰度优先
+   可通过 data-color-scheme="high-contrast" 激活
+   =================================== */
+
+:root,
+[data-color-scheme="high-contrast"] {
+    /* 主色调 */
+    --primary: #2563eb;
+    /* 蓝色 - 主色 */
+    --primary-dark: #1e40af;
+    /* 深蓝 */
+    --secondary: #16a34a;
+    /* 绿色 - 辅助色 */
+    --accent: #d97706;
+    /* 橙色 - 强调色 */
+    --danger: #dc2626;
+    /* 红色 - 警示色 */
+
+    /* 背景色 */
+    --bg-page: #ffffff;
+    /* 页面背景 - 纯白 */
+    --bg-card: #ffffff;
+    /* 卡片背景 - 纯白 */
+    --bg-code: #111827;
+    /* 代码块背景 - 近黑 */
+    --bg-header: linear-gradient(90deg, #1e40af 0%, #2563eb 100%);
+
+    /* 卡片背景色（带色调） */
+    --bg-card-primary: #eff6ff;
+    /* 浅蓝卡片背景 */
+    --bg-card-secondary: #f0fdf4;
+    /* 浅绿卡片背景 */
+    --bg-card-accent: #fffbeb;
+    /* 浅橙卡片背景 */
+    --bg-card-danger: #fef2f2;
+    /* 浅红卡片背景 */
+
+    /* 文字色 */
+    --text-heading: #111827;
+    /* 标题文字 - 近黑 */
+    --text-body: #374151;
+    /* 正文文字 - 深灰 */
+    --text-muted: #6b7280;
+    /* 弱化文字 - 中灰 */
+    --text-inverse: #ffffff;
+    /* 反色文字 */
+    --text-code: #f9fafb;
+    /* 代码文字 */
+    --text-code-accent: #34d399;
+    /* 代码高亮 */
+
+    /* 边框色 */
+    --border-card: #d1d5db;
+    /* 卡片边框 - 更深 */
+    --border-primary: var(--primary);
+    --border-secondary: var(--secondary);
+    --border-accent: var(--accent);
+    --border-danger: var(--danger);
+
+    /* 阴影 */
+    --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 20px 35px rgba(0, 0, 0, 0.12);
+
+    /* 玻璃效果 */
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(37, 99, 235, 0.3);
+}
