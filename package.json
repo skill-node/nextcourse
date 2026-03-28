@@ -1,0 +1,20 @@
+{
+  "name": "courseflow",
+  "version": "2.0.0",
+  "description": "Agent-Native 全链路课程开发工具 — 从 script.md 到 Reveal.js HTML 课件",
+  "main": "bin/courseflow.js",
+  "bin": {
+    "courseflow": "bin/courseflow.js"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "render": "node bin/courseflow.js render",
+    "list-presets": "node bin/courseflow.js list-presets"
+  },
+  "keywords": ["courseflow", "reveal.js", "slides", "presentation", "education"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

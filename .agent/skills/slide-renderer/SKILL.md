@@ -45,7 +45,29 @@ description: 课件渲染引擎。将 content-design 生成的 script.md 转换�
 3. 填充标题、内容、图片等数据
 4. 如有组件内容（JSON），解析并填充到对应位置
 
-### Step 4：组装与输出
+### Step 4：自动渲染（优先）
+
+如果项目中存在 `bin/courseflow.js`，**优先使用 CLI 进行一键渲染**：
+
+```bash
+# 基础渲染
+node bin/courseflow.js render courses/[name]
+
+# 渲染并自动打开浏览器
+node bin/courseflow.js render courses/[name] --open
+
+# 使用指定预设覆盖 script.md 中的配色
+node bin/courseflow.js render courses/[name] --preset bold-signal --open
+
+# 列出所有可用预设
+node bin/courseflow.js list-presets
+```
+
+CLI 会自动完成 Step 2-3 的所有工作：解析 script.md → 匹配组件 → 注入动画 → 输出 index.html。
+
+### Step 5：手动组装（备选）
+
+若 CLI 不可用，按以下流程手动组装 HTML：
 
 1. 在课程目录中创建 `index.html`
 2. 复制 master 模板
@@ -56,7 +78,7 @@ description: 课件渲染引擎。将 content-design 生成的 script.md 转换�
 4. 如果有 `style-preset`，在 `<head>` 中插入对应的预设内联样式
 5. 在浏览器中打开 `index.html`
 
-### Step 5：动画注入
+### Step 6：动画注入
 
 根据 style-preset 的特征，为组件添加入场动画：
 - 默认：`fragment fade-up` 渐进式显示（Reveal.js 内置）

@@ -1,81 +1,111 @@
-# CourseFlow 🎓
+# ⚡ CourseFlow
 
-**Agent-Native 全链路课程开发工具** — 从课程内容结构化设计到专业 Reveal.js 课件渲染的完整 AI 工作流。
+**Agent-Native 全链路课程开发工具** — 从想法到专业课件，一个命令搞定。
 
-## 核心理念
+CourseFlow 将 AI 驱动的教学设计与自动化渲染引擎融为一体，支持 CLI 和 Web 双模式操作，生成基于 Reveal.js 的专业 HTML 课件，可离线运行、零依赖部署。
 
-> 不造 App，造 Agent Skill。核心资产（组件库、视觉预设、script.md 规范）平台无关，可平滑升级为 Web 应用。
+---
 
-## 功能架构
+## ✨ 核心特性
 
+- 🤖 **AI 内容设计助手** — 基于 ADDIE/ARCS 模型，三阶段引导（需求分析→结构设计→脚本细化），自动生成结构化脚本
+- 🎨 **11 套视觉预设** — 5 基础 + 6 高级配色方案，覆盖企业培训、技术分享、创意演示等场景
+- 🖥️ **Web 工作台** — 浏览器内完成课程管理、内容编辑、实时预览和可视化微调
+- ⌨️ **CLI 渲染引擎** — 零依赖解析器 + 组件化渲染器，一行命令完成构建
+- ✏️ **可视化编辑** — 在预览中直接点击修改幻灯片文字，保存自动回写脚本
+- 📦 **离线运行** — 生成的 HTML 课件带全部资源，无需网络即可演示
+
+## 🚀 快速开始
+
+### 1. 安装
+
+```bash
+git clone https://github.com/skill-node/Course_Flow.git
+cd Course_Flow
+npm install
 ```
-用户输入课程主题 → /content-design → script.md → /slide-renderer → Reveal.js HTML 课件
+
+### 2. 配置 AI（可选）
+
+```bash
+cp .env.example .env
+# 编辑 .env，填入你的 LLM API Key
 ```
 
-### 🧠 内容引擎 (`/content-design`)
-基于 ADDIE/ARCS 教学模型的三阶段结构化设计：
-1. **需求分析** — 学员画像 + 课程定位
-2. **结构设计** — Module/Lesson 提纲 + 风格决策
-3. **脚本细化** — 逐页 `[Slide N]` 输出，带组件类名标注
+支持 DeepSeek、OpenAI 等 OpenAI 兼容 API。
 
-### 🎨 渲染引擎 (`/slide-renderer`)
-将 `script.md` 转换为离线可用的 Reveal.js HTML 课件：
-- **11 套配色方案**（5 基础 + 6 高级预设）
-- **Standard/Modern 双轨制**组件白名单
-- **入场动画**（fade-up/left/right、zoom-in、stagger 交错延迟）
-- **响应式适配**（clamp() 排版 + 多断点）
-- **演讲者备注**（Reveal.js 原生支持，按 S 键）
+### 3. 启动 Web UI
 
-## 视觉预设一览
+```bash
+npm start
+# → http://localhost:3000
+```
 
-| 预设 | 字体 | 风格 | 适用场景 |
-|------|------|------|----------|
-| `standard-default` | 系统字体 | 蓝/深灰企业风 | 企业培训通用 |
-| `dark-ocean` | 系统字体 | 深蓝黑 | 投影仪暗场 |
-| `bold-signal` | Archivo Black + Space Grotesk | 深色高对比 + 橙色 | 高管演讲 |
-| `electric-studio` | Manrope | 黑白 + 蓝色强调 | 产品演示 |
-| `creative-voltage` | Syne + Space Mono | 电蓝 + 荧光黄 | 创意分享 |
-| `notebook-tabs` | Bodoni Moda + DM Sans | 纸质 + 柔和色调 | 工作坊 |
-| `swiss-modern` | Archivo + Nunito | 极简黑白 + 红色 | 技术培训 |
-| `dark-botanical` | Cormorant + IBM Plex Sans | 深色 + 暖色调 | 高端品牌 |
+### 4. CLI 渲染
 
-## 项目结构
+```bash
+# 渲染指定课程
+npm run render -- --course gem_test
+
+# 使用指定预设渲染
+npm run render -- --course gem_test --preset bold-signal
+
+# 查看所有预设
+npm run list-presets
+```
+
+## 🎨 视觉预设
+
+| 预设 | 风格 | 适用场景 |
+|------|------|----------|
+| `standard-default` | 蓝/深灰/绿/橙 | 企业培训通用 |
+| `bold-signal` | 深色高对比 + 橙色 | 高管演讲 |
+| `notebook-tabs` | 纸质 + 彩色标签 | 工作坊 |
+| `swiss-modern` | 极简黑白 + 红色 | 技术培训 |
+| `electric-studio` | 黑白 + 蓝色强调 | 产品演示 |
+| `creative-voltage` | 电蓝 + 荧光黄 | 创意分享 |
+| `dark-ocean` | 深蓝黑 | 科技感强的技术分享 |
+| `dark-botanical` | 深色 + 暖色调 | 高端优雅 |
+| `neon-cyber` | 深海军蓝 + 霓虹 | 未来科技 |
+| `warm-sand` | 暖米色 | 长时间阅读 |
+| `high-contrast` | 纯白高对比 | 强光环境 |
+
+## 📁 项目结构
 
 ```
 Course_Flow/
-├── .agent/skills/
-│   ├── content-design/SKILL.md       # 内容引擎
-│   └── slide-renderer/
-│       ├── SKILL.md                  # 渲染引擎
-│       └── resources/                # 模板与组件库
-├── lib/                              # Reveal.js + FontAwesome（本地化）
-├── shared_styles/
-│   ├── base_layout.css               # 基础布局（含响应式）
-│   ├── animations.css                # 动画工具库
-│   ├── themes/                       # Standard/Modern 主题
-│   └── color-schemes/                # 11 套配色方案
-└── courses/                          # 课程文件存储
-    └── [course-name]/
-        ├── script.md                 # 教学脚本
-        ├── index.html                # 渲染产出
-        └── assets/                   # 图片资源
+├── bin/                    # CLI 工具
+│   ├── courseflow.js        # 命令行入口
+│   └── lib/
+│       ├── parser.js        # script.md 零依赖解析器
+│       └── renderer.js      # HTML 组件化渲染引擎
+├── server/                 # Web 服务
+│   ├── index.js             # Express API（9 端点）
+│   └── public/              # 前端 SPA
+│       ├── index.html
+│       ├── css/app.css
+│       └── js/
+│           ├── app.js        # 核心逻辑（路由+编辑+同步）
+│           ├── ai-chat.js    # AI 对话组件
+│           └── editor-inject.js  # 可视化编辑器
+├── shared_styles/          # 全局样式资源
+│   ├── base_layout.css
+│   ├── animations.css
+│   ├── themes.css
+│   └── color-schemes/      # 11 套配色方案 CSS
+├── lib/                    # Reveal.js 运行时
+├── courses/                # 课程数据（每个子目录 = 一门课程）
+├── .agent/skills/          # AI Agent 技能定义
+│   ├── content-design/      # 内容设计 SKILL
+│   └── slide-renderer/      # 渲染引擎 SKILL
+├── .env.example            # API 配置模板
+└── package.json
 ```
 
-## 使用方式
+## 📖 详细文档
 
-在支持 Skill 的 AI Agent 环境中（如 Antigravity）：
+完整的技术架构、文件逻辑、数据流和开发指南，请参阅 [SYSTEM.md](./SYSTEM.md)。
 
-1. **创建课程内容**：输入 `/content-design`，按引导完成课程结构化设计
-2. **渲染课件**：输入 `/slide-renderer`，将 `script.md` 转换为 HTML
-
-## 产品化路径
-
-| 阶段 | 形态 | 复用率 |
-|------|------|--------|
-| V1 (当前) | Agent Skill | — |
-| V2 | CLI 工具 | ~90% |
-| V3 | Web App | ~70% |
-
-## License
+## 📜 License
 
 MIT
