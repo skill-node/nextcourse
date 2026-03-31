@@ -120,7 +120,8 @@ style-preset: bold-signal
     document.getElementById('btn-ai-send').onclick = sendMessage;
     document.getElementById('btn-ai-extract').onclick = extractScript;
     document.getElementById('ai-input').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      // 只有在单独按下 Enter（没有 Shift/Ctrl/Meta）时才发送
+      if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         sendMessage();
       }
@@ -273,34 +274,16 @@ style-preset: bold-signal
     if (span) span.textContent = text;
   }
 
-  // 简化 Markdown → HTML 转换
+  // Markdown → HTML 转换（使用 marked.js）
   function markdownToHtml(md) {
-    let html = escapeHtml(md);
-    // 代码块
-    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="lang-$1">$2</code></pre>');
-    // 行内代码
-    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-    // 加粗
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    // 标题
-    html = html.replace(/^### (.+)$/gm, '<h4>$1</h4>');
-    html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>');
-    html = html.replace(/^# (.+)$/gm, '<h2>$1</h2>');
-    // 列表
-    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
-    html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
-    // 表格
-    html = html.replace(/\|(.+)\|/g, (match) => {
-      const cells = match.split('|').filter(c => c.trim());
-      if (cells.every(c => c.trim().match(/^[-:]+$/))) return '';
-      return '<tr>' + cells.map(c => `<td>${c.trim()}</td>`).join('') + '</tr>';
+    if (!md) return '';
+    // 配置 marked：GFM 模式，但不把单换行转 br
+    // 这样只有双换行才会产生新段落，避免过多空行
+    marked.setOptions({
+      breaks: false,     // 单换行不转 <br>，保持标准 markdown 行为
+      gfm: true,         // GitHub Flavored Markdown
     });
-    html = html.replace(/(<tr>.*<\/tr>\n?)+/g, '<table>$&</table>');
-    // 换行
-    html = html.replace(/\n/g, '<br>');
-    // 清理多余 br
-    html = html.replace(/<br><br>/g, '</p><p>');
-    return html;
+    return marked.parse(md);
   }
 
   function escapeHtml(str) {

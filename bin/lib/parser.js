@@ -103,8 +103,8 @@ function parseSlideBlock(block, number) {
       continue;
     }
 
-    // 视觉组件
-    const componentMatch = trimmed.match(/^-\s*视觉组件\s*:\s*(.+)$/);
+    // 视觉组件（兼容两种格式）
+    const componentMatch = trimmed.match(/^-\s*(?:视觉组件|组件)\s*:\s*(.+)$/);
     if (componentMatch) {
       slide.component = componentMatch[1].trim();
       continue;

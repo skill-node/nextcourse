@@ -1,12 +1,12 @@
 ---
-title: OpenClaw 在职场中的应用技巧
-template: standard
-color-scheme: swiss-modern
-style-preset: swiss-modern
+title: openclaw职场应用
+template: modern
+color-scheme: warm-sand
+style-preset: warm-sand
 ---
 
 [Slide 1]
-# OpenClaw 在职场中的应用技巧
+# openclaw职场应用
 ## 副标题
 - 视觉组件: .cover-slide
 - 演讲备注: 欢迎词

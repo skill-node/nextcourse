@@ -44,6 +44,66 @@ app.use('/shared_styles', express.static(path.join(ROOT_DIR, 'shared_styles')));
 app.use('/lib', express.static(path.join(ROOT_DIR, 'lib')));
 
 // ──────────────────────────────────────────────
+//  辅助函数
+// ──────────────────────────────────────────────
+
+/**
+ * 计算课程阶段状态
+ * @param {number} slideCount - 幻灯片数量
+ * @param {boolean} hasHtml - 是否已渲染
+ * @returns {string} - 'draft' | 'structured' | 'rendered'
+ */
+function computePhase(slideCount, hasHtml) {
+  if (hasHtml) return 'rendered';
+  if (slideCount > 1) return 'structured';
+  return 'draft';
+}
+
+/**
+ * 获取课程的 AI session 文件路径
+ */
+function getAiSessionPath(courseName) {
+  return path.join(COURSES_DIR, courseName, '.ai_session.json');
+}
+
+/**
+ * 获取课程的 AI context 文件路径
+ */
+function getAiContextPath(courseName) {
+  return path.join(COURSES_DIR, courseName, '.ai_context.json');
+}
+
+/**
+ * 读取 AI session（如果存在）
+ */
+function readAiSession(courseName) {
+  const sessionPath = getAiSessionPath(courseName);
+  if (fs.existsSync(sessionPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(sessionPath, 'utf-8'));
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * 读取 AI context（如果存在）
+ */
+function readAiContext(courseName) {
+  const contextPath = getAiContextPath(courseName);
+  if (fs.existsSync(contextPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(contextPath, 'utf-8'));
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
+
+// ──────────────────────────────────────────────
 //  API 路由
 // ──────────────────────────────────────────────
 
@@ -78,6 +138,10 @@ app.get('/api/courses', (req, res) => {
         }
       }
 
+      // 计算 phase 和 hasAiSession
+      const phase = computePhase(slideCount, hasHtml);
+      const hasAiSession = fs.existsSync(getAiSessionPath(d.name));
+
       return {
         name: d.name,
         title: frontmatter.title,
@@ -87,6 +151,8 @@ app.get('/api/courses', (req, res) => {
         slideCount,
         hasHtml,
         lastModified,
+        phase,
+        hasAiSession,
       };
     });
 
@@ -110,13 +176,42 @@ app.get('/api/courses/:name', (req, res) => {
 
     const raw = fs.readFileSync(scriptPath, 'utf-8');
     const parsed = parseScript(scriptPath);
+    const indexPath = path.join(coursePath, 'index.html');
+    const hasHtml = fs.existsSync(indexPath);
+    const phase = computePhase(parsed.slides.length, hasHtml);
+    const aiSession = readAiSession(req.params.name);
+    const aiContext = readAiContext(req.params.name);
 
     res.json({
       name: req.params.name,
       raw,
       frontmatter: parsed.frontmatter,
       slides: parsed.slides,
+      phase,
+      hasHtml,
+      hasAiSession: aiSession !== null,
+      aiSession,
+      aiContext,
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * DELETE /api/courses/:name — 删除课程
+ */
+app.delete('/api/courses/:name', (req, res) => {
+  try {
+    const coursePath = path.join(COURSES_DIR, req.params.name);
+
+    if (!fs.existsSync(coursePath)) {
+      return res.status(404).json({ error: '课程不存在' });
+    }
+
+    // 递归删除课程目录
+    fs.rmSync(coursePath, { recursive: true, force: true });
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -127,7 +222,7 @@ app.get('/api/courses/:name', (req, res) => {
  */
 app.post('/api/courses', (req, res) => {
   try {
-    let { name, title, template, colorScheme, stylePreset } = req.body;
+    let { name, title, targetAudience, learningGoal, duration, template, colorScheme, stylePreset } = req.body;
 
     // 标题是必填的，目录名可自动生成
     if (!title || !title.trim()) {
@@ -149,9 +244,14 @@ app.post('/api/courses', (req, res) => {
       }
     }
 
-    const coursePath = path.join(COURSES_DIR, name);
-    if (fs.existsSync(coursePath)) {
-      return res.status(409).json({ error: `课程目录「${name}」已存在，请使用其他标题` });
+    // 如果目录名已存在，自动添加数字后缀避免冲突
+    const baseName = name;
+    let suffix = 2;
+    let coursePath = path.join(COURSES_DIR, name);
+    while (fs.existsSync(coursePath)) {
+      name = `${baseName}_${suffix}`;
+      coursePath = path.join(COURSES_DIR, name);
+      suffix++;
     }
 
     // 创建目录
@@ -174,7 +274,19 @@ color-scheme: ${colorScheme || 'standard-default'}${stylePreset ? `\nstyle-prese
 
     fs.writeFileSync(path.join(coursePath, 'script.md'), scriptContent, 'utf-8');
 
-    res.status(201).json({ name, title, path: coursePath });
+    // 保存 AI context（基础信息）
+    const contextData = {
+      title,
+      targetAudience: targetAudience || '',
+      learningGoal: learningGoal || '',
+      duration: duration || '',
+      template: template || 'standard',
+      preset: stylePreset || colorScheme || 'standard-default',
+      createdAt: new Date().toISOString(),
+    };
+    fs.writeFileSync(path.join(coursePath, '.ai_context.json'), JSON.stringify(contextData, null, 2), 'utf-8');
+
+    res.status(201).json({ name, title, path: coursePath, phase: 'draft' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -276,6 +388,364 @@ app.delete('/api/courses/:name', (req, res) => {
 
     fs.rmSync(coursePath, { recursive: true, force: true });
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ──────────────────────────────────────────────
+//  AI Session API
+// ──────────────────────────────────────────────
+
+/**
+ * GET /api/courses/:name/ai-session — 获取 AI 对话历史
+ */
+app.get('/api/courses/:name/ai-session', (req, res) => {
+  try {
+    const session = readAiSession(req.params.name);
+    if (!session) {
+      return res.json({ messages: [], phase: 'analysis', createdAt: null, updatedAt: null });
+    }
+    res.json(session);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * PUT /api/courses/:name/phase — 更新课程阶段
+ */
+app.put('/api/courses/:name/phase', (req, res) => {
+  try {
+    const coursePath = path.join(COURSES_DIR, req.params.name);
+    if (!fs.existsSync(coursePath)) {
+      return res.status(404).json({ error: '课程不存在' });
+    }
+
+    const { phase } = req.body;
+    const validPhases = ['draft', 'structured', 'rendered'];
+    if (!phase || !validPhases.includes(phase)) {
+      return res.status(400).json({ error: '无效的阶段值' });
+    }
+
+    // 更新 AI Session 中的阶段
+    const sessionPath = getAiSessionPath(req.params.name);
+    const now = new Date().toISOString();
+    const existingSession = readAiSession(req.params.name);
+
+    const sessionData = {
+      courseName: req.params.name,
+      messages: existingSession?.messages || [],
+      phase,
+      createdAt: existingSession?.createdAt || now,
+      updatedAt: now,
+    };
+
+    fs.writeFileSync(sessionPath, JSON.stringify(sessionData, null, 2));
+    res.json({ success: true, phase });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * PUT /api/courses/:name/ai-session — 更新 AI 对话历史
+ */
+app.put('/api/courses/:name/ai-session', (req, res) => {
+  try {
+    const coursePath = path.join(COURSES_DIR, req.params.name);
+    if (!fs.existsSync(coursePath)) {
+      return res.status(404).json({ error: '课程不存在' });
+    }
+
+    const { messages, phase } = req.body;
+    if (!Array.isArray(messages)) {
+      return res.status(400).json({ error: 'messages 必须是数组' });
+    }
+
+    const sessionPath = getAiSessionPath(req.params.name);
+    const now = new Date().toISOString();
+    const existingSession = readAiSession(req.params.name);
+
+    const sessionData = {
+      courseName: req.params.name,
+      messages,
+      phase: phase || existingSession?.phase || 'analysis',
+      createdAt: existingSession?.createdAt || now,
+      updatedAt: now,
+    };
+
+    fs.writeFileSync(sessionPath, JSON.stringify(sessionData, null, 2), 'utf-8');
+    res.json({ success: true, session: sessionData });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * DELETE /api/courses/:name/ai-session — 清除 AI 对话历史
+ */
+app.delete('/api/courses/:name/ai-session', (req, res) => {
+  try {
+    const sessionPath = getAiSessionPath(req.params.name);
+    if (fs.existsSync(sessionPath)) {
+      fs.unlinkSync(sessionPath);
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * POST /api/courses/:name/generate-script — 基于 AI 对话生成 script.md
+ */
+app.post('/api/courses/:name/generate-script', async (req, res) => {
+  try {
+    const coursePath = path.join(COURSES_DIR, req.params.name);
+    if (!fs.existsSync(coursePath)) {
+      return res.status(404).json({ error: '课程不存在' });
+    }
+
+    // 读取 AI 对话历史和课程信息
+    const session = readAiSession(req.params.name);
+    const context = readAiContext(req.params.name);
+
+    if (!session || !session.messages || session.messages.length === 0) {
+      return res.status(400).json({ error: '没有对话历史，请先与 AI 讨论课程内容' });
+    }
+
+    // 构建生成脚本的提示
+    const scriptPrompt = `你是课件脚本生成器。基于以下课程讨论内容，生成完整的 script.md。
+
+## 课程信息
+- 标题：${context?.title || '未命名课程'}
+- 对象：${context?.targetAudience || '未指定'}
+- 目标：${context?.learningGoal || '未指定'}
+
+## 对话历史
+${session.messages.map(m => `${m.role === 'user' ? '用户' : 'AI'}: ${m.content}`).join('\n\n')}
+
+## 输出格式规范（必须严格遵守）
+
+### 基础结构
+\`\`\`markdown
+---
+title: 课程标题
+template: standard
+color-scheme: bold-signal
+---
+
+[Slide 1]
+# 封面标题
+## 封面副标题
+- 组件: .cover-slide
+- 演讲备注: 开场白内容
+
+[Slide 2]
+# 模块一标题
+- 组件: .module-cover .module-1
+- 说明: 本模块学习目标...
+
+[Slide 3]
+# 内容页标题
+## 小标题（可选）
+- 要点一
+- 要点二
+- 要点三
+- 演讲备注: 讲解要点
+\`\`\`
+
+### 重要规则
+1. **组件必须用 \`- 组件: .xxx\` 格式声明**，不能混入内容中
+2. **布局结构（左侧/右侧）必须用 \`组件内容:\` 字段**，不能当作普通列表项
+3. **只有实际要显示的内容才作为普通列表项**
+4. 每页必须有 \`[Slide N]\` 标记
+
+### 各种组件的正确格式
+
+#### grid-2 两栏布局
+\`\`\`markdown
+[Slide N]
+# 标题
+- 组件: .grid-2
+- 组件内容: {"left":[{"class":"card-primary","title":"左侧标题","content":"左侧实际内容"}],"right":[{"class":"card-secondary","title":"右侧标题","content":"右侧实际内容"}]}
+- 演讲备注: 讲解要点
+\`\`\`
+
+#### grid-3 三栏布局
+\`\`\`markdown
+[Slide N]
+# 标题
+- 组件: .grid-3
+- 组件内容: [{"class":"card","title":"第一栏","content":"内容一"},{"class":"card","title":"第二栏","content":"内容二"},{"class":"card","title":"第三栏","content":"内容三"}]
+\`\`\`
+
+#### vs-good / vs-bad 对比页
+\`\`\`markdown
+[Slide N]
+# 正确做法 vs 错误做法
+- 组件: .grid-2
+- 组件内容: {"left":[{"class":"vs-good","title":"正确做法","content":"具体做法一；具体做法二；具体做法三"}],"right":[{"class":"vs-bad","title":"错误做法","content":"错误做法一；错误做法二；错误做法三"}]}
+\`\`\`
+
+#### 普通内容页（无特殊组件）
+\`\`\`markdown
+[Slide N]
+# 标题
+## 副标题（可选）
+- 第一个要点
+- 第二个要点
+- 第三个要点
+- 第四个要点
+- 演讲备注: 讲解内容
+\`\`\`
+
+#### card-primary 强调卡片
+\`\`\`markdown
+[Slide N]
+# 标题
+- 组件: .card-primary
+- 核心观点在这里
+- 要点一
+- 要点二
+\`\`\`
+
+#### ending-slide 结尾页
+\`\`\`markdown
+[Slide N]
+# 感谢聆听
+- 组件: .ending-slide
+- 联系方式或总结语
+- 演讲备注: 结束语
+\`\`\`
+
+## 错误示例（避免）
+
+❌ 错误：把组件写进内容
+\`\`\`markdown
+- **应用**：熟练使用AI工具
+- 组件: .card-primary   ← 这是错的！组件不能作为内容项
+\`\`\`
+
+❌ 错误：把结构说明当作内容
+\`\`\`markdown
+- 组件: .grid-2
+- **左侧**：它能做...   ← 这是错的！"左侧"是结构标记，不是内容
+- **右侧**：它不能做...
+\`\`\`
+
+✅ 正确：用组件内容字段表达结构
+\`\`\`markdown
+- 组件: .grid-2
+- 组件内容: {"left":[{"class":"card-primary","title":"AI 能做什么","content":"分析数据；识别模式；生成建议"}],"right":[{"class":"card-secondary","title":"AI 不能做什么","content":"情感判断；伦理决策；承担责任"}]}
+\`\`\`
+
+## 注意事项
+1. 只输出 markdown 代码块，不要其他说明文字
+2. 内容要点控制在 4-6 条，避免单页过长
+3. 组件选择要匹配内容特征
+4. 组件内容中的 content 用分号分隔多个要点`;
+
+    // 调用 AI API
+    const apiKey = process.env.LLM_API_KEY;
+    const baseUrl = process.env.LLM_BASE_URL || 'https://api.deepseek.com/v1';
+    const model = process.env.LLM_MODEL || 'deepseek-chat';
+
+    if (!apiKey || apiKey === 'sk-your-api-key-here') {
+      return res.status(400).json({ error: '请配置 LLM_API_KEY' });
+    }
+
+    const url = new URL(`${baseUrl}/chat/completions`);
+    const transport = url.protocol === 'https:' ? https : http;
+
+    const payload = JSON.stringify({
+      model,
+      messages: [{ role: 'user', content: scriptPrompt }],
+      temperature: 0.3,
+      max_tokens: 8192,
+    });
+
+    const apiReq = transport.request({
+      hostname: url.hostname,
+      port: url.port,
+      path: url.pathname,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Length': Buffer.byteLength(payload),
+      },
+    }, (apiRes) => {
+      let body = '';
+      apiRes.on('data', chunk => body += chunk);
+      apiRes.on('end', async () => {
+        try {
+          if (apiRes.statusCode !== 200) {
+            const err = JSON.parse(body);
+            return res.status(apiRes.statusCode).json({ error: err.error?.message || body });
+          }
+
+          const data = JSON.parse(body);
+          let scriptContent = data.choices?.[0]?.message?.content || '';
+
+          // 提取 markdown 代码块中的内容
+          const codeMatch = scriptContent.match(/```(?:markdown|md)?\s*\n([\s\S]*?)```/);
+          if (codeMatch) {
+            scriptContent = codeMatch[1].trim();
+          }
+
+          // 保存脚本
+          const scriptPath = path.join(coursePath, 'script.md');
+          fs.writeFileSync(scriptPath, scriptContent, 'utf-8');
+
+          // 更新阶段
+          const sessionPath = getAiSessionPath(req.params.name);
+          const now = new Date().toISOString();
+          const updatedSession = {
+            ...session,
+            phase: 'structured',
+            updatedAt: now,
+          };
+          fs.writeFileSync(sessionPath, JSON.stringify(updatedSession, null, 2), 'utf-8');
+
+          res.json({ success: true, scriptLength: scriptContent.length });
+        } catch (err) {
+          res.status(500).json({ error: `解析失败: ${err.message}` });
+        }
+      });
+    });
+
+    apiReq.on('error', (err) => {
+      res.status(500).json({ error: `API 连接失败: ${err.message}` });
+    });
+
+    apiReq.write(payload);
+    apiReq.end();
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * PUT /api/courses/:name/ai-context — 保存课程基础信息（新建课程时收集）
+ */
+app.put('/api/courses/:name/ai-context', (req, res) => {
+  try {
+    const coursePath = path.join(COURSES_DIR, req.params.name);
+    if (!fs.existsSync(coursePath)) {
+      return res.status(404).json({ error: '课程不存在' });
+    }
+
+    const contextPath = getAiContextPath(req.params.name);
+    const contextData = {
+      ...req.body,
+      updatedAt: new Date().toISOString(),
+    };
+
+    fs.writeFileSync(contextPath, JSON.stringify(contextData, null, 2), 'utf-8');
+    res.json({ success: true, context: contextData });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
