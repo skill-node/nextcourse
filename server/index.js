@@ -761,7 +761,7 @@ app.post('/api/ai/chat', (req, res) => {
   const model = process.env.LLM_MODEL || 'deepseek-chat';
 
   if (!apiKey || apiKey === 'sk-your-api-key-here') {
-    return res.status(400).json({ error: '请在 .env 文件中配置 LLM_API_KEY' });
+    return res.status(400).json({ error: '请配置系统环境变量或 .env 中的 LLM_API_KEY' });
   }
 
   const { messages } = req.body;
