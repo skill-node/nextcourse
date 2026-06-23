@@ -213,22 +213,28 @@ agent 写 slides/*.html
 - [x] 视觉回环改为本地浏览器人审(去掉 Playwright/shot.js)
 - 验收 ✓: linter 能正确拦截 4 类违规并报告；组件覆盖 AI/HR 题材所有常见页型
 
-**Phase B — slide 出片闭环(2-3 天,最先拿到质量证据)** ★
-- [ ] `build.js` + `shot.js` 跑通
-- [ ] `skills/slide-design.md`(Phase 4-5 + B 档组合规则 + lint + 视觉回环 rubric)
-- [ ] 用现有 `openclaw_2` 反推 `course.meta.md`,按 B 档出片 + 截图自校验
-- 验收:新出片与现有 `index.html` 当面对比,质量明显更好且审美一致、保持 slide 感
+**Phase B — slide 出片闭环** ✅ 完成
+- [x] `build.js` 跑通（视觉回环改为本地浏览器人审，去掉 shot.js）
+- [x] `skills/slide-design.md`（Phase 4-5 + B 档组合规则 + lint + 视觉回环 rubric）
+- [x] `openclaw_2` 课程 25 张幻灯片按 B 档出片，用户浏览器验证通过
+- 验收 ✓：lint 全部通过，build 成功，用户人审质量确认
 
-**Phase C — 课程设计引导(1-2 天)**
-- [ ] `skills/course-design.md`(逆向设计 + Bloom + Merrill 五阶段 + 引导话术)
-- [ ] 轻量校验器(密度 / 资源 / frontmatter)
-- 验收:`/course-design "AI 领导力培训"` → 五阶段 → 可出片的 `course.meta.md`
+**Phase C — 课程设计引导** ✅ 完成
+- [x] `skills/course-design.md`（逆向设计 + Bloom + Merrill 五阶段 + 引导话术）
+- [x] 轻量校验：frontmatter 必填由 build.js 读取时自然暴露，无需独立校验器
+- 验收 ✓：`/course-design` 触发五阶段对话式引导，输出 `course.meta.md`
 
-**Phase D — 收尾与(可选)工程化(按需)**
-- [ ] 迁移其余 `courses/*`;删除旧管线;合回 `main`
-- [ ] CLI 化:`courseflow render/preview/list/export/migrate`(Commander)
-- [ ] 评估是否值得引入 TS + schema 校验(若 agent 自纠已足够可靠,则不引入)
-- [ ] PDF/PPTX 导出(headless 截图)、课程模板库
+**Phase D — 收尾与工程化** ✅ 完成
+- [x] 删除旧管线：`server/`（V1 SPA + Express）、`bin/`（V1 parser/renderer）已删除
+- [x] 删除 `.agent/`（V1 Skills），已从 git 移除并加入 gitignore
+- [x] 课程内容（`courses/`）移出 git 跟踪，加入 gitignore
+- [x] CLI 化：`courseflow.js` 统一入口（list / new / lint / build / render / export）
+- [x] `export.js`：离线打包（路径修正 + 拷贝 lib/ + shared_styles/）
+- [x] `AGENT.md`：全 agent 兼容的完整项目文档
+- [x] 分支整理：`v1` 保留历史，`main` = V2 主线，`v2` 分支已删除
+- [ ] TS + Zod：**评估后跳过** — agent 自纠 + lint 已足够可靠，引入 TS 重写收益不足以覆盖迁移成本
+- [ ] PDF/PPTX 导出：**推迟** — 需 headless 浏览器依赖，待有实际需求时再做
+- [ ] 课程模板库：**推迟** — `openclaw_2` 作为参考样本，模板库待积累后提炼
 
 ---
 

@@ -13,11 +13,13 @@ CourseFlow 是一个以 **AI-Native 工作流为核心的课程开发工具**。
 CourseFlow/
 ├── AGENT.md              ← 当前文档（agent 入口）
 ├── DESIGN-SYSTEM.md      ← 完整组件参考手册（创作幻灯片前必读）
-├── build.js              ← 课程组装脚本
-├── lint-slides.js        ← 样式规范校验脚本
-├── export.js             ← 课程打包脚本（生成可离线演示文件夹）
+├── courseflow.js         ← 统一 CLI 入口
+├── build.js              ← 课程组装（courseflow build 内部调用）
+├── lint-slides.js        ← 样式校验（courseflow lint 内部调用）
+├── export.js             ← 离线打包（courseflow export 内部调用）
 ├── skills/
-│   └── slide-design.md   ← 幻灯片创作 Skill 定义
+│   ├── course-design.md  ← /course-design Skill（大纲设计）
+│   └── slide-design.md   ← /slide-design Skill（幻灯片渲染）
 ├── shared_styles/        ← 全局设计系统 CSS（所有课程共用）
 │   ├── base_layout.css
 │   ├── tokens.css
@@ -33,52 +35,36 @@ CourseFlow/
         │   ├── slide-02.html
         │   └── ...
         ├── assets/             ← 课程图片（可选）
-        └── deck.html           ← 由 build.js 生成，勿手动编辑
+        └── deck.html           ← 由 build 生成，勿手动编辑
 ```
 
 ---
 
 ## CLI 命令参考
 
-### 构建课程
+所有命令通过统一入口 `courseflow.js` 调用（或 `npm run <cmd>`）：
 
 ```bash
-node build.js <course-name>
+node courseflow.js list                     # 列出所有课程及状态
+node courseflow.js new    <name>            # 初始化新课程目录
+node courseflow.js lint   <name>            # 校验幻灯片样式规范
+node courseflow.js build  <name>            # 组装生成 deck.html
+node courseflow.js render <name>            # lint + build 一步完成（推荐）
+node courseflow.js export <name> [outdir]   # 打包为可离线演示文件夹
 ```
 
-- 读取 `courses/<name>/course.meta.md` 中的 frontmatter（标题、配色、模板）
-- 按文件名顺序拼接 `courses/<name>/slides/slide-*.html`
-- 生成 `courses/<name>/deck.html`
+### 各命令说明
 
-### 校验样式规范
+| 命令 | 说明 |
+|------|------|
+| `list` | 显示 courses/ 下所有课程，标注 meta/slides/deck/export 完成状态 |
+| `new <name>` | 创建 courses/\<name\>/ 目录结构 + course.meta.md 模板 |
+| `lint <name>` | 扫描 slide-*.html，检查 5 类违规（内联 style / 硬编码色 / 硬编码 RGB / 新字体 / 未注册 class） |
+| `build <name>` | 读 course.meta.md frontmatter + 拼接 slides/ → 生成 deck.html |
+| `render <name>` | lint 通过后再 build，是日常最常用的命令 |
+| `export <name>` | 生成 courses/\<name\>/export/，含 lib/ + shared_styles/，双击 index.html 即可离线演示 |
 
-```bash
-node lint-slides.js <course-name>
-```
-
-- 扫描所有 `slide-*.html` 文件
-- 检查 5 类违规：内联 style / 硬编码颜色 / 硬编码 RGB / 私自引入字体 / 使用未注册 class
-- 退出码 0 = 通过，1 = 有违规（打印详细报告）
-
-**建议在 build 前先 lint：**
-
-```bash
-node lint-slides.js <name> && node build.js <name>
-```
-
-### 打包为可离线演示文件夹
-
-```bash
-node export.js <course-name>
-# 默认输出到 courses/<course-name>/export/
-
-node export.js <course-name> ~/Desktop
-# 输出到 ~/Desktop/<course-name>/
-```
-
-- 输出文件夹包含 index.html + lib/ + shared_styles/ + assets/
-- 将整个文件夹拷贝到 U 盘 / 云盘 / 任意电脑，双击 index.html 即可演示
-- **无需网络，无需安装任何软件**
+也可以通过 npm scripts：`npm run render -- openclaw_2`
 
 ---
 
@@ -144,7 +130,7 @@ theme: bold-signal
 | `high-contrast`    | 无障碍高对比     |
 | `standard-default` | 白底经典学术     |
 
-修改后重新 `node build.js <name>` 即生效，无需改任何幻灯片文件。
+修改后重新 `node courseflow.js render <name>` 即生效，无需改任何幻灯片文件。
 
 ---
 
@@ -250,21 +236,18 @@ Bloom 动词参考：remember / understand / apply / analyze / evaluate / create
 典型调用序列：
 
 ```bash
-# 1. 创建课程目录
-mkdir -p courses/<name>/slides
+# 1. 初始化课程目录
+node courseflow.js new <name>
 
-# 2. 写 course.meta.md (frontmatter + 大纲)
+# 2. 编辑 course.meta.md（frontmatter + 大纲）
 
 # 3. 写 slide-*.html 片段（参考 DESIGN-SYSTEM.md 组件）
 
-# 4. 校验样式
-node lint-slides.js <name>
+# 4. 校验 + 构建
+node courseflow.js render <name>
 
-# 5. 构建
-node build.js <name>
-
-# 6. 打包交付
-node export.js <name>
+# 5. 打包交付
+node courseflow.js export <name>
 ```
 
 ### Claude Code 专属
