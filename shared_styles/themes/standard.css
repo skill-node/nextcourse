@@ -307,28 +307,77 @@ body {
     height: 100%;
 }
 
+.card h3 {
+    color: var(--primary) !important;
+}
+
 .card p,
 .card li {
     font-size: 1rem;
     line-height: 1.8;
+    color: var(--text-body) !important;
 }
 
-.card-primary {
-    background: var(--primary);
+/* 主色卡片 - 使用更高的 specificity */
+.reveal .slides section .card-primary {
+    background: var(--primary) !important;
     color: var(--text-inverse);
     border-radius: 1rem;
     padding: 1.5rem;
     box-shadow: var(--shadow-card);
 }
 
-.card-primary h3,
-.card-primary p {
+.reveal .slides section .card-primary h3,
+.reveal .slides section .card-primary h4,
+.reveal .slides section .card-primary p,
+.reveal .slides section .card-primary ul,
+.reveal .slides section .card-primary ol,
+.reveal .slides section .card-primary li,
+.reveal .slides section .card-primary span {
     color: var(--text-inverse) !important;
 }
 
-.card-primary p {
+.reveal .slides section .card-primary p {
     font-size: 1rem;
     line-height: 1.8;
+}
+
+/* 辅助色卡片 - 新增定义 */
+.reveal .slides section .card-secondary {
+    background: var(--secondary) !important;
+    color: var(--text-inverse);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+}
+
+.reveal .slides section .card-secondary h3,
+.reveal .slides section .card-secondary h4,
+.reveal .slides section .card-secondary p,
+.reveal .slides section .card-secondary ul,
+.reveal .slides section .card-secondary ol,
+.reveal .slides section .card-secondary li,
+.reveal .slides section .card-secondary span {
+    color: var(--text-inverse) !important;
+}
+
+/* 强调色卡片 - 新增定义 */
+.reveal .slides section .card-accent {
+    background: var(--accent) !important;
+    color: var(--text-inverse);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+}
+
+.reveal .slides section .card-accent h3,
+.reveal .slides section .card-accent h4,
+.reveal .slides section .card-accent p,
+.reveal .slides section .card-accent ul,
+.reveal .slides section .card-accent ol,
+.reveal .slides section .card-accent li,
+.reveal .slides section .card-accent span {
+    color: var(--text-inverse) !important;
 }
 
 /* ===== 高亮框 ===== */
@@ -356,13 +405,17 @@ body {
     border-radius: 8px;
 }
 
+.vs-bad h3,
 .vs-bad h4 {
     color: var(--danger) !important;
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
 }
 
-.vs-bad p {
+.vs-bad p,
+.vs-bad ul,
+.vs-bad ol,
+.vs-bad li {
     font-size: 1rem;
     line-height: 1.8;
 }
@@ -374,13 +427,17 @@ body {
     border-radius: 8px;
 }
 
+.vs-good h3,
 .vs-good h4 {
     color: var(--success) !important;
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
 }
 
-.vs-good p {
+.vs-good p,
+.vs-good ul,
+.vs-good ol,
+.vs-good li {
     font-size: 1rem;
     line-height: 1.8;
 }

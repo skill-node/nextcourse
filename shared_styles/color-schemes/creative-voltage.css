@@ -18,7 +18,7 @@
 
     /* ===== 模块封面颜色（10套）===== */
     --module-1: #0066ff;
-    --module-2: #1a1a2e;
+    --module-2: #4f46e5;
     --module-3: #00cc66;
     --module-4: #d4ff00;
     --module-5: #9933ff;
@@ -31,7 +31,7 @@
     /* ===== 背景 ===== */
     --bg-page: #1a1a2e;
     --bg-slide: #1a1a2e;
-    --bg-card: rgba(255, 255, 255, 0.05);
+    --bg-card: rgba(255, 255, 255, 0.1);
     --bg-highlight: rgba(212, 255, 0, 0.08);
     --bg-vs-good: rgba(0, 255, 136, 0.08);
     --bg-vs-bad: rgba(255, 51, 102, 0.08);
@@ -47,7 +47,8 @@
     --text-heading: #ffffff;
     --text-body: rgba(255, 255, 255, 0.85);
     --text-muted: rgba(255, 255, 255, 0.5);
-    --text-inverse: #1a1a2e;
+    --text-inverse: #ffffff;
+    /* 反色文字 - 在蓝色背景上用白色 */
     --text-tag: #d4ff00;
 
     /* ===== 阴影 ===== */
@@ -85,7 +86,34 @@ body {
 }
 
 .card-primary h3,
-.card-primary p {
+.card-primary p,
+.card-primary ul,
+.card-primary ol,
+.card-primary li {
+    color: #ffffff !important;
+}
+
+.card-secondary {
+    background: #d4ff00 !important;
+}
+
+.card-secondary h3,
+.card-secondary p,
+.card-secondary ul,
+.card-secondary ol,
+.card-secondary li {
+    color: #1a1a2e !important;
+}
+
+.card-accent {
+    background: #00cc66 !important;
+}
+
+.card-accent h3,
+.card-accent p,
+.card-accent ul,
+.card-accent ol,
+.card-accent li {
     color: #ffffff !important;
 }
 
@@ -102,8 +130,31 @@ body {
     border: 1px solid rgba(0, 102, 255, 0.3) !important;
 }
 
+/* ===== 普通卡片增强 ===== */
+.card {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(0, 102, 255, 0.3) !important;
+}
+
+.card h3 {
+    color: #d4ff00 !important;
+}
+
+.card p,
+.card ul,
+.card ol,
+.card li {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
 /* ===== 模块封面白色文字 ===== */
+.module-cover {
+    color: #ffffff !important;
+}
+
 .module-cover h1,
+.module-cover h2,
+.module-cover h3,
 .module-cover p {
     color: #ffffff !important;
 }

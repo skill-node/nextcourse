@@ -9,10 +9,13 @@
 
 :root {
     /* ===== 主色系 ===== */
-    --primary: #1a1a1a;
-    --primary-dark: #0d0d0d;
-    --secondary: #2d2d2d;
-    --accent: #c7b8ea;
+    --primary: #c7b8ea;
+    /* 柔和紫色 - 笔记标签风格 */
+    --primary-dark: #5b4a8a;
+    --secondary: #98d4bb;
+    /* 柔和绿色 */
+    --accent: #f4b8c5;
+    /* 柔和粉色 */
     --success: #98d4bb;
     --danger: #f4b8c5;
 
@@ -48,6 +51,7 @@
     --text-body: #3d3d3d;
     --text-muted: #6b6b6b;
     --text-inverse: #1a1a1a;
+    /* 反色文字 - 在浅色卡片背景上用深色 */
     --text-tag: #5b4a8a;
 
     /* ===== 阴影 ===== */
@@ -93,7 +97,7 @@ body {
     width: 80px !important;
 }
 
-/* ===== 模块封面白色文字 ===== */
+/* ===== 模块封面深色文字（浅色背景） ===== */
 .module-cover h1,
 .module-cover p {
     color: #1a1a1a !important;

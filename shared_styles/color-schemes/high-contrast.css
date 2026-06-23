@@ -18,6 +18,18 @@
     --danger: #dc2626;
     /* 红色 - 警示色 */
 
+    /* 模块封面颜色（10套）*/
+    --module-1: #2563eb;
+    --module-2: #16a34a;
+    --module-3: #d97706;
+    --module-4: #7c3aed;
+    --module-5: #dc2626;
+    --module-6: #0891b2;
+    --module-7: #c026d3;
+    --module-8: #ea580c;
+    --module-9: #0d9488;
+    --module-10: #4f46e5;
+
     /* 背景色 */
     --bg-page: #ffffff;
     /* 页面背景 - 纯白 */
@@ -66,4 +78,16 @@
     /* 玻璃效果 */
     --glass-bg: rgba(255, 255, 255, 0.95);
     --glass-border: rgba(37, 99, 235, 0.3);
+}
+
+/* ===== 模块封面白色文字 ===== */
+.module-cover {
+    color: #ffffff !important;
+}
+
+.module-cover h1,
+.module-cover h2,
+.module-cover h3,
+.module-cover p {
+    color: #ffffff !important;
 }

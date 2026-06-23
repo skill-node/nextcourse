@@ -86,3 +86,40 @@ body {
 .code-block {
     color: #e5e7eb !important;
 }
+
+/* ===== 模块封面白色文字 ===== */
+.module-cover {
+    color: #ffffff !important;
+}
+
+.module-cover h1,
+.module-cover h2,
+.module-cover h3,
+.module-cover p {
+    color: #ffffff !important;
+}
+
+/* ===== 卡片样式 ===== */
+.card-primary {
+    background: #4361ee !important;
+}
+
+.card-primary h3,
+.card-primary p,
+.card-primary ul,
+.card-primary ol,
+.card-primary li {
+    color: #ffffff !important;
+}
+
+.card-secondary {
+    background: #0a0a0a !important;
+}
+
+.card-secondary h3,
+.card-secondary p,
+.card-secondary ul,
+.card-secondary ol,
+.card-secondary li {
+    color: #ffffff !important;
+}

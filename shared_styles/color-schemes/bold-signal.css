@@ -18,7 +18,7 @@
 
     /* ===== 模块封面颜色（10套）===== */
     --module-1: #FF5722;
-    --module-2: #1a1a1a;
+    --module-2: #E64A19;
     --module-3: #2196F3;
     --module-4: #FF9800;
     --module-5: #9C27B0;
@@ -87,14 +87,59 @@ body {
     color: #ffffff !important;
 }
 
-/* ===== 卡片主色增强 ===== */
+/* ===== 普通卡片增强 ===== */
+.card {
+    background: #3d3d3d !important;
+    border-color: rgba(255, 87, 34, 0.2) !important;
+}
+
+.card h3 {
+    color: #FF5722 !important;
+}
+
+.card p,
+.card ul,
+.card ol,
+.card li {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* ===== 主色卡片增强 ===== */
 .card-primary {
     background: #FF5722 !important;
     color: #1a1a1a !important;
 }
 
 .card-primary h3,
-.card-primary p {
+.card-primary p,
+.card-primary ul,
+.card-primary ol,
+.card-primary li {
+    color: #1a1a1a !important;
+}
+
+/* ===== 辅助色卡片 ===== */
+.card-secondary {
+    background: #E64A19 !important;
+}
+
+.card-secondary h3,
+.card-secondary p,
+.card-secondary ul,
+.card-secondary ol,
+.card-secondary li {
+    color: #ffffff !important;
+}
+
+.card-accent {
+    background: #FFC107 !important;
+}
+
+.card-accent h3,
+.card-accent p,
+.card-accent ul,
+.card-accent ol,
+.card-accent li {
     color: #1a1a1a !important;
 }
 

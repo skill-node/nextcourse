@@ -3,6 +3,12 @@ node_modules/
 .DS_Store
 .env
 
+# Course content (user-generated, not project code)
+courses/
+
+# V1 legacy agent skills (replaced by skills/ in V2)
+.agent/
+
 # IDE
 .vscode/
 .idea/

@@ -1,0 +1,66 @@
+/* ===================================
+   CourseFlow V2 — 结构令牌 (tokens.css)
+   颜色令牌在 color-schemes/*.css 中定义
+   本文件锁定: 间距 / 圆角 / 动画 / 层级 / 组件尺寸
+   =================================== */
+
+:root {
+    /* ===== 间距刻度 ===== */
+    --space-1:  0.25rem;   /*  4px */
+    --space-2:  0.5rem;    /*  8px */
+    --space-3:  0.75rem;   /* 12px */
+    --space-4:  1rem;      /* 16px */
+    --space-5:  1.25rem;   /* 20px */
+    --space-6:  1.5rem;    /* 24px */
+    --space-8:  2rem;      /* 32px */
+    --space-10: 2.5rem;    /* 40px */
+    --space-12: 3rem;      /* 48px */
+    --space-16: 4rem;      /* 64px */
+    --space-20: 5rem;      /* 80px */
+
+    /* ===== 圆角刻度 ===== */
+    --radius-sm:   0.375rem;  /*  6px — badge、tag、表格单元格 */
+    --radius-md:   0.75rem;   /* 12px — 按钮、输入框、callout */
+    --radius-lg:   1rem;      /* 16px — 卡片 */
+    --radius-xl:   1.5rem;    /* 24px — 大卡片、封面装饰 */
+    --radius-pill: 9999px;    /* 完全圆角 — tag、pill、footer-num */
+
+    /* ===== 过渡时长 ===== */
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.3s ease;
+    --transition-slow: 0.6s ease;
+
+    /* ===== 层级 ===== */
+    --z-base:    1;
+    --z-overlay: 50;
+    --z-fixed:   100;
+    --z-modal:   200;
+
+    /* ===== 卡片组件 ===== */
+    --card-padding: 1.5rem;
+    --card-radius:  var(--radius-lg);
+
+    /* ===== 统计数字墙 ===== */
+    --stat-number-size: clamp(2.5rem, 5vw, 4rem);
+    --stat-label-size:  clamp(0.8rem, 1.2vw, 1rem);
+
+    /* ===== 引用金句 ===== */
+    --quote-font-size:    clamp(1.4rem, 3vw, 2.2rem);
+    --quote-border-width: 6px;
+
+    /* ===== 时间轴 ===== */
+    --timeline-dot-size:      1rem;
+    --timeline-line-width:    3px;
+    --timeline-item-min-width: 120px;
+
+    /* ===== 四象限 ===== */
+    --quadrant-gap:          0.5rem;
+    --quadrant-cell-padding: 1.25rem;
+
+    /* ===== 标注框 / 小结 ===== */
+    --callout-border-width: 4px;
+
+    /* ===== 表格对比 ===== */
+    --table-header-padding: 0.75rem 1rem;
+    --table-cell-padding:   0.65rem 1rem;
+}

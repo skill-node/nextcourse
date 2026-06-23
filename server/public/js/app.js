@@ -1313,8 +1313,8 @@ function setupWorkbenchEvents(name) {
   // 编辑模式按钮
   $('#btn-edit-mode').onclick = () => {
     const frame = $('#preview-frame');
-    // 检查 iframe 是否有有效内容（不是空白页）
-    if (!frame || frame.src === 'about:blank' || !frame.src.includes('/render/')) {
+    // 检查 iframe 是否有有效内容（已渲染的课程页面）
+    if (!frame || frame.src === 'about:blank' || !frame.src.includes('/courses/')) {
       toast('请先点击「渲染」按钮生成课件', 'warning');
       return;
     }
@@ -1673,6 +1673,9 @@ async function handleSlidesEdited(changes, courseName) {
 function loadPreview(name) {
   const frame = $('#preview-frame');
   if (!frame) return;
+
+  // 清除 srcdoc 属性（如果存在），否则 src 可能不生效
+  frame.removeAttribute('srcdoc');
   frame.src = `/courses/${name}/index.html?t=${Date.now()}`;
 
   // iframe 加载完成后注入编辑器脚本

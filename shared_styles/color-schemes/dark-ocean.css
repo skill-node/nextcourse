@@ -18,6 +18,18 @@
     --danger: #fda4af;
     /* 粉红 - 警示色（调亮） */
 
+    /* 模块封面颜色（10套）- 深色模式用亮色 */
+    --module-1: #a5b4fc;
+    --module-2: #5eead4;
+    --module-3: #fcd34d;
+    --module-4: #818cf8;
+    --module-5: #fda4af;
+    --module-6: #67e8f9;
+    --module-7: #f0abfc;
+    --module-8: #fbbf24;
+    --module-9: #34d399;
+    --module-10: #93c5fd;
+
     /* 背景色 - 纯色 */
     --bg-page: #1e293b;
     /* 页面背景 - 深灰蓝纯色 */
@@ -78,8 +90,29 @@ body {
     color: #f8fafc !important;
 }
 
+/* 普通卡片增强 */
+.card {
+    background: #3d4f65 !important;
+    border-color: rgba(165, 180, 252, 0.2) !important;
+}
+
+.card h3 {
+    color: #a5b4fc !important;
+}
+
+.card p,
+.card ul,
+.card ol,
+.card li {
+    color: rgba(248, 250, 252, 0.9) !important;
+}
+
 /* 卡片内所有标题和文字 */
 .card-primary h3,
+.card-primary p,
+.card-primary ul,
+.card-primary ol,
+.card-primary li,
 .card-indigo h3,
 .card-secondary h3,
 .card-teal h3,
@@ -119,4 +152,16 @@ body {
 /* 分隔线 */
 .divider {
     background: var(--secondary) !important;
+}
+
+/* ===== 模块封面白色文字 ===== */
+.module-cover {
+    color: #1e293b !important;
+}
+
+.module-cover h1,
+.module-cover h2,
+.module-cover h3,
+.module-cover p {
+    color: #1e293b !important;
 }
