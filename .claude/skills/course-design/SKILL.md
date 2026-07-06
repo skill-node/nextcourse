@@ -1,3 +1,8 @@
+---
+name: course-design
+description: 对话式设计课程大纲——定位 → 学习成果 → 知识架构，输出 courses/<name>/course.meta.md。适用于任何主题（领导力 / AI 技术 / HR 管理等）。
+---
+
 # /course-design — CourseFlow 课程大纲设计 Skill
 
 ## 触发方式
@@ -78,19 +83,19 @@ Phase 3: 知识架构   → 拆分模块，确定每模块主题与页数
 - 他们需要能**做到**什么？
 - 他们能**创造/决策**什么？
 
-根据用户回答，起草 3-5 条学习成果：
+根据用户回答，起草 3-5 条学习成果。每条包含三个字段：
+- `do` — 动词开头的可观察行为（学完能做什么）
+- `bloom` — 所属 Bloom 层级
+- `success` — 成功标准（怎样算达成，能写出考题或实操验收）
 
 ```yaml
 outcomes:
-  - bloom: understand
-    text: "学员能够解释 X 的工作原理"
-  - bloom: apply
-    text: "学员能够使用 X 完成 Y 任务"
-  - bloom: analyze
-    text: "学员能够诊断 X 场景中的 Y 问题"
+  - { do: "解释 X 的工作原理及适用边界", bloom: understand, success: "能用自己的话向同事讲清并举 1 个反例" }
+  - { do: "使用 X 完成 Y 任务", bloom: apply, success: "独立完成 Y 并通过检查清单验收" }
+  - { do: "诊断 X 场景中的 Y 问题", bloom: analyze, success: "对 3 个给定案例说出根因与对策" }
 ```
 
-让用户确认后进入 Phase 3。
+**质量闸门：** 若 3-5 条成果大多停留在 记住/理解 层，提醒用户"课程可能太浅"，建议至少 1 条达到 apply 及以上。让用户确认后进入 Phase 3。
 
 ---
 
@@ -146,12 +151,9 @@ theme: bold-signal
 audience: "受众描述（来自 Phase 1）"
 positioning: "价值主张（来自 Phase 1，1 句话）"
 outcomes:
-  - bloom: apply
-    text: "学员能够…"
-  - bloom: analyze
-    text: "学员能够…"
-  - bloom: create
-    text: "学员能够…"
+  - { do: "动词开头的行为", bloom: apply, success: "成功标准" }
+  - { do: "动词开头的行为", bloom: analyze, success: "成功标准" }
+  - { do: "动词开头的行为", bloom: create, success: "成功标准" }
 ---
 
 ## 课程大纲
@@ -174,18 +176,21 @@ outcomes:
 - 致谢结束
 ```
 
-### theme 选择建议
+### 题材域适配（贯穿三个 Phase 使用）
 
-根据课程风格推荐配色（用户可以直接指定，也可以接受建议）：
+不同题材的教学形态差异很大。识别课程所属题材后，按此表调整引导重点、模块结构和 theme 推荐（用户可覆盖）：
 
-| 课程风格           | 推荐 theme          |
-|--------------------|---------------------|
-| 技术 / 工具培训    | `bold-signal`       |
-| 企业管理 / 商业    | `warm-sand`         |
-| 数据 / 分析        | `dark-ocean`        |
-| 创意 / 设计        | `creative-voltage`  |
-| 学术 / 严肃        | `standard-default`  |
-| 高对比无障碍场景   | `high-contrast`     |
+| 题材 | 教学形态重点 | Practice 形式 | 推荐 theme |
+|---|---|---|---|
+| 领导力 / 软技能 | 案例讨论驱动：真实情境 → 多方视角 → 反思。Demo 页多用案例与金句，少用流程图 | 情境研讨、角色扮演、自评量表（不是"动手操作"） | `warm-sand` 或 `dark-botanical` |
+| AI / 技术工具 | Demo 驱动：先看到效果再讲原理。每模块必须有可跟做的操作演示 | 动手任务 + 检查清单验收 | `bold-signal` |
+| HR / 制度合规 | 场景判断驱动：对/错边界、政策条文 → 具体情境判断。多用对比和判断题 | 情景判断题、合规检查清单 | `standard-default` |
+| 数据 / 分析 | 图表与数字驱动：结论先行，数据佐证 | 读图任务、指标计算 | `dark-ocean` |
+| 创意 / 设计 | 视觉范例驱动：好坏对比、before/after | 点评练习、改稿任务 | `creative-voltage` |
+
+其他风格补充：极简瑞士 `swiss-modern`（管理/战略）、手记粉彩 `notebook-tabs`（工作坊/互动）。全部 8 套见 AGENT.md 配色表。
+
+**Phase 2 提示：** 领导力/合规类成果多落在 analyze/evaluate 层（判断与决策），技术类多落在 apply/create 层（操作与搭建）——如果起草的 Bloom 分布与题材惯性不符，向用户确认是否有意为之。
 
 ---
 

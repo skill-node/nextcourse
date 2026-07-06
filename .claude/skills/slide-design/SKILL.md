@@ -1,3 +1,8 @@
+---
+name: slide-design
+description: 读取 courses/<name>/course.meta.md，按 Merrill 第一原理逐页设计幻灯片并生成 deck.html。需要一个课程名参数。
+---
+
 # /slide-design — CourseFlow V2 Slide Design Skill
 
 ## 触发方式
@@ -8,9 +13,11 @@
 
 读取 `courses/<课程名>/course.meta.md`，按 **Merrill 第一性原理**（Hook→Concept→Demo→Practice→Takeaway）为每个模块逐页设计 slide，输出到 `courses/<课程名>/slides/slide-XX.html`，最后运行 `node build.js <课程名>` 生成 `deck.html`。
 
+**两阶段、两道人审：** Phase 4 先产出 `slide-plan.md`（纯内容，人审），确认后 Phase 5 才写 HTML（视觉，人审）。**不要跳过 Phase 4 直接写 HTML**——内容问题在 plan 里改一行字，在 HTML 里改要重排版。
+
 ---
 
-## Phase 4：学习体验设计（每模块）
+## Phase 4：学习体验设计 → slide-plan.md（内容审阅关卡）
 
 读 `course.meta.md` 的大纲，每个模块按此结构设计页面：
 
@@ -21,6 +28,22 @@
 | **Demo** | 具体案例或流程演示 | 优先用 case-study / workflow / timeline |
 | **Practice** | 学员动手实操的引导 | checklist 或 pill-list；指令明确 |
 | **Takeaway** | 模块最核心的一句话 | key-takeaway 组件；≤3 条要点 |
+
+**固定页面：**
+- 第 1 页 封面：title + positioning
+- 第 2 页 课程概览：**直接由 frontmatter 的 `outcomes` 生成**——每条成果一行（do + success），让学员开课即知道"学完能做什么、怎样算学会"
+- 倒数第 2 页 学习路径/下一步；最后 1 页 致谢结束
+
+**落盘 `courses/<课程名>/slide-plan.md`**，每页一个条目：
+
+```markdown
+## slide-03 [Hook] 你的 AI 工具，真的用"对"了吗？
+- 要点: 效率天花板的 3 个信号（各 ≤20 字）
+- 组件倾向: stats-wall 或 quote-slide
+- 备注要点: 现场提问互动，请学员举手
+```
+
+**写完 slide-plan.md 后停下来，请用户审阅内容**（页数、顺序、每页要点、案例是否贴合）。用户确认或修改后才进入 Phase 5。
 
 ---
 
@@ -48,6 +71,16 @@
   ├─ 章节分隔            → section.module-N > .module-divider
   └─ 补充说明/提示        → .callout  (.callout--tip / --warning / --insight)
 ```
+
+### 题材域组件倾向（rubric ⑦ 题材贴合的依据）
+
+| 题材 | 高频组件 | 慎用 |
+|---|---|---|
+| 领导力 / 软技能 | `.case-study` `.quote-slide` `.quadrant` `.vs-box` | 流程图、代码块——软技能少有标准流程 |
+| AI / 技术工具 | `.workflow` `.timeline` `.check-list` `.stats-wall` | 长引用——技术课要"看得见操作" |
+| HR / 制度合规 | `.vs-box`（对/错边界） `.table-compare` `.callout--warning` | 夸张视觉冲击——合规内容要克制 |
+| 数据 / 分析 | `.stats-wall` `.table-compare` `.quadrant` | 纯文字页——数据课让数字说话 |
+| 创意 / 设计 | `.layout-text-image` `.vs-box`（before/after） | 密集表格 |
 
 ### 铁律（lint-slides.js 会自动检查）
 
@@ -85,15 +118,19 @@
 
 ```
 1. 读 course.meta.md
-2. 按大纲确定页数和顺序 (封面 + 模块 × 5页 + 结尾, 通常 20-30页)
-3. 逐页写 slides/slide-XX.html (从 01 开始，两位数补零)
-4. 每写 5 页, 运行: node lint-slides.js <课程名>
+2. 按大纲确定页数和顺序 (封面 + 概览 + 模块 × 5页 + 结尾, 通常 20-30页)
+3. [Phase 4] 写 slide-plan.md → 用户审阅内容 → 确认后继续
+4. [Phase 5] 按 plan 逐页写 slides/slide-XX.html (从 01 开始，两位数补零)
+5. 每写 5 页, 运行: node lint-slides.js <课程名>
    → 有违规立即修复, 再继续
-5. 全部写完后: node build.js <课程名>
-6. 告知用户打开 courses/<课程名>/deck.html 审阅
-7. 根据用户反馈定位问题页, 修改对应 slide-XX.html
-8. 重新 node build.js <课程名>
-9. 效果好的自定义布局 → 沉淀到 shared_styles/components.css + DESIGN-SYSTEM.md
+6. 全部写完后: node build.js <课程名>
+7. 视觉自查: node shot.js <课程名>
+   → 溢出报告有问题页立即修复
+   → 逐张查看 .review/slide-XX.png, 按下方 rubric 自我批判并修正, 再交用户
+8. 告知用户打开 courses/<课程名>/deck.html 审阅
+9. 根据用户反馈定位问题页, 修改对应 slide-XX.html（内容变化同步回 slide-plan.md）
+10. 重新 node build.js <课程名>
+11. 效果好的自定义布局 → 沉淀到 shared_styles/components.css + DESIGN-SYSTEM.md
 ```
 
 ---
