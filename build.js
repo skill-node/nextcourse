@@ -27,8 +27,7 @@ const COURSE_DIR  = path.join(ROOT, 'courses', courseName);
 const META_PATH   = path.join(COURSE_DIR, 'course.meta.md');
 const SLIDES_DIR  = path.join(COURSE_DIR, 'slides');
 const DECK_PATH   = path.join(COURSE_DIR, 'deck.html');
-const TMPL_PATH   = path.join(ROOT, '.agent', 'skills', 'slide-renderer',
-                               'resources', 'master_template.html');
+const TMPL_PATH   = path.join(ROOT, 'templates', 'master_template.html');
 
 // ─── 校验 ────────────────────────────────────────────────────────────────────
 for (const [label, p] of [
@@ -51,7 +50,9 @@ function parseFrontmatter(content) {
         const colon = line.indexOf(':');
         if (colon < 1) continue;
         const key = line.slice(0, colon).trim();
-        const val = line.slice(colon + 1).trim();
+        let val = line.slice(colon + 1).trim();
+        // 去掉成对的包裹引号: title: "xxx" → xxx
+        if (/^".*"$/.test(val) || /^'.*'$/.test(val)) val = val.slice(1, -1);
         if (key && val) fm[key] = val;
     }
     return fm;
@@ -60,7 +61,26 @@ function parseFrontmatter(content) {
 const meta     = parseFrontmatter(fs.readFileSync(META_PATH, 'utf8'));
 const title    = meta.title    || courseName;
 const template = meta.template || 'standard';
-const theme    = meta.theme    || 'default';
+const theme    = meta.theme    || 'standard-default';
+
+// theme / template 必须对应实际存在的 CSS 文件，否则 deck 会静默无样式
+const themeCss    = path.join(ROOT, 'shared_styles', 'color-schemes', `${theme}.css`);
+const templateCss = path.join(ROOT, 'shared_styles', 'themes', `${template}.css`);
+if (!fs.existsSync(themeCss)) {
+    const available = fs.readdirSync(path.join(ROOT, 'shared_styles', 'color-schemes'))
+        .filter(f => f.endsWith('.css')).map(f => f.replace(/\.css$/, '')).join(', ');
+    console.error(`ERROR: theme "${theme}" 不存在 (course.meta.md)`);
+    console.error(`       可选: ${available}`);
+    process.exit(1);
+}
+if (!fs.existsSync(templateCss)) {
+    console.error(`ERROR: template "${template}" 不存在 (course.meta.md), 可选: standard`);
+    process.exit(1);
+}
+
+function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 // ─── 收集 slides ────────────────────────────────────────────────────────────
 const slideFiles = fs.readdirSync(SLIDES_DIR)
@@ -82,11 +102,10 @@ const slidesContent = slideFiles
 // ─── 组装 ────────────────────────────────────────────────────────────────────
 const tmpl = fs.readFileSync(TMPL_PATH, 'utf8');
 const deck = tmpl
-    .replace(/\{\{COURSE_TITLE\}\}/g,    title)
+    .replace(/\{\{COURSE_TITLE\}\}/g,    escapeHtml(title))
     .replace(/\{\{COLOR_SCHEME\}\}/g,    theme)
     .replace(/\{\{TEMPLATE\}\}/g,        template)
-    .replace(/\{\{SLIDES_CONTENT\}\}/g,  slidesContent)
-    .replace(/\{\{STYLE_PRESET_CSS\}\}/g, '');
+    .replace(/\{\{SLIDES_CONTENT\}\}/g,  () => slidesContent);
 
 fs.writeFileSync(DECK_PATH, deck, 'utf8');
 

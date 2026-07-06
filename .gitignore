@@ -38,3 +38,6 @@ Thumbs.db
 *.swp
 *.swo
 
+
+# Claude Code 本机设置 (权限白名单等, 不共享)
+.claude/settings.local.json
