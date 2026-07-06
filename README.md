@@ -53,10 +53,11 @@ CourseFlow/
 ├── build.js           ← 课程组装
 ├── lint-slides.js     ← 样式校验（5 类违规检测）
 ├── export.js          ← 离线打包
-├── skills/            ← Claude Code Skill 定义
-│   ├── course-design.md   ← /course-design（大纲设计）
-│   └── slide-design.md    ← /slide-design（幻灯片渲染）
-├── shared_styles/     ← 设计系统 CSS（11 套配色 + 组件库）
+├── templates/         ← deck.html 母版
+├── .claude/skills/    ← Claude Code Skill 定义
+│   ├── course-design/SKILL.md   ← /course-design（大纲设计）
+│   └── slide-design/SKILL.md    ← /slide-design（幻灯片渲染）
+├── shared_styles/     ← 设计系统 CSS（8 套配色 + 组件库）
 ├── lib/               ← Reveal.js（vendored，离线可用）
 └── courses/           ← 课程内容（gitignore，本地保留）
 ```

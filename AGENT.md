@@ -17,19 +17,22 @@ CourseFlow/
 ├── build.js              ← 课程组装（courseflow build 内部调用）
 ├── lint-slides.js        ← 样式校验（courseflow lint 内部调用）
 ├── export.js             ← 离线打包（courseflow export 内部调用）
-├── skills/
-│   ├── course-design.md  ← /course-design Skill（大纲设计）
-│   └── slide-design.md   ← /slide-design Skill（幻灯片渲染）
+├── templates/
+│   └── master_template.html  ← deck.html 母版（build.js 使用）
+├── .claude/skills/
+│   ├── course-design/SKILL.md  ← /course-design Skill（大纲设计）
+│   └── slide-design/SKILL.md   ← /slide-design Skill（幻灯片渲染）
 ├── shared_styles/        ← 全局设计系统 CSS（所有课程共用）
 │   ├── base_layout.css
 │   ├── tokens.css
 │   ├── components.css
 │   ├── animations.css
 │   ├── themes/standard.css
-│   └── color-schemes/    ← 11 套配色方案
+│   └── color-schemes/    ← 8 套配色方案
 └── courses/
     └── <course-name>/
         ├── course.meta.md      ← 课程元数据 + 大纲（frontmatter）
+        ├── slide-plan.md       ← 每页内容规划（Phase 4 产出，人审内容用）
         ├── slides/
         │   ├── slide-01.html   ← 每个文件 = 一张幻灯片 <section>
         │   ├── slide-02.html
@@ -51,6 +54,8 @@ node courseflow.js lint   <name>            # 校验幻灯片样式规范
 node courseflow.js build  <name>            # 组装生成 deck.html
 node courseflow.js render <name>            # lint + build 一步完成（推荐）
 node courseflow.js export <name> [outdir]   # 打包为可离线演示文件夹
+node courseflow.js notes  <name>            # 导出讲师手册 handout.md（各页演讲备注）
+node courseflow.js shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（需本机 Chrome）
 ```
 
 ### 各命令说明
@@ -62,7 +67,9 @@ node courseflow.js export <name> [outdir]   # 打包为可离线演示文件夹
 | `lint <name>` | 扫描 slide-*.html，检查 5 类违规（内联 style / 硬编码色 / 硬编码 RGB / 新字体 / 未注册 class） |
 | `build <name>` | 读 course.meta.md frontmatter + 拼接 slides/ → 生成 deck.html |
 | `render <name>` | lint 通过后再 build，是日常最常用的命令 |
-| `export <name>` | 生成 courses/\<name\>/export/，含 lib/ + shared_styles/，双击 index.html 即可离线演示 |
+| `export <name>` | 生成 courses/\<name\>/export/，只含演示必需文件，双击 index.html 即可离线演示 |
+| `notes <name>` | 抽取各页 h2 + aside.notes，生成讲师手册 courses/\<name\>/handout.md |
+| `shot <name>` | 用本机 Chrome headless 做溢出检测并逐页截图到 .review/，供视觉自查（`--check` 只检测不截图） |
 
 也可以通过 npm scripts：`npm run render -- openclaw_2`
 
@@ -95,8 +102,8 @@ node courseflow.js export <name> [outdir]   # 打包为可离线演示文件夹
 读取 `course.meta.md`，按 Merrill 第一原理逐页生成 HTML 片段，自动 build：
 
 ```
-阶段 4 学习体验  → 规划每张幻灯片类型（Hook/Concept/Demo/Practice/Takeaway）
-阶段 5 视觉     → 生成 slide-XX.html，组装并生成 deck.html
+阶段 4 学习体验  → 输出 slide-plan.md（每页页型/标题/要点），人审内容后再继续
+阶段 5 视觉     → 按 plan 生成 slide-XX.html，组装并生成 deck.html
 ```
 
 > 完整教学方法论：逆向设计（Backward Design）+ Bloom 分类法 + Merrill 第一原理
@@ -116,19 +123,16 @@ theme: bold-signal
 
 可选配色（`shared_styles/color-schemes/` 目录下）：
 
-| 名称               | 风格描述         |
-|--------------------|-----------------|
-| `default`          | 通用蓝紫渐变     |
-| `bold-signal`      | 深色 + 高饱和强调|
-| `dark-ocean`       | 深蓝沉浸感       |
-| `dark-botanical`   | 深绿自然质感     |
-| `electric-studio`  | 霓虹电子风       |
-| `creative-voltage` | 创意活力橙       |
-| `warm-sand`        | 暖色系商务       |
-| `swiss-modern`     | 极简瑞士风       |
-| `notebook-tabs`    | 手记分栏风       |
-| `high-contrast`    | 无障碍高对比     |
-| `standard-default` | 白底经典学术     |
+| 名称               | 风格描述                     |
+|--------------------|------------------------------|
+| `bold-signal`      | 深灰 + 高饱和橙强调（技术/工具） |
+| `dark-ocean`       | 深蓝 + 柔和点缀（数据/分析）   |
+| `dark-botanical`   | 近黑 + 暖棕衬线（高端质感）    |
+| `creative-voltage` | 深夜蓝 + 荧光绿（创意/年轻）   |
+| `swiss-modern`     | 纯白 + 红黑极简（瑞士风）      |
+| `warm-sand`        | 米白底 + 紫绿点缀（商务浅色）  |
+| `notebook-tabs`    | 奶油底 + 衬线粉彩（手记/轻松） |
+| `standard-default` | 白底学术蓝（严肃/学术）        |
 
 修改后重新 `node courseflow.js render <name>` 即生效，无需改任何幻灯片文件。
 
@@ -146,12 +150,9 @@ theme: bold-signal
 audience: "目标受众描述"
 positioning: "核心价值主张（1句话）"
 outcomes:
-  - bloom: apply
-    text: "学员能够…"
-  - bloom: analyze
-    text: "学员能够…"
-  - bloom: create
-    text: "学员能够…"
+  - { do: "动词开头的可观察行为", bloom: apply, success: "成功标准（怎样算达成）" }
+  - { do: "动词开头的可观察行为", bloom: analyze, success: "成功标准" }
+  - { do: "动词开头的可观察行为", bloom: create, success: "成功标准" }
 ---
 
 ## 课程大纲
@@ -183,7 +184,7 @@ Bloom 动词参考：remember / understand / apply / analyze / evaluate / create
 
 ## 设计规范核心规则（8 条铁律）
 
-> 违反 1-5 条将被 lint-slides.js 拦截，违反 6-8 条需人工检查。
+> 违反 1-4 条将被 lint-slides.js 拦截（exit 1）；第 6 条由 lint 输出密度警告（不阻断）；5、7、8 条需人工检查。
 
 1. **禁止内联 style** — 所有样式必须通过 CSS class 实现
 2. **禁止硬编码颜色** — 只允许 CSS 变量 `var(--xxx)`
@@ -230,7 +231,7 @@ Bloom 动词参考：remember / understand / apply / analyze / evaluate / create
 
 1. **读取本文档（AGENT.md）**获取项目全貌
 2. **读取 `DESIGN-SYSTEM.md`** 获取完整组件规范
-3. **读取 `skills/slide-design.md`** 获取幻灯片创作完整工作流
+3. **读取 `.claude/skills/slide-design/SKILL.md`** 获取幻灯片创作完整工作流
 4. **直接调用 CLI 脚本**完成构建、校验、导出
 
 典型调用序列：
@@ -256,8 +257,8 @@ node courseflow.js export <name>
 
 | Skill            | 定义文件                    | 职责                                     |
 |------------------|-----------------------------|------------------------------------------|
-| `/course-design` | `skills/course-design.md`   | 对话式引导：定位 → 成果 → 知识架构 → 写 course.meta.md |
-| `/slide-design`  | `skills/slide-design.md`    | 读 course.meta.md → 逐页生成幻灯片 → build → deck.html |
+| `/course-design` | `.claude/skills/course-design/SKILL.md` | 对话式引导：定位 → 成果 → 知识架构 → 写 course.meta.md |
+| `/slide-design`  | `.claude/skills/slide-design/SKILL.md`  | 读 course.meta.md → 逐页生成幻灯片 → build → deck.html |
 
 完整流程：先 `/course-design` 完成大纲，再 `/slide-design <name>` 渲染。
 
@@ -269,3 +270,4 @@ node courseflow.js export <name>
 - `courses/<name>/export/` 是**打包输出目录**，不要把它提交到 Git（已在 .gitignore 中排除，如果没有请添加）
 - 添加新 CSS 组件类型时，必须同步更新 `DESIGN-SYSTEM.md`，否则 lint 会拦截使用了新 class 的幻灯片
 - FontAwesome 图标已通过 `lib/fonts/fontawesome/` 离线引入，可直接在 HTML 中使用 `<i class="fa-solid fa-xxx"></i>`
+- template 当前只有 `standard` 一套（V1 的 modern.css 已删除，其中有价值的 workflow / icon-card-grid 组件已迁入 `components.css`）；如需第二套版式风格，应基于 V2 令牌体系新建并在 DESIGN-SYSTEM.md 登记
