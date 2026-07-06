@@ -89,20 +89,32 @@ html = html
 
 fs.writeFileSync(path.join(EXPORT_DIR, 'index.html'), html, 'utf8');
 
-// ─── 3. 拷贝依赖 ─────────────────────────────────────────────────────────────
+// ─── 3. 拷贝依赖 (只拷贝演示实际需要的文件) ──────────────────────────────────
 let fileCount = 1; // index.html
 
-// Reveal.js 核心 + 字体 (离线必需)
-fileCount += copyDir(
-    path.join(ROOT, 'lib'),
-    path.join(EXPORT_DIR, 'lib')
-);
+// Reveal.js 运行时: dist/ + 图标字体 + notes 插件 (演讲者视图)
+// lib/ 其余为开发文件 (examples/test/js/css 等), 不进交付包
+for (const sub of ['dist', 'fonts', path.join('plugin', 'notes')]) {
+    fileCount += copyDir(
+        path.join(ROOT, 'lib', sub),
+        path.join(EXPORT_DIR, 'lib', sub)
+    );
+}
 
-// 设计系统 CSS (配色 / 组件 / 令牌等)
-fileCount += copyDir(
-    path.join(ROOT, 'shared_styles'),
-    path.join(EXPORT_DIR, 'shared_styles')
-);
+// 设计系统 CSS: 只拷贝 index.html 实际引用的文件 (theme/template 各 1 套)
+const cssRefs = [...html.matchAll(/\.\/shared_styles\/([\w./-]+\.css)/g)]
+    .map(m => m[1]);
+for (const rel of new Set(cssRefs)) {
+    const src  = path.join(ROOT, 'shared_styles', rel);
+    const dest = path.join(EXPORT_DIR, 'shared_styles', rel);
+    if (!fs.existsSync(src)) {
+        console.error(`ERROR: deck 引用的样式不存在: shared_styles/${rel}`);
+        process.exit(1);
+    }
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(src, dest);
+    fileCount++;
+}
 
 // 课程图片素材 (如果有)
 const assetsDir = path.join(COURSE_DIR, 'assets');
