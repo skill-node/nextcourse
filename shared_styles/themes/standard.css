@@ -334,7 +334,7 @@ body {
 .reveal .slides section .card-primary ol,
 .reveal .slides section .card-primary li,
 .reveal .slides section .card-primary span {
-    color: var(--text-inverse) !important;
+    color: var(--text-on-primary, var(--text-inverse)) !important;
 }
 
 .reveal .slides section .card-primary p {
@@ -358,7 +358,8 @@ body {
 .reveal .slides section .card-secondary ol,
 .reveal .slides section .card-secondary li,
 .reveal .slides section .card-secondary span {
-    color: var(--text-inverse) !important;
+    /* --text-on-secondary: 配色方案可覆盖的配对令牌 (如 secondary 为亮色时配深字) */
+    color: var(--text-on-secondary, var(--text-inverse)) !important;
 }
 
 /* 强调色卡片 - 新增定义 */
@@ -377,7 +378,7 @@ body {
 .reveal .slides section .card-accent ol,
 .reveal .slides section .card-accent li,
 .reveal .slides section .card-accent span {
-    color: var(--text-inverse) !important;
+    color: var(--text-on-accent, var(--text-inverse)) !important;
 }
 
 /* ===== 高亮框 ===== */

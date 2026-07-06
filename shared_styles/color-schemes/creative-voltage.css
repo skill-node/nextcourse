@@ -48,6 +48,9 @@
     --text-body: rgba(255, 255, 255, 0.85);
     --text-muted: rgba(255, 255, 255, 0.5);
     --text-inverse: #ffffff;
+    --text-on-secondary: #1a1a2e;
+    --text-on-accent: #1a1a2e;
+    /* secondary/accent 均为亮荧光色, 配深字 */
     /* 反色文字 - 在蓝色背景上用白色 */
     --text-tag: #d4ff00;
 
@@ -79,42 +82,9 @@ body {
     font-weight: 700 !important;
 }
 
-/* ===== 霓虹发光效果 ===== */
-.card-primary {
-    background: #0066ff !important;
+/* ===== 霓虹发光效果 (卡片底色/文字色由 --text-on-* 配对令牌控制) ===== */
+.reveal .slides section .card-primary {
     box-shadow: 0 0 20px rgba(0, 102, 255, 0.4) !important;
-}
-
-.card-primary h3,
-.card-primary p,
-.card-primary ul,
-.card-primary ol,
-.card-primary li {
-    color: #ffffff !important;
-}
-
-.card-secondary {
-    background: #d4ff00 !important;
-}
-
-.card-secondary h3,
-.card-secondary p,
-.card-secondary ul,
-.card-secondary ol,
-.card-secondary li {
-    color: #1a1a2e !important;
-}
-
-.card-accent {
-    background: #00cc66 !important;
-}
-
-.card-accent h3,
-.card-accent p,
-.card-accent ul,
-.card-accent ol,
-.card-accent li {
-    color: #ffffff !important;
 }
 
 /* ===== 封面页增强 ===== */

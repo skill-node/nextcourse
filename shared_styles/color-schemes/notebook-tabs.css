@@ -9,8 +9,8 @@
 
 :root {
     /* ===== 主色系 ===== */
-    --primary: #c7b8ea;
-    /* 柔和紫色 - 笔记标签风格 */
+    --primary: #8f7ac2;
+    /* 加深的笔记紫 - 白底标题/强调需足够对比度; 模块底色仍为粉彩(见 --module-*) */
     --primary-dark: #5b4a8a;
     --secondary: #98d4bb;
     /* 柔和绿色 */

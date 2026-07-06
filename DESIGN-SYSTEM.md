@@ -82,17 +82,14 @@ Reveal.js 逐步显示: 在元素上加 `class="fragment"`,可叠加动画类。
 
 | 方案名 | 适合场景 |
 |---|---|
-| `default` | 靛蓝 — 通用 |
-| `bold-signal` | 深色 + 橙红 — 高管演讲、影响力展示 |
-| `dark-ocean` | 深蓝 — 技术/AI 主题 |
-| `dark-botanical` | 深绿 — 自然、可持续 |
-| `electric-studio` | 亮色 + 电气蓝 — 创意、设计 |
-| `creative-voltage` | 紫色 — 创新、新趋势 |
-| `swiss-modern` | 黑白极简 — 管理、战略 |
-| `warm-sand` | 暖米色 — 人文、HR 培训 |
-| `notebook-tabs` | 米黄 + 色标签 — 工作坊、互动 |
-| `standard-default` | 中性蓝灰 — 安全通用 |
-| `high-contrast` | 纯黑白 — 无障碍 |
+| `bold-signal` | 深灰 + 高饱和橙 — 技术/工具培训 |
+| `dark-ocean` | 深蓝 + 柔和点缀 — 数据/分析 |
+| `dark-botanical` | 近黑 + 暖棕衬线 — 高端质感、领导力 |
+| `creative-voltage` | 深夜蓝 + 荧光绿 — 创意、新趋势 |
+| `swiss-modern` | 纯白 + 红黑极简 — 管理、战略 |
+| `warm-sand` | 米白 + 紫绿点缀 — 商务浅色、HR 培训 |
+| `notebook-tabs` | 奶油 + 衬线粉彩 — 工作坊、互动 |
+| `standard-default` | 白底学术蓝 — 严肃、学术、安全通用 |
 
 ---
 
@@ -204,7 +201,7 @@ Reveal.js 逐步显示: 在元素上加 `class="fragment"`,可叠加动画类。
 
 ---
 
-### § 4 流程步骤 (.workflow) — *来自 standard.css*
+### § 4 流程步骤 (.workflow) — *components.css*
 
 ```html
 <section>
@@ -389,7 +386,7 @@ Reveal.js 逐步显示: 在元素上加 `class="fragment"`,可叠加动画类。
 
 ---
 
-### § 10 图标卡片组 (.icon-card-grid) — *来自 standard.css*
+### § 10 图标卡片组 (.icon-card-grid) — *components.css*
 
 ```html
 <section>

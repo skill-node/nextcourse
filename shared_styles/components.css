@@ -186,7 +186,8 @@
     display: block;
 }
 
-.module-divider__title {
+/* 加 .reveal 前缀提升特异性: 需要压过 themes/*.css 的 .reveal h2 / .reveal p (!important) */
+.reveal .module-divider__title {
     font-size: clamp(2rem, 5vw, 3.5rem) !important;
     font-weight: 900 !important;
     color: var(--text-inverse) !important;
@@ -195,7 +196,7 @@
     max-width: 70%;
 }
 
-.module-divider__hook {
+.reveal .module-divider__hook {
     font-size: clamp(1rem, 2vw, 1.3rem);
     color: var(--text-inverse) !important;
     opacity: 0.85;
@@ -851,6 +852,83 @@
 .divider-h--primary {
     background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
     height: 4px;
+}
+
+/* ===== 图标卡片组 (icon-card-grid) ===== */
+/* 图标分类 3~4 项; 见 DESIGN-SYSTEM.md § 10 */
+.icon-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+}
+
+.icon-card {
+    padding: var(--card-padding);
+    background: var(--bg-card);
+    color: var(--text-body);
+    border: 1px solid var(--border-card);
+    border-radius: var(--card-radius);
+}
+
+.icon-card__icon {
+    font-size: 2rem;
+    margin-bottom: var(--space-4);
+    color: var(--primary);
+}
+
+.icon-card__icon.primary   { color: var(--primary); }
+.icon-card__icon.secondary { color: var(--secondary); }
+.icon-card__icon.accent    { color: var(--accent); }
+.icon-card__icon.danger    { color: var(--danger); }
+
+/* ===== 流程步骤 (workflow) ===== */
+/* 横向节点 + 连接线, 步骤 ≤6; 见 DESIGN-SYSTEM.md § 4 */
+.workflow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: var(--space-4) 0;
+}
+
+.workflow-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: var(--z-base);
+}
+
+.workflow-node__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary);
+    color: var(--text-inverse);
+    font-size: 1.4rem;
+    margin-bottom: var(--space-2);
+    box-shadow: var(--shadow-card);
+}
+
+.workflow-node__icon.primary   { background: var(--primary); }
+.workflow-node__icon.secondary { background: var(--secondary); }
+.workflow-node__icon.accent    { background: var(--accent); }
+.workflow-node__icon.danger    { background: var(--danger); }
+
+.workflow-node__label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    /* 跟随容器的配对文字色: 直接放在 slide 上时为 text-heading(见 §0b),
+       嵌入 card 等有底色容器时继承该容器的显式文字色 */
+    color: inherit;
+}
+
+.workflow-line {
+    flex-grow: 1;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    margin: 0 -10px;
 }
 
 /* 全幅包裹容器 (无最大宽度限制时使用) */
