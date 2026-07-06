@@ -58,7 +58,7 @@ const commands = {
             return;
         }
         const entries = fs.readdirSync(coursesDir, { withFileTypes: true })
-            .filter(e => e.isDirectory());
+            .filter(e => e.isDirectory() && !e.name.startsWith('.'));
         if (entries.length === 0) {
             console.log('\n  (暂无课程)\n');
             return;
@@ -101,12 +101,9 @@ theme: bold-signal
 audience: "目标受众"
 positioning: "核心价值主张（1句话）"
 outcomes:
-  - bloom: apply
-    text: "学员能够…"
-  - bloom: analyze
-    text: "学员能够…"
-  - bloom: create
-    text: "学员能够…"
+  - { do: "动词开头的行为", bloom: apply, success: "成功标准" }
+  - { do: "动词开头的行为", bloom: analyze, success: "成功标准" }
+  - { do: "动词开头的行为", bloom: create, success: "成功标准" }
 ---
 
 ## 课程大纲
@@ -144,6 +141,51 @@ outcomes:
         process.exit(run('export.js', [name, ...rest.slice(1)]));
     },
 
+    shot() {
+        const name = requireName('shot');
+        process.exit(run('shot.js', [name, ...rest.slice(1)]));
+    },
+
+    notes() {
+        const name      = requireName('notes');
+        const slidesDir = path.join(ROOT, 'courses', name, 'slides');
+        if (!fs.existsSync(slidesDir)) die(`slides/ not found: ${slidesDir}`);
+        const files = fs.readdirSync(slidesDir).filter(f => f.endsWith('.html')).sort();
+        if (files.length === 0) die('slides/ 目录为空');
+
+        let title = name;
+        const metaPath = path.join(ROOT, 'courses', name, 'course.meta.md');
+        if (fs.existsSync(metaPath)) {
+            const m = fs.readFileSync(metaPath, 'utf8').match(/^title:\s*["']?(.+?)["']?\s*$/m);
+            if (m) title = m[1];
+        }
+
+        const stripTags = s => s.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+        const out = [
+            `# ${title} — 讲师手册`,
+            '',
+            '> 由 `courseflow notes` 自动生成，来源为各 slide 的演讲备注（aside.notes）。',
+            '> 修改备注请编辑 slides/slide-XX.html 后重新生成，不要直接改本文件。',
+            '',
+        ];
+        let noteCount = 0;
+        files.forEach((f, i) => {
+            const src  = fs.readFileSync(path.join(slidesDir, f), 'utf8');
+            const h2   = src.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i);
+            const note = src.match(/<aside\b[^>]*class\s*=\s*["'][^"']*\bnotes\b[^"']*["'][^>]*>([\s\S]*?)<\/aside>/i);
+            if (note) noteCount++;
+            out.push(`## ${String(i + 1).padStart(2, '0')}. ${h2 ? stripTags(h2[1]) : '(无标题页)'}`);
+            out.push('');
+            out.push(note ? stripTags(note[1]) : '_（本页无备注）_');
+            out.push('');
+        });
+
+        const outPath = path.join(ROOT, 'courses', name, 'handout.md');
+        fs.writeFileSync(outPath, out.join('\n'), 'utf8');
+        console.log(`\n  ✓  讲师手册已生成: courses/${name}/handout.md`);
+        console.log(`     共 ${files.length} 页, 其中 ${noteCount} 页有演讲备注\n`);
+    },
+
     help() {
         console.log(`
 CourseFlow V2 — 课程开发工具
@@ -155,6 +197,8 @@ CourseFlow V2 — 课程开发工具
   courseflow build  <name>            组装生成 deck.html
   courseflow render <name>            lint + build 一步完成（推荐）
   courseflow export <name> [outdir]   打包为可离线演示文件夹
+  courseflow notes  <name>            导出讲师手册 handout.md（各页演讲备注）
+  courseflow shot   <name> [--check]  溢出检测 + 逐页截图到 .review/（需本机 Chrome）
 
 工作流（从零开始）:
   /course-design                ← Claude Code: 对话式设计大纲
