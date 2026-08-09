@@ -100,6 +100,22 @@ max-width: var(--content-max-width);   /* tokens.css，默认 80rem */
 > 四条都由展板自动体检：`node courseflow.js themes` → 打开 `theme-gallery/<主题>.html`
 > → 「体检」区必须归零。
 
+**配色文件的头注释是展板的数据源**，新增配色时这几行不是装饰：
+
+```css
+/* ===================================
+   Bold Signal — 高对比深色 + 亮色卡片      ← 展板标题 + 中文简介
+   适用于: 高管演讲、影响力展示               ← 中文「适用于」
+   EN tagline: High-contrast dark canvas with light cards   ← 英文简介
+   EN use: Executive keynotes, high-impact showcases        ← 英文「适用于」
+   默认字体集: impact-sans (…)               ← 与 build.js 的 DEFAULT_FONT_SET 对齐
+   =================================== */
+```
+
+展板是中 / EN 双语的（`<html data-lang>` + `.l-zh` / `.l-en`，语言状态存 localStorage 的
+`lang` 键，和 nextskill.cc 主站同一个约定）。漏写 `EN tagline:` / `EN use:` 不会报错，
+只会让英文版那一栏退回中文 —— `node theme-gallery.js` 跑完会在末尾点名缺哪几套。
+
 **R1 · 全屏红色只留一次，且放末位**
 全屏铺色的页只有三类：封面、十个模块封面、封底。其中红/橘红家族
 （HSL 色相 `≤35°` 或 `≥340°` 且饱和度 `>25%`）最多允许 **1 个**，且必须是

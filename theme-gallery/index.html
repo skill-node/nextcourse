@@ -1,10 +1,32 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CourseFlow 主题展板</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>
+(function () {
+  var titles = { zh: "CourseFlow 主题展板", en: "CourseFlow Theme Gallery" };
+  var root = document.documentElement;
+  function apply(lang, save) {
+    root.dataset.lang = lang;
+    root.lang = lang === 'en' ? 'en' : 'zh-CN';
+    document.title = titles[lang];
+    if (save) { try { localStorage.setItem('lang', lang); } catch (e) {} }
+    document.dispatchEvent(new CustomEvent('tg:lang', { detail: lang }));
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('lang'); } catch (e) {}
+  var nav = (navigator.language || '').toLowerCase();
+  apply(saved === 'en' || saved === 'zh' ? saved : (nav.indexOf('zh') === 0 ? 'zh' : 'en'), false);
+  // 事件委托：按钮此刻还没进 DOM，绑在 document 上就不用等 DOMContentLoaded
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('[data-tg-lang]')) return;
+    apply(root.dataset.lang === 'en' ? 'zh' : 'en', true);
+  });
+})();
+</script>
 <link rel="stylesheet" href="../shared_styles/tokens.css">
 <link rel="stylesheet" href="gallery.css">
 <!-- 只引 @font-face 层：卡片标题按主题的 display 字体渲染，不引入任何 :root/body 规则 -->
@@ -25,17 +47,25 @@
   .tg-idx-head code { font-family: ui-monospace, Menlo, monospace; font-size: .86em;
     background: rgba(128,128,128,.16); padding: .1rem .38rem; border-radius: 5px; }
   .tg-idx-body { max-width: 1180px; margin: 0 auto; padding: 0 2rem 5rem; }
-  @media (max-width: 720px) { .tg-idx-head, .tg-idx-body { padding-left: 1.2rem; padding-right: 1.2rem; } }
+  .tg-idx-bar { max-width: 1180px; margin: 0 auto; padding: 1.4rem 2rem 0; display: flex; justify-content: flex-end; }
+  @media (max-width: 720px) {
+    .tg-idx-head, .tg-idx-body, .tg-idx-bar { padding-left: 1.2rem; padding-right: 1.2rem; }
+  }
 </style>
 </head>
 <body>
 
+<div class="tg-idx-bar"><button class="tg-langbtn" type="button" data-tg-lang aria-label="切换语言 / Switch language">中 / EN</button></div>
+
 <header class="tg-idx-head">
-  <h1>CourseFlow 主题展板</h1>
-  <p>8 套配色，每套一页：语义色、背景与文字、十个模块封面色、字体、组件实景、自动体检。
-     色带是该配色的 <code>--module-1</code> 到 <code>--module-10</code>，按顺序排。</p>
-  <p>换主题只要改课程的 <code>course.meta.md</code> 里的 <code>theme:</code>，
-     再跑 <code>node build.js &lt;课程名&gt;</code>。字体想单独换就再加一行 <code>fontset:</code>。</p>
+  <h1><span class="l-zh">CourseFlow 主题展板</span><span class="l-en">CourseFlow Theme Gallery</span></h1>
+  <p><span class="l-zh">8 套配色，每套一页：语义色、背景与文字、十个模块封面色、字体、组件实景、自动体检。
+     色带是该配色的 <code>--module-1</code> 到 <code>--module-10</code>，按顺序排。</span><span class="l-en">8 color schemes, one page each: semantic colors, surfaces and text, the ten module
+     cover colors, typography, components in context and an automatic audit. The stripe is that scheme's
+     <code>--module-1</code> through <code>--module-10</code>, in order.</span></p>
+  <p><span class="l-zh">换主题只要改课程的 <code>course.meta.md</code> 里的 <code>theme:</code>，
+     再跑 <code>node build.js &lt;课程名&gt;</code>。字体想单独换就再加一行 <code>fontset:</code>。</span><span class="l-en">To switch themes, change <code>theme:</code> in the course's <code>course.meta.md</code> and run
+     <code>node build.js &lt;course-name&gt;</code>. To change only the typeface, add a <code>fontset:</code> line.</span></p>
 </header>
 
 <main class="tg-idx-body">
@@ -49,7 +79,7 @@
       </div>
       <div class="tg-card__body">
         <p class="tg-card__name" style="color:#FF5722">bold-signal</p>
-        <p class="tg-card__desc">高对比深色 + 亮色卡片｜高管演讲、影响力展示</p>
+        <p class="tg-card__desc"><span class="l-zh">高对比深色 + 亮色卡片｜高管演讲、影响力展示</span><span class="l-en">High-contrast dark canvas with light cards · Executive keynotes, high-impact showcases</span></p>
         <div class="tg-card__foot"><span>impact-sans</span><span>#FF5722</span></div>
       </div>
     </a>
@@ -62,7 +92,7 @@
       </div>
       <div class="tg-card__body">
         <p class="tg-card__name" style="color:#3d8bff">creative-voltage</p>
-        <p class="tg-card__desc">电蓝 + 荧光黄｜创意分享、年轻受众、创新主题</p>
+        <p class="tg-card__desc"><span class="l-zh">电蓝 + 荧光黄｜创意分享、年轻受众、创新主题</span><span class="l-en">Electric blue with neon yellow · Creative talks, younger audiences, innovation topics</span></p>
         <div class="tg-card__foot"><span>voltage-sans</span><span>#3D8BFF</span></div>
       </div>
     </a>
@@ -75,7 +105,7 @@
       </div>
       <div class="tg-card__body">
         <p class="tg-card__name" style="color:#d4a574">dark-botanical</p>
-        <p class="tg-card__desc">深色 + 暖色调｜高端场合、优雅主题、品牌展示</p>
+        <p class="tg-card__desc"><span class="l-zh">深色 + 暖色调｜高端场合、优雅主题、品牌展示</span><span class="l-en">Dark ground with warm botanical tones · Premium settings, elegant topics, brand showcases</span></p>
         <div class="tg-card__foot"><span>garamond-serif</span><span>#D4A574</span></div>
       </div>
     </a>
@@ -88,7 +118,7 @@
       </div>
       <div class="tg-card__body">
         <p class="tg-card__name" style="color:#a5b4fc">dark-ocean</p>
-        <p class="tg-card__desc">深海配色方案｜投影仪暗场、低光环境</p>
+        <p class="tg-card__desc"><span class="l-zh">深海配色方案｜投影仪暗场、低光环境</span><span class="l-en">Deep navy palette built for dim rooms · Projector blackout, low-light environments</span></p>
         <div class="tg-card__foot"><span>modern-sans</span><span>#A5B4FC</span></div>
       </div>
     </a>
@@ -101,20 +131,20 @@
       </div>
       <div class="tg-card__body">
         <p class="tg-card__name" style="color:#6d57a8">notebook-tabs</p>
-        <p class="tg-card__desc">纸质 + 彩色标签页｜工作坊、互动培训、笔记风格</p>
+        <p class="tg-card__desc"><span class="l-zh">纸质 + 彩色标签页｜工作坊、互动培训、笔记风格</span><span class="l-en">Paper stock with colored tab dividers · Workshops, interactive training, notebook feel</span></p>
         <div class="tg-card__foot"><span>didone-serif</span><span>#6D57A8</span></div>
       </div>
     </a>
     <a class="tg-card" href="standard-default.html">
       <div class="tg-card__hero" style="background:#ffffff;color:#0f172a;font-family:'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;font-weight:900">
-        Standard 模板
+        Standard Default
       </div>
       <div class="tg-card__strip">
         <span style="background:#2563eb"></span><span style="background:#047857"></span><span style="background:#a16207"></span><span style="background:#7e22ce"></span><span style="background:#0f766e"></span><span style="background:#be185d"></span><span style="background:#4338ca"></span><span style="background:#4d7c0f"></span><span style="background:#0f172a"></span><span style="background:#b91c1c"></span>
       </div>
       <div class="tg-card__body">
         <p class="tg-card__name" style="color:#2563eb">standard-default</p>
-        <p class="tg-card__desc">默认配色方案</p>
+        <p class="tg-card__desc"><span class="l-zh">默认配色方案</span><span class="l-en">The default scheme — full-bleed canvas, clean and lively · Any topic; the safe starting point</span></p>
         <div class="tg-card__foot"><span>modern-sans</span><span>#2563EB</span></div>
       </div>
     </a>
@@ -127,7 +157,7 @@
       </div>
       <div class="tg-card__body">
         <p class="tg-card__name" style="color:#dd2c00">swiss-modern</p>
-        <p class="tg-card__desc">极简黑白 + 红色强调｜专业技术培训、数据驱动型展示</p>
+        <p class="tg-card__desc"><span class="l-zh">极简黑白 + 红色强调｜专业技术培训、数据驱动型展示</span><span class="l-en">Minimal black and white with a single red accent · Technical training, data-driven presentations</span></p>
         <div class="tg-card__foot"><span>grotesk-sans</span><span>#DD2C00</span></div>
       </div>
     </a>
@@ -140,7 +170,7 @@
       </div>
       <div class="tg-card__body">
         <p class="tg-card__name" style="color:#7c3aed">warm-sand</p>
-        <p class="tg-card__desc">米白底 + 紫(primary)/绿(secondary)点缀的商务浅色｜企业管理/商业课、柔和护眼场景</p>
+        <p class="tg-card__desc"><span class="l-zh">米白底 + 紫(primary)/绿(secondary)点缀的商务浅色｜企业管理/商业课、柔和护眼场景</span><span class="l-en">Off-white business light theme, violet and green accents · Corporate and management courses, easy on the eyes</span></p>
         <div class="tg-card__foot"><span>modern-sans</span><span>#7C3AED</span></div>
       </div>
     </a>

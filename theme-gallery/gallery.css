@@ -11,6 +11,41 @@ body {
     overflow-y: auto !important;
 }
 
+/* ---------- 中 / EN ----------
+   静态文案都由 theme-gallery.js 输出成一对 <span class="l-zh">/<span class="l-en">,
+   靠 <html data-lang> 切显示。运行时才拼出来的读数(色值/对比度/体检结论)不在这里,
+   走 gallery.js 的 STR 字典 + tg:lang 事件重绘。 */
+.l-en {
+    display: none;
+}
+
+[data-lang="en"] .l-zh {
+    display: none;
+}
+
+[data-lang="en"] .l-en {
+    display: inline;
+}
+
+.tg-langbtn {
+    flex: none;
+    margin-left: var(--space-2, 0.5rem);
+    padding: 0.25rem 0.7rem;
+    font: inherit;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--text-muted, #64748b);
+    background: transparent;
+    border: 1px solid var(--border-card, rgba(128, 128, 128, 0.3));
+    border-radius: var(--radius-pill, 9999px);
+    cursor: pointer;
+}
+
+.tg-langbtn:hover {
+    color: var(--text-heading, inherit);
+    border-color: var(--primary, currentColor);
+}
+
 body {
     margin: 0;
     padding: 0;

@@ -9,6 +9,11 @@
  * shared_styles/*.css 读出来（见 theme-gallery/gallery.js）。
  * 所以改了配色 CSS 不用重跑本脚本，刷新页面即可；只有新增/删除配色、
  * 或改了 build.js 的字体默认映射时才需要重新生成。
+ *
+ * 中 / EN：页面里所有静态文案都用 L(zh, en) 输出成一对 span，
+ * 靠 <html data-lang> 切换显示（见 gallery.css 顶部）。语言状态存在
+ * localStorage 的 'lang' 键里 —— 和 nextskill.cc 主站同一个约定，
+ * 从主站切成英文再点进展板不会打回中文。
  */
 
 const fs = require('fs');
@@ -37,13 +42,17 @@ function readDefaultFontSets() {
     return map;
 }
 
-// 每个配色 CSS 的头注释里有一行人话描述和「适用于」，拿来当展板简介
+// 每个配色 CSS 的头注释里有一行人话描述和「适用于」，拿来当展板简介。
+// 英文版走同一个头注释里的 `EN tagline:` / `EN use:` 两行 —— 配色 CSS
+// 仍然是唯一事实来源，不在生成器里另立一张翻译表。
 function readSchemeMeta(cssPath) {
     const src = fs.readFileSync(cssPath, 'utf8');
     const header = src.slice(0, src.indexOf('*/') + 2);
     const titleLine = header.match(/^\s*(.+?)\s*(?:—|-)\s*(.+)$/m);
     const useFor = header.match(/适用于[：:]\s*(.+)/);
     const fontHint = header.match(/默认字体集[：:]\s*([a-z-]+)/);
+    const taglineEn = header.match(/EN tagline[：:]\s*(.+)/);
+    const useForEn = header.match(/EN use[：:]\s*(.+)/);
 
     // 头注释第一行有两种写法：
     //   「Bold Signal — 高对比深色 + 亮色卡片」
@@ -69,7 +78,9 @@ function readSchemeMeta(cssPath) {
     return {
         displayName,
         tagline,
+        taglineEn: taglineEn ? taglineEn[1].trim() : '',
         useFor: useFor ? useFor[1].trim() : '',
+        useForEn: useForEn ? useForEn[1].trim() : '',
         fontHint: fontHint ? fontHint[1] : null,
         // 生成期解析出来只给 index.html 的缩略图用；详情页一律走运行时取值
         vars: Object.fromEntries(
@@ -152,73 +163,128 @@ function maxWeightOf(stack, faceFiles) {
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+// 双语文案。缺英文时原样输出中文，不留空洞。
+const L = (zh, en) => (en
+    ? `<span class="l-zh">${zh}</span><span class="l-en">${en}</span>`
+    : String(zh));
+
+// 运行时才填的占位符：中英通用，省得为一个瞬间就被覆盖的字做两版
+const LOADING = '…';
+
+// 语言引导脚本。放 <head> 里，在首屏绘制之前就把 data-lang 定下来，
+// 否则英文用户会先看到一闪而过的中文。
+//   · localStorage 'lang' 优先，其次按 navigator.language 探测
+//   · 切换时广播 tg:lang，gallery.js 收到后重算并重绘那些运行时拼出来的读数
+function langBoot(titleZh, titleEn) {
+    return `<script>
+(function () {
+  var titles = { zh: ${JSON.stringify(titleZh)}, en: ${JSON.stringify(titleEn)} };
+  var root = document.documentElement;
+  function apply(lang, save) {
+    root.dataset.lang = lang;
+    root.lang = lang === 'en' ? 'en' : 'zh-CN';
+    document.title = titles[lang];
+    if (save) { try { localStorage.setItem('lang', lang); } catch (e) {} }
+    document.dispatchEvent(new CustomEvent('tg:lang', { detail: lang }));
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('lang'); } catch (e) {}
+  var nav = (navigator.language || '').toLowerCase();
+  apply(saved === 'en' || saved === 'zh' ? saved : (nav.indexOf('zh') === 0 ? 'zh' : 'en'), false);
+  // 事件委托：按钮此刻还没进 DOM，绑在 document 上就不用等 DOMContentLoaded
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest || !e.target.closest('[data-tg-lang]')) return;
+    apply(root.dataset.lang === 'en' ? 'zh' : 'en', true);
+  });
+})();
+</script>`;
+}
+
+const LANG_BUTTON =
+    '<button class="tg-langbtn" type="button" data-tg-lang aria-label="切换语言 / Switch language">中 / EN</button>';
+
 const SEMANTIC_SWATCHES = [
-    ['--primary', '标题、强调、数字、边框'],
-    ['--primary-dark', '封面标题、深色背景'],
-    ['--secondary', '示例、tip、时间轴结束端'],
-    ['--accent', '警示、callout、次级强调'],
-    ['--success', 'check-list、vs-good、正面结果'],
-    ['--danger', 'vs-bad、错误、反面例子'],
+    ['--primary', '标题、强调、数字、边框', 'Headings, emphasis, numbers, borders'],
+    ['--primary-dark', '封面标题、深色背景', 'Cover titles, dark backgrounds'],
+    ['--secondary', '示例、tip、时间轴结束端', 'Examples, tips, timeline end'],
+    ['--accent', '警示、callout、次级强调', 'Warnings, callouts, secondary emphasis'],
+    ['--success', 'check-list、vs-good、正面结果', 'check-list, vs-good, positive outcomes'],
+    ['--danger', 'vs-bad、错误、反面例子', 'vs-bad, errors, counter-examples'],
 ];
 
 const SURFACE_SWATCHES = [
-    ['--bg-page', '整份 deck 的底'],
-    ['--bg-slide', '单页背景'],
-    ['--bg-card', '卡片背景'],
-    ['--bg-highlight', 'highlight-box / callout 底'],
-    ['--bg-vs-good', 'vs-good 底'],
-    ['--bg-vs-bad', 'vs-bad 底'],
-    ['--bg-code', '代码块底'],
-    ['--border-card', '卡片描边'],
+    ['--bg-page', '整份 deck 的底', 'Backdrop behind the whole deck'],
+    ['--bg-slide', '单页背景', 'Single slide background'],
+    ['--bg-card', '卡片背景', 'Card background'],
+    ['--bg-highlight', 'highlight-box / callout 底', 'highlight-box / callout fill'],
+    ['--bg-vs-good', 'vs-good 底', 'vs-good fill'],
+    ['--bg-vs-bad', 'vs-bad 底', 'vs-bad fill'],
+    ['--bg-code', '代码块底', 'Code block fill'],
+    ['--border-card', '卡片描边', 'Card border'],
 ];
 
 const TEXT_SWATCHES = [
-    ['--text-heading', '标题'],
-    ['--text-body', '正文'],
-    ['--text-muted', '注释 / 出处'],
-    ['--text-inverse', '深色或彩色底上的文字'],
+    ['--text-heading', '标题', 'Headings'],
+    ['--text-body', '正文', 'Body text'],
+    ['--text-muted', '注释 / 出处', 'Captions / sources'],
+    ['--text-inverse', '深色或彩色底上的文字', 'Text on dark or colored surfaces'],
 ];
 
-function swatch([name, use]) {
+function swatch([name, use, useEn]) {
     return `        <div class="tg-swatch" data-tg-var="${name}">
           <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
           <div class="tg-swatch__body">
             <span class="tg-swatch__var">${name}</span>
-            <span class="tg-swatch__val">读取中…</span>
-            <span class="tg-swatch__use">${use}</span>
+            <span class="tg-swatch__val">${LOADING}</span>
+            <span class="tg-swatch__use">${L(use, useEn)}</span>
           </div>
         </div>`;
 }
 
-// 十个模块封面用课程里真实会出现的措辞，方便直接判断"这个色能不能上"
+// 十个模块封面用课程里真实会出现的措辞，方便直接判断"这个色能不能上"。
+//
+// 英文一栏刻意压得很短（标题 ≤15 字符、副标题 ≤40）：中文那栏 5–11 个字全是单行，
+// 英文照字面译过去会撑到 2–3 行，Syne / Archivo Black 这种宽字面尤其明显。
+// 卡片一高一低，展板就不是在同一个比例下比颜色了 —— 而真做英文课也不会把
+// 分隔页标题写这么长。改这里的文案时先量行数再定稿。
 const MODULE_SAMPLES = [
-    ['认清你在用的是什么', '你天天在用的 AI，到底是哪一层？'],
-    ['把话说对：提示词五要素', '同一个问题，换个问法，结果差一个档次'],
-    ['把活干完：三个真实场景', '不演示玩具任务，只做你明天就要交的活'],
-    ['守住红线：合规与边界', '哪些字段一旦发出去就收不回来'],
-    ['从个人到团队', '一个人用得好，不等于团队跑得起来'],
-    ['度量与复盘', '省下来的时间，得算得出来'],
-    ['工具选型', '不是越贵越好，是越贴合流程越好'],
-    ['常见失败模式', '八成的翻车，出在同样几件事上'],
-    ['进阶：把流程串起来', '单点提效的天花板在哪'],
-    ['行动计划', '离开这间教室之后的第一周'],
+    ['认清你在用的是什么', '你天天在用的 AI，到底是哪一层？',
+        'Your AI stack', 'Which layer are you actually using?'],
+    ['把话说对：提示词五要素', '同一个问题，换个问法，结果差一个档次',
+        'Prompt craft', 'Better phrasing, better result'],
+    ['把活干完：三个真实场景', '不演示玩具任务，只做你明天就要交的活',
+        'Real scenarios', 'No toy demos — real work only'],
+    ['守住红线：合规与边界', '哪些字段一旦发出去就收不回来',
+        'Red lines', 'Some fields you can never take back'],
+    ['从个人到团队', '一个人用得好，不等于团队跑得起来',
+        'Team rollout', 'One good user is not a working team'],
+    ['度量与复盘', '省下来的时间，得算得出来',
+        'Measure it', 'The time saved has to be countable'],
+    ['工具选型', '不是越贵越好，是越贴合流程越好',
+        'Picking tools', 'Fit to workflow beats price'],
+    ['常见失败模式', '八成的翻车，出在同样几件事上',
+        'Failure modes', 'Most failures share a few causes'],
+    ['进阶：把流程串起来', '单点提效的天花板在哪',
+        'Chain the flow', 'The ceiling on point fixes'],
+    ['行动计划', '离开这间教室之后的第一周',
+        'Action plan', 'Your first week after this room'],
 ];
 
 function moduleCard(i) {
-    const [title, hook] = MODULE_SAMPLES[i - 1];
+    const [title, hook, titleEn, hookEn] = MODULE_SAMPLES[i - 1];
     const num = String(i).padStart(2, '0');
     return `        <div class="tg-module" data-tg-module="${i}">
           <div class="reveal"><div class="slides">
             <section class="module-${i}">
               <div class="module-divider">
-                <span class="module-divider__label">模块 ${num}</span>
-                <h2 class="module-divider__title">${title}</h2>
-                <p class="module-divider__hook">${hook}</p>
+                <span class="module-divider__label">${L('模块 ' + num, 'Module ' + num)}</span>
+                <h2 class="module-divider__title">${L(title, titleEn)}</h2>
+                <p class="module-divider__hook">${L(hook, hookEn)}</p>
                 <span class="module-divider__number" aria-hidden="true">${num}</span>
               </div>
             </section>
           </div></div>
-          <div class="tg-module__foot">读取中…</div>
+          <div class="tg-module__foot">${LOADING}</div>
         </div>`;
 }
 
@@ -228,22 +294,22 @@ function fullPageCards() {
     return `        <div class="tg-module tg-fullpage" data-tg-fullpage="cover">
           <div class="reveal"><div class="slides">
             <section class="cover-slide">
-              <h1>从会聊天到会办事</h1>
+              <h1>${L('从会聊天到会办事', 'From chat to action')}</h1>
               <div class="divider-h divider-h--primary"></div>
-              <h2>让 AI 变成替你动手的助理</h2>
+              <h2>${L('让 AI 变成替你动手的助理', 'An assistant that acts, not advises')}</h2>
             </section>
           </div></div>
-          <div class="tg-module__foot">读取中…</div>
+          <div class="tg-module__foot">${LOADING}</div>
         </div>
         <div class="tg-module tg-fullpage" data-tg-fullpage="ending">
           <div class="reveal"><div class="slides">
             <section class="ending-slide">
-              <h1>谢谢</h1>
+              <h1>${L('谢谢', 'Thank you')}</h1>
               <div class="divider-h divider-h--primary"></div>
-              <p class="text-muted">问题 &amp; 讨论</p>
+              <p class="text-muted">${L('问题 &amp; 讨论', 'Questions &amp; discussion')}</p>
             </section>
           </div></div>
-          <div class="tg-module__foot">读取中…</div>
+          <div class="tg-module__foot">${LOADING}</div>
         </div>`;
 }
 
@@ -251,67 +317,114 @@ function componentStage() {
     return `      <div class="tg-stage-wrap">
         <div class="reveal"><div class="slides"><section>
 
-          <p class="tg-sublabel">卡片四态</p>
+          <p class="tg-sublabel">${L('卡片四态', 'Four card variants')}</p>
           <div class="tg-grid2">
-            <div class="card"><h3>标准卡片</h3><p>正文用 --text-body，标题用 --primary。这是 deck 里出现频率最高的容器。</p></div>
-            <div class="card card-primary"><h3>主色卡片</h3><p>底色 --primary，文字必须显式配对，不能靠继承。</p></div>
-            <div class="card card-secondary"><h3>辅助色卡片</h3><p>底色 --secondary，用于示例、tip。</p></div>
-            <div class="card card-accent"><h3>强调色卡片</h3><p>底色 --accent，用于警示与次级强调。</p></div>
+            <div class="card"><h3>${L('标准卡片', 'Standard card')}</h3><p>${L(
+        '正文用 --text-body，标题用 --primary。这是 deck 里出现频率最高的容器。',
+        'Body takes --text-body, heading takes --primary. The most common container in a deck.'
+    )}</p></div>
+            <div class="card card-primary"><h3>${L('主色卡片', 'Primary card')}</h3><p>${L(
+        '底色 --primary，文字必须显式配对，不能靠继承。',
+        'Filled with --primary; the text color must be paired explicitly, never inherited.'
+    )}</p></div>
+            <div class="card card-secondary"><h3>${L('辅助色卡片', 'Secondary card')}</h3><p>${L(
+        '底色 --secondary，用于示例、tip。',
+        'Filled with --secondary, for examples and tips.'
+    )}</p></div>
+            <div class="card card-accent"><h3>${L('强调色卡片', 'Accent card')}</h3><p>${L(
+        '底色 --accent，用于警示与次级强调。',
+        'Filled with --accent, for warnings and secondary emphasis.'
+    )}</p></div>
           </div>
 
-          <p class="tg-sublabel">概念定义卡</p>
+          <p class="tg-sublabel">${L('概念定义卡', 'Concept card')}</p>
           <div class="concept-card">
-            <h3 class="concept-card__term">办公智能体 (Agent)</h3>
-            <p class="concept-card__def">能调用工具、能读写文件、能把一串动作跑完的 AI —— 区别于只能在对话框里出主意的聊天 AI。</p>
-            <div class="concept-card__example"><strong>示例：</strong>聊天 AI 告诉你发票该怎么整理；智能体直接把二十张发票整理成一张明细表。</div>
+            <h3 class="concept-card__term">${L('办公智能体 (Agent)', 'Office agent (Agent)')}</h3>
+            <p class="concept-card__def">${L(
+        '能调用工具、能读写文件、能把一串动作跑完的 AI —— 区别于只能在对话框里出主意的聊天 AI。',
+        'An AI that calls tools, reads and writes files, and runs a chain of actions to completion — as opposed to a chat AI that only offers advice in a text box.'
+    )}</p>
+            <div class="concept-card__example"><strong>${L('示例：', 'Example: ')}</strong>${L(
+        '聊天 AI 告诉你发票该怎么整理；智能体直接把二十张发票整理成一张明细表。',
+        'A chat AI tells you how to organize your invoices; an agent turns twenty of them into one itemized sheet.'
+    )}</div>
           </div>
 
-          <p class="tg-sublabel">对比框</p>
+          <p class="tg-sublabel">${L('对比框', 'Comparison box')}</p>
           <div class="vs-box vs-box--columns">
-            <div class="vs-bad"><h3>❌ 含糊指令</h3><ul><li>"帮我写个宣传文案"</li><li>产出泛泛而谈，还得重写</li></ul></div>
-            <div class="vs-neutral"><h3>中性项</h3><ul><li>不好不坏的第三种选择</li><li>用于三栏比较</li></ul></div>
-            <div class="vs-good"><h3>✅ 五要素指令</h3><ul><li>角色 + 对象 + 目标 + 约束 + 格式</li><li>产出可直接用</li></ul></div>
+            <div class="vs-bad"><h3>${L('❌ 含糊指令', '❌ Vague prompt')}</h3><ul><li>${L(
+        '"帮我写个宣传文案"', '&quot;Write me some marketing copy&quot;'
+    )}</li><li>${L('产出泛泛而谈，还得重写', 'Generic output you end up rewriting')}</li></ul></div>
+            <div class="vs-neutral"><h3>${L('中性项', 'Neutral option')}</h3><ul><li>${L(
+        '不好不坏的第三种选择', 'A third choice, neither good nor bad'
+    )}</li><li>${L('用于三栏比较', 'For three-column comparisons')}</li></ul></div>
+            <div class="vs-good"><h3>${L('✅ 五要素指令', '✅ Five-part prompt')}</h3><ul><li>${L(
+        '角色 + 对象 + 目标 + 约束 + 格式', 'Role + audience + goal + constraints + format'
+    )}</li><li>${L('产出可直接用', 'Output you can ship as is')}</li></ul></div>
           </div>
 
-          <p class="tg-sublabel">提示词对比</p>
+          <p class="tg-sublabel">${L('提示词对比', 'Prompt before / after')}</p>
           <div class="prompt-compare">
             <div class="prompt-compare__col prompt-compare__col--before">
-              <div class="prompt-compare__label">❌ 改前</div>
-              <p class="prompt-compare__text">承载提示词原文的小字段落，检查 --bg-vs-bad 底上 --text-body 是否读得清；这里刻意写长一点，让行距 1.85 的效果显出来。</p>
-              <div class="prompt-compare__verdict">判语用 --danger，压在 --bg-vs-bad 上</div>
+              <div class="prompt-compare__label">${L('❌ 改前', '❌ Before')}</div>
+              <p class="prompt-compare__text">${L(
+        '承载提示词原文的小字段落，检查 --bg-vs-bad 底上 --text-body 是否读得清；这里刻意写长一点，让行距 1.85 的效果显出来。',
+        'A small-type paragraph carrying the raw prompt, here to check whether --text-body stays legible on --bg-vs-bad. Deliberately long, so the 1.85 line height has room to show.'
+    )}</p>
+              <div class="prompt-compare__verdict">${L(
+        '判语用 --danger，压在 --bg-vs-bad 上', 'Verdict in --danger, sitting on --bg-vs-bad'
+    )}</div>
             </div>
             <div class="prompt-compare__col prompt-compare__col--after">
-              <div class="prompt-compare__label">✅ 改后</div>
-              <p class="prompt-compare__text">同一段小字换到 --bg-vs-good 底上。两栏的正文色都取 --text-body，只有标签和判语走语义色。</p>
-              <div class="prompt-compare__verdict">判语用 --success，压在 --bg-vs-good 上</div>
+              <div class="prompt-compare__label">${L('✅ 改后', '✅ After')}</div>
+              <p class="prompt-compare__text">${L(
+        '同一段小字换到 --bg-vs-good 底上。两栏的正文色都取 --text-body，只有标签和判语走语义色。',
+        'The same small type moved onto --bg-vs-good. Both columns take --text-body; only the labels and verdicts use semantic colors.'
+    )}</p>
+              <div class="prompt-compare__verdict">${L(
+        '判语用 --success，压在 --bg-vs-good 上', 'Verdict in --success, sitting on --bg-vs-good'
+    )}</div>
             </div>
           </div>
 
-          <p class="tg-sublabel">统计数字墙</p>
+          <p class="tg-sublabel">${L('统计数字墙', 'Stat wall')}</p>
           <div class="stats-wall">
-            <div class="stat-item"><span class="stat-item__number">85%</span><span class="stat-item__label">默认色号的数字</span><span class="stat-item__source">--primary</span></div>
-            <div class="stat-item stat-item--accent"><span class="stat-item__number">3×</span><span class="stat-item__label">强调色的数字</span><span class="stat-item__source">--accent</span></div>
-            <div class="stat-item stat-item--secondary"><span class="stat-item__number">12</span><span class="stat-item__label">辅助色的数字</span><span class="stat-item__source">--secondary</span></div>
-            <div class="stat-item stat-item--danger"><span class="stat-item__number">-40%</span><span class="stat-item__label">危险色的数字</span><span class="stat-item__source">--danger</span></div>
+            <div class="stat-item"><span class="stat-item__number">85%</span><span class="stat-item__label">${L(
+        '默认色号的数字', 'Number in the default color'
+    )}</span><span class="stat-item__source">--primary</span></div>
+            <div class="stat-item stat-item--accent"><span class="stat-item__number">3×</span><span class="stat-item__label">${L(
+        '强调色的数字', 'Number in the accent color'
+    )}</span><span class="stat-item__source">--accent</span></div>
+            <div class="stat-item stat-item--secondary"><span class="stat-item__number">12</span><span class="stat-item__label">${L(
+        '辅助色的数字', 'Number in the secondary color'
+    )}</span><span class="stat-item__source">--secondary</span></div>
+            <div class="stat-item stat-item--danger"><span class="stat-item__number">-40%</span><span class="stat-item__label">${L(
+        '危险色的数字', 'Number in the danger color'
+    )}</span><span class="stat-item__source">--danger</span></div>
           </div>
 
-          <p class="tg-sublabel">高亮框 / 标签 / 徽章</p>
-          <div class="highlight-box">高亮框：底色 --bg-highlight，文字 --text-body，左侧色条 --primary。用于补充说明。</div>
+          <p class="tg-sublabel">${L('高亮框 / 标签 / 徽章', 'Highlight box / tags / badges')}</p>
+          <div class="highlight-box">${L(
+        '高亮框：底色 --bg-highlight，文字 --text-body，左侧色条 --primary。用于补充说明。',
+        'Highlight box: --bg-highlight fill, --text-body text, --primary bar down the left. For side notes.'
+    )}</div>
           <p style="margin-top:1rem">
-            <span class="badge badge--primary">主色</span>
-            <span class="badge badge--secondary">辅助</span>
-            <span class="badge badge--accent">强调</span>
-            <span class="badge badge--success">成功</span>
-            <span class="badge badge--danger">危险</span>
+            <span class="badge badge--primary">${L('主色', 'Primary')}</span>
+            <span class="badge badge--secondary">${L('辅助', 'Secondary')}</span>
+            <span class="badge badge--accent">${L('强调', 'Accent')}</span>
+            <span class="badge badge--success">${L('成功', 'Success')}</span>
+            <span class="badge badge--danger">${L('危险', 'Danger')}</span>
             <span class="tag">tag</span>
           </p>
 
-          <p class="tg-sublabel">时间轴</p>
+          <p class="tg-sublabel">${L('时间轴', 'Timeline')}</p>
           <div class="timeline">
             <div class="timeline__item"><div class="timeline__dot"></div><div class="timeline__period">2017</div><div class="timeline__label">Transformer</div></div>
             <div class="timeline__item timeline__item--secondary"><div class="timeline__dot"></div><div class="timeline__period">2020</div><div class="timeline__label">GPT-3</div></div>
             <div class="timeline__item timeline__item--accent"><div class="timeline__dot"></div><div class="timeline__period">2022</div><div class="timeline__label">ChatGPT</div></div>
-            <div class="timeline__item timeline__item--muted"><div class="timeline__dot"></div><div class="timeline__period">2025</div><div class="timeline__label">办公智能体</div></div>
+            <div class="timeline__item timeline__item--muted"><div class="timeline__dot"></div><div class="timeline__period">2025</div><div class="timeline__label">${L(
+        '办公智能体', 'Office agents'
+    )}</div></div>
           </div>
 
         </section></div></div>
@@ -328,18 +441,31 @@ function themePage(scheme, all, defaults) {
         `<a href="${s.id}.html"${s.id === id ? ' aria-current="page"' : ''}>${esc(s.meta.displayName || s.id)}</a>`
     ).join('\n            ');
 
+    const name = esc(meta.displayName || id);
     const fontMismatch = meta.fontHint && meta.fontHint !== fontSet
-        ? `<p class="tg-section__note" style="color:var(--danger)">注意：CSS 头注释写的默认字体集是 <code>${meta.fontHint}</code>，
-        但 build.js 实际用的是 <code>${fontSet}</code>，两处已经不一致。</p>`
+        ? `<p class="tg-section__note" style="color:var(--danger)">${L(
+            `注意：CSS 头注释写的默认字体集是 <code>${meta.fontHint}</code>，
+        但 build.js 实际用的是 <code>${fontSet}</code>，两处已经不一致。`,
+            `Heads-up: the CSS header comment claims the default font set is <code>${meta.fontHint}</code>,
+        but build.js actually uses <code>${fontSet}</code> — the two have drifted apart.`
+        )}</p>`
         : '';
 
+    const desc = L(
+        esc(meta.tagline || '') + (meta.useFor ? '　适用于：' + esc(meta.useFor) : ''),
+        (meta.taglineEn || meta.useForEn)
+            ? esc(meta.taglineEn || '') + (meta.useForEn ? ' · Best for: ' + esc(meta.useForEn) : '')
+            : ''
+    );
+
     return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${esc(meta.displayName || id)} · CourseFlow 主题展板</title>
+<title>${name} · CourseFlow 主题展板</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+${langBoot(`${meta.displayName || id} · CourseFlow 主题展板`, `${meta.displayName || id} · CourseFlow Theme Gallery`)}
 
 <!-- 加载顺序与 templates/master_template.html 保持一致，
      这样展板看到的层叠结果就是 deck 里的层叠结果 -->
@@ -355,10 +481,11 @@ function themePage(scheme, all, defaults) {
 
 <div class="tg-topbar">
   <div class="tg-topbar__inner">
-    <a class="tg-topbar__home" href="index.html">← 全部主题</a>
+    <a class="tg-topbar__home" href="index.html">${L('← 全部主题', '← All themes')}</a>
     <nav class="tg-topbar__nav">
             ${nav}
     </nav>
+    ${LANG_BUTTON}
   </div>
 </div>
 
@@ -366,121 +493,162 @@ function themePage(scheme, all, defaults) {
 
   <header class="tg-head">
     <p class="tg-head__eyebrow">Color Scheme</p>
-    <h1 class="tg-head__title">${esc(meta.displayName || id)}</h1>
-    <p class="tg-head__desc">${esc(meta.tagline || '')}${meta.useFor ? '　适用于：' + esc(meta.useFor) : ''}</p>
+    <h1 class="tg-head__title">${name}</h1>
+    <p class="tg-head__desc">${desc}</p>
     <div class="tg-meta">
       <div class="tg-meta__item">
         <span class="tg-meta__k">course.meta.md</span>
         <span class="tg-meta__v"><span class="tg-code">theme: ${id}</span></span>
       </div>
       <div class="tg-meta__item">
-        <span class="tg-meta__k">默认字体集</span>
+        <span class="tg-meta__k">${L('默认字体集', 'Default font set')}</span>
         <span class="tg-meta__v"><span class="tg-code">fontset: ${fontSet}</span></span>
       </div>
       <div class="tg-meta__item">
-        <span class="tg-meta__k">配色文件</span>
+        <span class="tg-meta__k">${L('配色文件', 'Scheme file')}</span>
         <span class="tg-meta__v"><span class="tg-code">color-schemes/${id}.css</span></span>
       </div>
     </div>
   </header>
 
   <section class="tg-section" id="semantic">
-    <div class="tg-section__head"><span class="tg-section__num">01</span><h2 class="tg-section__title">语义色</h2></div>
-    <p class="tg-section__note">这六个是有语义的：学员在一份 deck 里反复看到 <code>--danger</code> 就是"别这么干"。
+    <div class="tg-section__head"><span class="tg-section__num">01</span><h2 class="tg-section__title">${L('语义色', 'Semantic colors')}</h2></div>
+    <p class="tg-section__note">${L(
+        `这六个是有语义的：学员在一份 deck 里反复看到 <code>--danger</code> 就是"别这么干"。
       同一个色不能既表示"危险"又表示"第 5 模块"。<br>
       色块下方那一档是 <strong>R5</strong>：这五个语义色在 <code>.text-*</code> /
       <code>.vs-* h3</code> / 统计数字 / 图标卡里都是当<strong>文字色</strong>用的，
-      落在 <code>--bg-slide</code> 上必须 ≥4.5:1，否则那些规则等于白写。</p>
+      落在 <code>--bg-slide</code> 上必须 ≥4.5:1，否则那些规则等于白写。`,
+        `These six carry meaning: seeing <code>--danger</code> over and over across a deck is what
+      teaches the audience "don't do this". One color cannot mean both "danger" and "module 5".<br>
+      The row under each chip is <strong>R5</strong>: all five semantic colors are used as
+      <strong>text</strong> colors in <code>.text-*</code> / <code>.vs-* h3</code> / stat numbers /
+      icon cards, so on <code>--bg-slide</code> they must reach ≥4.5:1 — otherwise those rules are dead letters.`
+    )}</p>
     <div class="tg-swatches">
-${SEMANTIC_SWATCHES.map(([n, u]) => swatch([n, u]).replace(
+${SEMANTIC_SWATCHES.map((s) => swatch(s).replace(
         '<span class="tg-swatch__use">',
-        `<span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-semratio="${n}"></span><span class="tg-swatch__use">`
+        `<span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-semratio="${s[0]}"></span><span class="tg-swatch__use">`
     )).join('\n')}
     </div>
   </section>
 
   <section class="tg-section" id="surface">
-    <div class="tg-section__head"><span class="tg-section__num">02</span><h2 class="tg-section__title">背景与文字</h2></div>
-    <p class="tg-section__note">半透明色会标出 α 值和压到 <code>--bg-slide</code> 上之后的实际色。
-      文字一栏的对比度按 WCAG 算，正文要 ≥4.5:1，标题这种大字 ≥3:1。</p>
+    <div class="tg-section__head"><span class="tg-section__num">02</span><h2 class="tg-section__title">${L('背景与文字', 'Surfaces and text')}</h2></div>
+    <p class="tg-section__note">${L(
+        `半透明色会标出 α 值和压到 <code>--bg-slide</code> 上之后的实际色。
+      文字一栏的对比度按 WCAG 算，正文要 ≥4.5:1，标题这种大字 ≥3:1。`,
+        `Translucent colors show their α and the real color once composited onto <code>--bg-slide</code>.
+      Text contrast follows WCAG: ≥4.5:1 for body copy, ≥3:1 for large headings.`
+    )}</p>
     <div class="tg-swatches">
 ${SURFACE_SWATCHES.map(swatch).join('\n')}
     </div>
-    <p class="tg-sublabel">文字（落在 --bg-slide 上）</p>
+    <p class="tg-sublabel">${L('文字（落在 --bg-slide 上）', 'Text (composited onto --bg-slide)')}</p>
     <div class="tg-swatches">
-${TEXT_SWATCHES.map(([n, u]) => swatch([n, u]).replace(
+${TEXT_SWATCHES.map((s) => swatch(s).replace(
         '<span class="tg-swatch__use">',
-        `<span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-textratio="${n}"></span><span class="tg-swatch__use">`
+        `<span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-textratio="${s[0]}"></span><span class="tg-swatch__use">`
     )).join('\n')}
     </div>
   </section>
 
   <section class="tg-section" id="modules">
-    <div class="tg-section__head"><span class="tg-section__num">03</span><h2 class="tg-section__title">全屏页</h2></div>
-    <p class="tg-section__note">全份 deck 里会整屏铺色的只有三类页：封面、十个模块封面、封底。
-      下面都是真实 DOM，配色和模板的 !important 规则原样生效——投影出来就是这个样子。</p>
+    <div class="tg-section__head"><span class="tg-section__num">03</span><h2 class="tg-section__title">${L('全屏页', 'Full-bleed slides')}</h2></div>
+    <p class="tg-section__note">${L(
+        `全份 deck 里会整屏铺色的只有三类页：封面、十个模块封面、封底。
+      下面都是真实 DOM，配色和模板的 !important 规则原样生效——投影出来就是这个样子。`,
+        `Only three kinds of slide flood the screen with color: the cover, the ten module dividers and the
+      closing slide. Everything below is real DOM — the scheme's and the template's !important rules apply
+      unchanged, so this is what the projector shows.`
+    )}</p>
 
-    <p class="tg-sublabel">封面 / 封底（走 --bg-slide，不吃 --module-*）</p>
+    <p class="tg-sublabel">${L('封面 / 封底（走 --bg-slide，不吃 --module-*）', 'Cover / closing (they take --bg-slide, not --module-*)')}</p>
     <div class="tg-modules">
 ${fullPageCards()}
     </div>
 
-    <p class="tg-sublabel">十个模块封面（--module-1 … --module-10）</p>
-    <p class="tg-section__note">多数课程只用到前 3–5 个，所以越靠前的位置越要安全。
+    <p class="tg-sublabel">${L('十个模块封面（--module-1 … --module-10）', 'Ten module dividers (--module-1 … --module-10)')}</p>
+    <p class="tg-section__note">${L(
+        `多数课程只用到前 3–5 个，所以越靠前的位置越要安全。
       每张下面标出实测色值、标题实际取到的文字色、对比度，以及和语义色/其他模块的撞车情况。
       <code>module-1 = --primary</code> 这类是各配色的惯例，只标灰不报警；撞上
-      <code>--danger</code> / <code>--accent</code> / <code>--success</code> 才算真冲突。</p>
+      <code>--danger</code> / <code>--accent</code> / <code>--success</code> 才算真冲突。`,
+        `Most courses only reach modules 3–5, so the earlier the slot, the safer it has to be.
+      Each card reports the measured color, the text color the title actually resolves to, the contrast
+      ratio, and any collision with a semantic color or another module.
+      <code>module-1 = --primary</code> is a convention across schemes — noted in grey, not flagged; only
+      collisions with <code>--danger</code> / <code>--accent</code> / <code>--success</code> count as real conflicts.`
+    )}</p>
     <div class="tg-modules">
 ${Array.from({ length: 10 }, (_, i) => moduleCard(i + 1)).join('\n')}
     </div>
   </section>
 
   <section class="tg-section" id="fonts">
-    <div class="tg-section__head"><span class="tg-section__num">04</span><h2 class="tg-section__title">字体</h2></div>
-    <p class="tg-section__note">字体集与配色是两根正交的轴。这里显示的是本配色的「原配」<code>${fontSet}</code>，
-      在 course.meta.md 里写 <code>fontset:</code> 可以单独换掉。</p>
+    <div class="tg-section__head"><span class="tg-section__num">04</span><h2 class="tg-section__title">${L('字体', 'Typography')}</h2></div>
+    <p class="tg-section__note">${L(
+        `字体集与配色是两根正交的轴。这里显示的是本配色的「原配」<code>${fontSet}</code>，
+      在 course.meta.md 里写 <code>fontset:</code> 可以单独换掉。`,
+        `Font sets and color schemes are two independent axes. Shown here is this scheme's default
+      <code>${fontSet}</code>; add a <code>fontset:</code> line to course.meta.md to swap it on its own.`
+    )}</p>
     ${fontMismatch}
     <div class="tg-fonts">
       <div class="tg-font">
-        <p class="tg-font__role">Display · 标题</p>
+        <p class="tg-font__role">${L('Display · 标题', 'Display · Headings')}</p>
         <p class="tg-font__stack" data-tg-font="--font-display">${esc(stacks.display)}</p>
         <p class="tg-font__sample-en" style="font-family:var(--font-display)">Handoff Ag 0123</p>
         <p class="tg-font__sample-cn" style="font-family:var(--font-display)">从会聊天到会办事</p>
         <div class="tg-font__weights" style="font-family:var(--font-display)">
-          <span class="tg-font__w" style="font-weight:400"><small>400</small>常规 Regular</span>
-          <span class="tg-font__w" style="font-weight:700"><small>700</small>加粗 Bold</span>
-          <span class="tg-font__w" style="font-weight:900"><small>900</small>特粗 Black</span>
+          <span class="tg-font__w" style="font-weight:400"><small>400</small>${L('常规 Regular', 'Regular')}</span>
+          <span class="tg-font__w" style="font-weight:700"><small>700</small>${L('加粗 Bold', 'Bold')}</span>
+          <span class="tg-font__w" style="font-weight:900"><small>900</small>${L('特粗 Black', 'Black')}</span>
         </div>
       </div>
       <div class="tg-font">
-        <p class="tg-font__role">Body · 正文</p>
+        <p class="tg-font__role">${L('Body · 正文', 'Body · Text')}</p>
         <p class="tg-font__stack" data-tg-font="--font-body">${esc(stacks.body)}</p>
         <p class="tg-font__sample-cn" style="font-family:var(--font-body);font-size:1.5rem">把 AI 从参谋变成助理</p>
+        <!-- 中英两段样张都不跟随语言切换：八套字体集里有一半是拉丁 display 字体，
+             中文全靠系统 fallback，那恰恰是选字体时必须两边都看的东西。 -->
         <p class="tg-font__para" style="font-family:var(--font-body)">
           大模型是发动机，智能体是整车。你在聊天框里问它"这份合同有什么风险"，它给你一段分析；
           你在智能体里给同样的指令，它会把二十份合同逐条读完，把风险点整理成一张表，
           然后把表存到你指定的目录里。1234567890 —— 数字与中文混排的字重表现看这一行。
         </p>
+        <p class="tg-font__para" style="font-family:var(--font-body)">
+          A large model is the engine; an agent is the whole vehicle. Ask a chat box "what are the risks in
+          this contract" and you get a paragraph back; give an agent the same instruction and it reads all
+          twenty contracts, tabulates every risk and files the table where you told it to. 1234567890.
+        </p>
         <div class="tg-font__weights" style="font-family:var(--font-body)">
-          <span class="tg-font__w" style="font-weight:400"><small>400</small>常规正文</span>
-          <span class="tg-font__w" style="font-weight:500"><small>500</small>中等强调</span>
-          <span class="tg-font__w" style="font-weight:700"><small>700</small>加粗强调</span>
+          <span class="tg-font__w" style="font-weight:400"><small>400</small>${L('常规正文', 'Regular')}</span>
+          <span class="tg-font__w" style="font-weight:500"><small>500</small>${L('中等强调', 'Medium')}</span>
+          <span class="tg-font__w" style="font-weight:700"><small>700</small>${L('加粗强调', 'Bold')}</span>
         </div>
       </div>
     </div>
   </section>
 
   <section class="tg-section" id="components">
-    <div class="tg-section__head"><span class="tg-section__num">05</span><h2 class="tg-section__title">组件实景</h2></div>
-    <p class="tg-section__note">同样是真实 DOM，用来检查"设了背景的组件有没有显式配对文字色"——
-      这是配色最容易漏的地方。</p>
+    <div class="tg-section__head"><span class="tg-section__num">05</span><h2 class="tg-section__title">${L('组件实景', 'Components in context')}</h2></div>
+    <p class="tg-section__note">${L(
+        `同样是真实 DOM，用来检查"设了背景的组件有没有显式配对文字色"——
+      这是配色最容易漏的地方。`,
+        `Real DOM again, here to check whether every component that sets a background also pairs an explicit
+      text color — the single most commonly missed thing in a scheme.`
+    )}</p>
 ${componentStage()}
   </section>
 
   <section class="tg-section" id="diagnostics">
-    <div class="tg-section__head"><span class="tg-section__num">06</span><h2 class="tg-section__title">体检</h2></div>
-    <p class="tg-section__note">浏览器实测，不是人工维护的清单。</p>
-    <div class="tg-diag" data-tg-diagnostics>读取中…</div>
+    <div class="tg-section__head"><span class="tg-section__num">06</span><h2 class="tg-section__title">${L('体检', 'Diagnostics')}</h2></div>
+    <p class="tg-section__note">${L(
+        '浏览器实测，不是人工维护的清单。',
+        'Measured live in the browser — not a hand-maintained checklist.'
+    )}</p>
+    <div class="tg-diag" data-tg-diagnostics>${LOADING}</div>
   </section>
 
 </div>
@@ -504,6 +672,12 @@ function indexPage(all) {
         const heading = v['--text-heading'] || '#000000';
         const primary = v['--primary'] || '#000000';
         const strip = Array.from({ length: 10 }, (_, i) => v['--module-' + (i + 1)] || 'transparent');
+        const desc = L(
+            esc(s.meta.tagline || '') + (s.meta.useFor ? '｜' + esc(s.meta.useFor) : ''),
+            (s.meta.taglineEn || s.meta.useForEn)
+                ? esc(s.meta.taglineEn || '') + (s.meta.useForEn ? ' · ' + esc(s.meta.useForEn) : '')
+                : ''
+        );
         return `    <a class="tg-card" href="${s.id}.html">
       <div class="tg-card__hero" style="background:${bg};color:${heading};font-family:${s.stacks.display || 'sans-serif'};font-weight:${s.stacks.displayWeight}">
         ${esc(s.meta.displayName || s.id)}
@@ -513,7 +687,7 @@ function indexPage(all) {
       </div>
       <div class="tg-card__body">
         <p class="tg-card__name" style="color:${primary}">${s.id}</p>
-        <p class="tg-card__desc">${esc(s.meta.tagline || '')}${s.meta.useFor ? '｜' + esc(s.meta.useFor) : ''}</p>
+        <p class="tg-card__desc">${desc}</p>
         <div class="tg-card__foot"><span>${s.fontSet}</span><span>${primary.toUpperCase()}</span></div>
       </div>
     </a>`;
@@ -527,12 +701,13 @@ function indexPage(all) {
         .join('\n');
 
     return `<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-lang="zh">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CourseFlow 主题展板</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+${langBoot('CourseFlow 主题展板', 'CourseFlow Theme Gallery')}
 <link rel="stylesheet" href="../shared_styles/tokens.css">
 <link rel="stylesheet" href="gallery.css">
 <!-- 只引 @font-face 层：卡片标题按主题的 display 字体渲染，不引入任何 :root/body 规则 -->
@@ -547,17 +722,31 @@ ${faceLinks}
   .tg-idx-head code { font-family: ui-monospace, Menlo, monospace; font-size: .86em;
     background: rgba(128,128,128,.16); padding: .1rem .38rem; border-radius: 5px; }
   .tg-idx-body { max-width: 1180px; margin: 0 auto; padding: 0 2rem 5rem; }
-  @media (max-width: 720px) { .tg-idx-head, .tg-idx-body { padding-left: 1.2rem; padding-right: 1.2rem; } }
+  .tg-idx-bar { max-width: 1180px; margin: 0 auto; padding: 1.4rem 2rem 0; display: flex; justify-content: flex-end; }
+  @media (max-width: 720px) {
+    .tg-idx-head, .tg-idx-body, .tg-idx-bar { padding-left: 1.2rem; padding-right: 1.2rem; }
+  }
 </style>
 </head>
 <body>
 
+<div class="tg-idx-bar">${LANG_BUTTON}</div>
+
 <header class="tg-idx-head">
-  <h1>CourseFlow 主题展板</h1>
-  <p>${all.length} 套配色，每套一页：语义色、背景与文字、十个模块封面色、字体、组件实景、自动体检。
-     色带是该配色的 <code>--module-1</code> 到 <code>--module-10</code>，按顺序排。</p>
-  <p>换主题只要改课程的 <code>course.meta.md</code> 里的 <code>theme:</code>，
-     再跑 <code>node build.js &lt;课程名&gt;</code>。字体想单独换就再加一行 <code>fontset:</code>。</p>
+  <h1>${L('CourseFlow 主题展板', 'CourseFlow Theme Gallery')}</h1>
+  <p>${L(
+        `${all.length} 套配色，每套一页：语义色、背景与文字、十个模块封面色、字体、组件实景、自动体检。
+     色带是该配色的 <code>--module-1</code> 到 <code>--module-10</code>，按顺序排。`,
+        `${all.length} color schemes, one page each: semantic colors, surfaces and text, the ten module
+     cover colors, typography, components in context and an automatic audit. The stripe is that scheme's
+     <code>--module-1</code> through <code>--module-10</code>, in order.`
+    )}</p>
+  <p>${L(
+        `换主题只要改课程的 <code>course.meta.md</code> 里的 <code>theme:</code>，
+     再跑 <code>node build.js &lt;课程名&gt;</code>。字体想单独换就再加一行 <code>fontset:</code>。`,
+        `To switch themes, change <code>theme:</code> in the course's <code>course.meta.md</code> and run
+     <code>node build.js &lt;course-name&gt;</code>. To change only the typeface, add a <code>fontset:</code> line.`
+    )}</p>
 </header>
 
 <main class="tg-idx-body">
@@ -589,16 +778,22 @@ const all = fs.readdirSync(SCHEME_DIR)
 
 if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });
 
+let missingEn = 0;
 all.forEach((s) => {
     fs.writeFileSync(path.join(OUT_DIR, s.id + '.html'), themePage(s, all, defaults));
     const hint = s.meta.fontHint && s.meta.fontHint !== s.fontSet
         ? `  ← CSS 注释说 ${s.meta.fontHint}，build.js 说 ${s.fontSet}`
         : '';
+    if (!s.meta.taglineEn) missingEn++;
     console.log(`  ${s.id.padEnd(18)} ${s.fontSet}${hint}`);
 });
 
 fs.writeFileSync(path.join(OUT_DIR, 'index.html'), indexPage(all));
 
 console.log(`\n生成 ${all.length} 套主题 + 索引页 → theme-gallery/index.html`);
+
+if (missingEn) {
+    console.warn(`  ! ${missingEn} 套配色的头注释缺 "EN tagline:" / "EN use:"，英文版会退回中文描述`);
+}
 
 if (!auditTokens(all.map((s) => s.id))) process.exitCode = 1;
