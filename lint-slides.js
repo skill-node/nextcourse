@@ -194,6 +194,9 @@ for (const file of htmlFiles) {
     }
     for (const m of visible.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)) {
         const t = textOf(m[1]);
+        // .prompt-compare__text 承载的是提示词原文, 逐字上屏才有教学价值
+        // (见 DESIGN-SYSTEM.md § 20)。它超长不是版面失控, 不报警。
+        if (/\bprompt-compare__text\b/.test(m[0])) continue;
         if ([...t].length > DENSITY.paragraph) {
             warnings.push({ type: 'long-paragraph', detail: `${[...t].length} 字 (≤${DENSITY.paragraph}), 建议改为列表/组件` });
         }

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CourseFlow 主题展板</title>
+<link rel="stylesheet" href="../shared_styles/tokens.css">
+<link rel="stylesheet" href="gallery.css">
+<!-- 只引 @font-face 层：卡片标题按主题的 display 字体渲染，不引入任何 :root/body 规则 -->
+<link rel="stylesheet" href="../lib/fonts/display/archivo-black.css">
+<link rel="stylesheet" href="../lib/fonts/display/archivo.css">
+<link rel="stylesheet" href="../lib/fonts/display/bodoni-moda.css">
+<link rel="stylesheet" href="../lib/fonts/display/cormorant.css">
+<link rel="stylesheet" href="../lib/fonts/display/noto-sans-sc.css">
+<link rel="stylesheet" href="../lib/fonts/display/noto-serif-sc.css">
+<link rel="stylesheet" href="../lib/fonts/display/syne.css">
+<style>
+  /* 索引页不套任何一套配色（套了就偏心），自己走一套中性壳 */
+  html, body { background: #f6f7f9; color: #0f172a; }
+  @media (prefers-color-scheme: dark) { html, body { background: #101317; color: #e7ebf0; } }
+  .tg-idx-head { max-width: 1180px; margin: 0 auto; padding: 4rem 2rem 2.5rem; }
+  .tg-idx-head h1 { font-size: clamp(2.2rem, 5vw, 3.4rem); margin: 0 0 .8rem; letter-spacing: -0.02em; }
+  .tg-idx-head p { max-width: 62ch; line-height: 1.8; margin: 0 0 .6rem; opacity: .75; font-size: .98rem; }
+  .tg-idx-head code { font-family: ui-monospace, Menlo, monospace; font-size: .86em;
+    background: rgba(128,128,128,.16); padding: .1rem .38rem; border-radius: 5px; }
+  .tg-idx-body { max-width: 1180px; margin: 0 auto; padding: 0 2rem 5rem; }
+  @media (max-width: 720px) { .tg-idx-head, .tg-idx-body { padding-left: 1.2rem; padding-right: 1.2rem; } }
+</style>
+</head>
+<body>
+
+<header class="tg-idx-head">
+  <h1>CourseFlow 主题展板</h1>
+  <p>8 套配色，每套一页：语义色、背景与文字、十个模块封面色、字体、组件实景、自动体检。
+     色带是该配色的 <code>--module-1</code> 到 <code>--module-10</code>，按顺序排。</p>
+  <p>换主题只要改课程的 <code>course.meta.md</code> 里的 <code>theme:</code>，
+     再跑 <code>node build.js &lt;课程名&gt;</code>。字体想单独换就再加一行 <code>fontset:</code>。</p>
+</header>
+
+<main class="tg-idx-body">
+  <div class="tg-index">
+    <a class="tg-card" href="bold-signal.html">
+      <div class="tg-card__hero" style="background:#1a1a1a;color:#ffffff;font-family:'Archivo Black', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;font-weight:400">
+        Bold Signal
+      </div>
+      <div class="tg-card__strip">
+        <span style="background:#2196F3"></span><span style="background:#FFB300"></span><span style="background:#26A69A"></span><span style="background:#BA68C8"></span><span style="background:#8BC34A"></span><span style="background:#4FC3F7"></span><span style="background:#9575CD"></span><span style="background:#CDDC39"></span><span style="background:#66BB6A"></span><span style="background:#FF5722"></span>
+      </div>
+      <div class="tg-card__body">
+        <p class="tg-card__name" style="color:#FF5722">bold-signal</p>
+        <p class="tg-card__desc">高对比深色 + 亮色卡片｜高管演讲、影响力展示</p>
+        <div class="tg-card__foot"><span>impact-sans</span><span>#FF5722</span></div>
+      </div>
+    </a>
+    <a class="tg-card" href="creative-voltage.html">
+      <div class="tg-card__hero" style="background:#1a1a2e;color:#ffffff;font-family:'Syne', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;font-weight:800">
+        Creative Voltage
+      </div>
+      <div class="tg-card__strip">
+        <span style="background:#33a1ff"></span><span style="background:#d4ff00"></span><span style="background:#ff5ce1"></span><span style="background:#00e5ff"></span><span style="background:#b388ff"></span><span style="background:#3ee66b"></span><span style="background:#7c8cff"></span><span style="background:#9dff4d"></span><span style="background:#ffb833"></span><span style="background:#ff7a45"></span>
+      </div>
+      <div class="tg-card__body">
+        <p class="tg-card__name" style="color:#3d8bff">creative-voltage</p>
+        <p class="tg-card__desc">电蓝 + 荧光黄｜创意分享、年轻受众、创新主题</p>
+        <div class="tg-card__foot"><span>voltage-sans</span><span>#3D8BFF</span></div>
+      </div>
+    </a>
+    <a class="tg-card" href="dark-botanical.html">
+      <div class="tg-card__hero" style="background:#0f0f0f;color:#e8e4df;font-family:'Cormorant', 'Noto Serif SC', 'Songti SC', serif;font-weight:700">
+        Dark Botanical
+      </div>
+      <div class="tg-card__strip">
+        <span style="background:#d4a574"></span><span style="background:#7fa8a6"></span><span style="background:#c4794e"></span><span style="background:#8595a6"></span><span style="background:#c9b896"></span><span style="background:#b088a5"></span><span style="background:#8fa97c"></span><span style="background:#e8b4b8"></span><span style="background:#7da58f"></span><span style="background:#a5946b"></span>
+      </div>
+      <div class="tg-card__body">
+        <p class="tg-card__name" style="color:#d4a574">dark-botanical</p>
+        <p class="tg-card__desc">深色 + 暖色调｜高端场合、优雅主题、品牌展示</p>
+        <div class="tg-card__foot"><span>garamond-serif</span><span>#D4A574</span></div>
+      </div>
+    </a>
+    <a class="tg-card" href="dark-ocean.html">
+      <div class="tg-card__hero" style="background:#1e293b;color:#f8fafc;font-family:'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;font-weight:900">
+        Dark Ocean
+      </div>
+      <div class="tg-card__strip">
+        <span style="background:#a5b4fc"></span><span style="background:#5eead4"></span><span style="background:#fcd34d"></span><span style="background:#818cf8"></span><span style="background:#bef264"></span><span style="background:#67e8f9"></span><span style="background:#f0abfc"></span><span style="background:#fbbf24"></span><span style="background:#34d399"></span><span style="background:#93c5fd"></span>
+      </div>
+      <div class="tg-card__body">
+        <p class="tg-card__name" style="color:#a5b4fc">dark-ocean</p>
+        <p class="tg-card__desc">深海配色方案｜投影仪暗场、低光环境</p>
+        <div class="tg-card__foot"><span>modern-sans</span><span>#A5B4FC</span></div>
+      </div>
+    </a>
+    <a class="tg-card" href="notebook-tabs.html">
+      <div class="tg-card__hero" style="background:#f8f6f1;color:#1a1a1a;font-family:'Bodoni Moda', 'Noto Serif SC', 'Songti SC', serif;font-weight:900">
+        Notebook Tabs
+      </div>
+      <div class="tg-card__strip">
+        <span style="background:#98d4bb"></span><span style="background:#c7b8ea"></span><span style="background:#f4b8c5"></span><span style="background:#a8d8ea"></span><span style="background:#ffe6a7"></span><span style="background:#b8d4e3"></span><span style="background:#d4c7ea"></span><span style="background:#eab8b8"></span><span style="background:#98c7d4"></span><span style="background:#c7d498"></span>
+      </div>
+      <div class="tg-card__body">
+        <p class="tg-card__name" style="color:#6d57a8">notebook-tabs</p>
+        <p class="tg-card__desc">纸质 + 彩色标签页｜工作坊、互动培训、笔记风格</p>
+        <div class="tg-card__foot"><span>didone-serif</span><span>#6D57A8</span></div>
+      </div>
+    </a>
+    <a class="tg-card" href="standard-default.html">
+      <div class="tg-card__hero" style="background:#ffffff;color:#0f172a;font-family:'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;font-weight:900">
+        Standard 模板
+      </div>
+      <div class="tg-card__strip">
+        <span style="background:#2563eb"></span><span style="background:#047857"></span><span style="background:#a16207"></span><span style="background:#7e22ce"></span><span style="background:#0f766e"></span><span style="background:#be185d"></span><span style="background:#4338ca"></span><span style="background:#4d7c0f"></span><span style="background:#0f172a"></span><span style="background:#b91c1c"></span>
+      </div>
+      <div class="tg-card__body">
+        <p class="tg-card__name" style="color:#2563eb">standard-default</p>
+        <p class="tg-card__desc">默认配色方案</p>
+        <div class="tg-card__foot"><span>modern-sans</span><span>#2563EB</span></div>
+      </div>
+    </a>
+    <a class="tg-card" href="swiss-modern.html">
+      <div class="tg-card__hero" style="background:#ffffff;color:#000000;font-family:'Archivo', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;font-weight:900">
+        Swiss Modern
+      </div>
+      <div class="tg-card__strip">
+        <span style="background:#000000"></span><span style="background:#141414"></span><span style="background:#242424"></span><span style="background:#333333"></span><span style="background:#414141"></span><span style="background:#4E4E4E"></span><span style="background:#5A5A5A"></span><span style="background:#666666"></span><span style="background:#727272"></span><span style="background:#CC2900"></span>
+      </div>
+      <div class="tg-card__body">
+        <p class="tg-card__name" style="color:#dd2c00">swiss-modern</p>
+        <p class="tg-card__desc">极简黑白 + 红色强调｜专业技术培训、数据驱动型展示</p>
+        <div class="tg-card__foot"><span>grotesk-sans</span><span>#DD2C00</span></div>
+      </div>
+    </a>
+    <a class="tg-card" href="warm-sand.html">
+      <div class="tg-card__hero" style="background:#faf7f2;color:#44403c;font-family:'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;font-weight:900">
+        Warm Sand
+      </div>
+      <div class="tg-card__strip">
+        <span style="background:#7c3aed"></span><span style="background:#047857"></span><span style="background:#1d4ed8"></span><span style="background:#a21caf"></span><span style="background:#0f766e"></span><span style="background:#4338ca"></span><span style="background:#0e7490"></span><span style="background:#92400e"></span><span style="background:#44403c"></span><span style="background:#b91c1c"></span>
+      </div>
+      <div class="tg-card__body">
+        <p class="tg-card__name" style="color:#7c3aed">warm-sand</p>
+        <p class="tg-card__desc">米白底 + 紫(primary)/绿(secondary)点缀的商务浅色｜企业管理/商业课、柔和护眼场景</p>
+        <div class="tg-card__foot"><span>modern-sans</span><span>#7C3AED</span></div>
+      </div>
+    </a>
+  </div>
+</main>
+
+</body>
+</html>

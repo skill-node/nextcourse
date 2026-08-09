@@ -6,9 +6,11 @@
  *   courseflow list                     列出所有课程及状态
  *   courseflow new    <name>            初始化新课程目录
  *   courseflow lint   <name>            校验幻灯片样式规范
+ *   courseflow animate <name> [--strip] 批量打入/剥离组件入场动画
  *   courseflow build  <name>            组装生成 deck.html
  *   courseflow render <name>            lint + build 一步完成
  *   courseflow export <name> [outdir]   打包为可离线演示文件夹
+ *   courseflow themes                   生成配色/字体展板（theme-gallery/）
  *
  * 工作流:
  *   1. /course-design              设计课程大纲（Claude Code Skill）
@@ -125,6 +127,11 @@ outcomes:
         process.exit(run('lint-slides.js', [requireName('lint')]));
     },
 
+    animate() {
+        const name = requireName('animate');
+        process.exit(run('animate-slides.js', [name, ...rest.slice(1)]));
+    },
+
     build() {
         process.exit(run('build.js', [requireName('build')]));
     },
@@ -144,6 +151,10 @@ outcomes:
     shot() {
         const name = requireName('shot');
         process.exit(run('shot.js', [name, ...rest.slice(1)]));
+    },
+
+    themes() {
+        process.exit(run('theme-gallery.js', rest));
     },
 
     notes() {
@@ -194,11 +205,13 @@ CourseFlow V2 — 课程开发工具
   courseflow list                     列出所有课程及状态
   courseflow new    <name>            初始化新课程目录（含 course.meta.md 模板）
   courseflow lint   <name>            校验幻灯片样式规范
+  courseflow animate <name> [--strip] 批量打入/剥离组件入场动画（不碰手写 fragment）
   courseflow build  <name>            组装生成 deck.html
   courseflow render <name>            lint + build 一步完成（推荐）
   courseflow export <name> [outdir]   打包为可离线演示文件夹
   courseflow notes  <name>            导出讲师手册 handout.md（各页演讲备注）
   courseflow shot   <name> [--check]  溢出检测 + 逐页截图到 .review/（需本机 Chrome）
+  courseflow themes                   生成配色/字体展板 theme-gallery/index.html
 
 工作流（从零开始）:
   /course-design                ← Claude Code: 对话式设计大纲

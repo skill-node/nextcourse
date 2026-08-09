@@ -12,11 +12,13 @@
   "scripts": {
     "list":   "node courseflow.js list",
     "lint":   "node courseflow.js lint",
+    "animate": "node courseflow.js animate",
     "build":  "node courseflow.js build",
     "render": "node courseflow.js render",
     "export": "node courseflow.js export",
     "notes":  "node courseflow.js notes",
-    "shot":   "node courseflow.js shot"
+    "shot":   "node courseflow.js shot",
+    "themes": "node courseflow.js themes"
   },
   "keywords": ["courseflow", "reveal.js", "slides", "presentation", "education"],
   "author": "",

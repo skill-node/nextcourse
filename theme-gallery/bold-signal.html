@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bold Signal · CourseFlow 主题展板</title>
+
+<!-- 加载顺序与 templates/master_template.html 保持一致，
+     这样展板看到的层叠结果就是 deck 里的层叠结果 -->
+<link rel="stylesheet" href="../shared_styles/base_layout.css">
+<link rel="stylesheet" href="../shared_styles/themes/standard.css">
+<link rel="stylesheet" href="../shared_styles/tokens.css">
+<link rel="stylesheet" href="../shared_styles/components.css">
+<link rel="stylesheet" href="../shared_styles/color-schemes/bold-signal.css">
+<link rel="stylesheet" href="../shared_styles/font-sets/impact-sans.css">
+<link rel="stylesheet" href="gallery.css">
+</head>
+<body>
+
+<div class="tg-topbar">
+  <div class="tg-topbar__inner">
+    <a class="tg-topbar__home" href="index.html">← 全部主题</a>
+    <nav class="tg-topbar__nav">
+            <a href="bold-signal.html" aria-current="page">Bold Signal</a>
+            <a href="creative-voltage.html">Creative Voltage</a>
+            <a href="dark-botanical.html">Dark Botanical</a>
+            <a href="dark-ocean.html">Dark Ocean</a>
+            <a href="notebook-tabs.html">Notebook Tabs</a>
+            <a href="standard-default.html">Standard 模板</a>
+            <a href="swiss-modern.html">Swiss Modern</a>
+            <a href="warm-sand.html">Warm Sand</a>
+    </nav>
+  </div>
+</div>
+
+<div class="tg-wrap">
+
+  <header class="tg-head">
+    <p class="tg-head__eyebrow">Color Scheme</p>
+    <h1 class="tg-head__title">Bold Signal</h1>
+    <p class="tg-head__desc">高对比深色 + 亮色卡片　适用于：高管演讲、影响力展示</p>
+    <div class="tg-meta">
+      <div class="tg-meta__item">
+        <span class="tg-meta__k">course.meta.md</span>
+        <span class="tg-meta__v"><span class="tg-code">theme: bold-signal</span></span>
+      </div>
+      <div class="tg-meta__item">
+        <span class="tg-meta__k">默认字体集</span>
+        <span class="tg-meta__v"><span class="tg-code">fontset: impact-sans</span></span>
+      </div>
+      <div class="tg-meta__item">
+        <span class="tg-meta__k">配色文件</span>
+        <span class="tg-meta__v"><span class="tg-code">color-schemes/bold-signal.css</span></span>
+      </div>
+    </div>
+  </header>
+
+  <section class="tg-section" id="semantic">
+    <div class="tg-section__head"><span class="tg-section__num">01</span><h2 class="tg-section__title">语义色</h2></div>
+    <p class="tg-section__note">这六个是有语义的：学员在一份 deck 里反复看到 <code>--danger</code> 就是"别这么干"。
+      同一个色不能既表示"危险"又表示"第 5 模块"。<br>
+      色块下方那一档是 <strong>R5</strong>：这五个语义色在 <code>.text-*</code> /
+      <code>.vs-* h3</code> / 统计数字 / 图标卡里都是当<strong>文字色</strong>用的，
+      落在 <code>--bg-slide</code> 上必须 ≥4.5:1，否则那些规则等于白写。</p>
+    <div class="tg-swatches">
+        <div class="tg-swatch" data-tg-var="--primary">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--primary</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-semratio="--primary"></span><span class="tg-swatch__use">标题、强调、数字、边框</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--primary-dark">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--primary-dark</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-semratio="--primary-dark"></span><span class="tg-swatch__use">封面标题、深色背景</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--secondary">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--secondary</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-semratio="--secondary"></span><span class="tg-swatch__use">示例、tip、时间轴结束端</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--accent">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--accent</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-semratio="--accent"></span><span class="tg-swatch__use">警示、callout、次级强调</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--success">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--success</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-semratio="--success"></span><span class="tg-swatch__use">check-list、vs-good、正面结果</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--danger">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--danger</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-semratio="--danger"></span><span class="tg-swatch__use">vs-bad、错误、反面例子</span>
+          </div>
+        </div>
+    </div>
+  </section>
+
+  <section class="tg-section" id="surface">
+    <div class="tg-section__head"><span class="tg-section__num">02</span><h2 class="tg-section__title">背景与文字</h2></div>
+    <p class="tg-section__note">半透明色会标出 α 值和压到 <code>--bg-slide</code> 上之后的实际色。
+      文字一栏的对比度按 WCAG 算，正文要 ≥4.5:1，标题这种大字 ≥3:1。</p>
+    <div class="tg-swatches">
+        <div class="tg-swatch" data-tg-var="--bg-page">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--bg-page</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use">整份 deck 的底</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--bg-slide">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--bg-slide</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use">单页背景</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--bg-card">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--bg-card</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use">卡片背景</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--bg-highlight">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--bg-highlight</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use">highlight-box / callout 底</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--bg-vs-good">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--bg-vs-good</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use">vs-good 底</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--bg-vs-bad">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--bg-vs-bad</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use">vs-bad 底</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--bg-code">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--bg-code</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use">代码块底</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--border-card">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--border-card</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use">卡片描边</span>
+          </div>
+        </div>
+    </div>
+    <p class="tg-sublabel">文字（落在 --bg-slide 上）</p>
+    <div class="tg-swatches">
+        <div class="tg-swatch" data-tg-var="--text-heading">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--text-heading</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-textratio="--text-heading"></span><span class="tg-swatch__use">标题</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--text-body">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--text-body</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-textratio="--text-body"></span><span class="tg-swatch__use">正文</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--text-muted">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--text-muted</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-textratio="--text-muted"></span><span class="tg-swatch__use">注释 / 出处</span>
+          </div>
+        </div>
+        <div class="tg-swatch" data-tg-var="--text-inverse">
+          <div class="tg-swatch__chip"><div class="tg-swatch__fill"></div></div>
+          <div class="tg-swatch__body">
+            <span class="tg-swatch__var">--text-inverse</span>
+            <span class="tg-swatch__val">读取中…</span>
+            <span class="tg-swatch__use" style="margin-bottom:.4rem" data-tg-textratio="--text-inverse"></span><span class="tg-swatch__use">深色或彩色底上的文字</span>
+          </div>
+        </div>
+    </div>
+  </section>
+
+  <section class="tg-section" id="modules">
+    <div class="tg-section__head"><span class="tg-section__num">03</span><h2 class="tg-section__title">全屏页</h2></div>
+    <p class="tg-section__note">全份 deck 里会整屏铺色的只有三类页：封面、十个模块封面、封底。
+      下面都是真实 DOM，配色和模板的 !important 规则原样生效——投影出来就是这个样子。</p>
+
+    <p class="tg-sublabel">封面 / 封底（走 --bg-slide，不吃 --module-*）</p>
+    <div class="tg-modules">
+        <div class="tg-module tg-fullpage" data-tg-fullpage="cover">
+          <div class="reveal"><div class="slides">
+            <section class="cover-slide">
+              <h1>从会聊天到会办事</h1>
+              <div class="divider-h divider-h--primary"></div>
+              <h2>让 AI 变成替你动手的助理</h2>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+        <div class="tg-module tg-fullpage" data-tg-fullpage="ending">
+          <div class="reveal"><div class="slides">
+            <section class="ending-slide">
+              <h1>谢谢</h1>
+              <div class="divider-h divider-h--primary"></div>
+              <p class="text-muted">问题 &amp; 讨论</p>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+    </div>
+
+    <p class="tg-sublabel">十个模块封面（--module-1 … --module-10）</p>
+    <p class="tg-section__note">多数课程只用到前 3–5 个，所以越靠前的位置越要安全。
+      每张下面标出实测色值、标题实际取到的文字色、对比度，以及和语义色/其他模块的撞车情况。
+      <code>module-1 = --primary</code> 这类是各配色的惯例，只标灰不报警；撞上
+      <code>--danger</code> / <code>--accent</code> / <code>--success</code> 才算真冲突。</p>
+    <div class="tg-modules">
+        <div class="tg-module" data-tg-module="1">
+          <div class="reveal"><div class="slides">
+            <section class="module-1">
+              <div class="module-divider">
+                <span class="module-divider__label">模块 01</span>
+                <h2 class="module-divider__title">认清你在用的是什么</h2>
+                <p class="module-divider__hook">你天天在用的 AI，到底是哪一层？</p>
+                <span class="module-divider__number" aria-hidden="true">01</span>
+              </div>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+        <div class="tg-module" data-tg-module="2">
+          <div class="reveal"><div class="slides">
+            <section class="module-2">
+              <div class="module-divider">
+                <span class="module-divider__label">模块 02</span>
+                <h2 class="module-divider__title">把话说对：提示词五要素</h2>
+                <p class="module-divider__hook">同一个问题，换个问法，结果差一个档次</p>
+                <span class="module-divider__number" aria-hidden="true">02</span>
+              </div>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+        <div class="tg-module" data-tg-module="3">
+          <div class="reveal"><div class="slides">
+            <section class="module-3">
+              <div class="module-divider">
+                <span class="module-divider__label">模块 03</span>
+                <h2 class="module-divider__title">把活干完：三个真实场景</h2>
+                <p class="module-divider__hook">不演示玩具任务，只做你明天就要交的活</p>
+                <span class="module-divider__number" aria-hidden="true">03</span>
+              </div>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+        <div class="tg-module" data-tg-module="4">
+          <div class="reveal"><div class="slides">
+            <section class="module-4">
+              <div class="module-divider">
+                <span class="module-divider__label">模块 04</span>
+                <h2 class="module-divider__title">守住红线：合规与边界</h2>
+                <p class="module-divider__hook">哪些字段一旦发出去就收不回来</p>
+                <span class="module-divider__number" aria-hidden="true">04</span>
+              </div>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+        <div class="tg-module" data-tg-module="5">
+          <div class="reveal"><div class="slides">
+            <section class="module-5">
+              <div class="module-divider">
+                <span class="module-divider__label">模块 05</span>
+                <h2 class="module-divider__title">从个人到团队</h2>
+                <p class="module-divider__hook">一个人用得好，不等于团队跑得起来</p>
+                <span class="module-divider__number" aria-hidden="true">05</span>
+              </div>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+        <div class="tg-module" data-tg-module="6">
+          <div class="reveal"><div class="slides">
+            <section class="module-6">
+              <div class="module-divider">
+                <span class="module-divider__label">模块 06</span>
+                <h2 class="module-divider__title">度量与复盘</h2>
+                <p class="module-divider__hook">省下来的时间，得算得出来</p>
+                <span class="module-divider__number" aria-hidden="true">06</span>
+              </div>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+        <div class="tg-module" data-tg-module="7">
+          <div class="reveal"><div class="slides">
+            <section class="module-7">
+              <div class="module-divider">
+                <span class="module-divider__label">模块 07</span>
+                <h2 class="module-divider__title">工具选型</h2>
+                <p class="module-divider__hook">不是越贵越好，是越贴合流程越好</p>
+                <span class="module-divider__number" aria-hidden="true">07</span>
+              </div>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+        <div class="tg-module" data-tg-module="8">
+          <div class="reveal"><div class="slides">
+            <section class="module-8">
+              <div class="module-divider">
+                <span class="module-divider__label">模块 08</span>
+                <h2 class="module-divider__title">常见失败模式</h2>
+                <p class="module-divider__hook">八成的翻车，出在同样几件事上</p>
+                <span class="module-divider__number" aria-hidden="true">08</span>
+              </div>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+        <div class="tg-module" data-tg-module="9">
+          <div class="reveal"><div class="slides">
+            <section class="module-9">
+              <div class="module-divider">
+                <span class="module-divider__label">模块 09</span>
+                <h2 class="module-divider__title">进阶：把流程串起来</h2>
+                <p class="module-divider__hook">单点提效的天花板在哪</p>
+                <span class="module-divider__number" aria-hidden="true">09</span>
+              </div>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+        <div class="tg-module" data-tg-module="10">
+          <div class="reveal"><div class="slides">
+            <section class="module-10">
+              <div class="module-divider">
+                <span class="module-divider__label">模块 10</span>
+                <h2 class="module-divider__title">行动计划</h2>
+                <p class="module-divider__hook">离开这间教室之后的第一周</p>
+                <span class="module-divider__number" aria-hidden="true">10</span>
+              </div>
+            </section>
+          </div></div>
+          <div class="tg-module__foot">读取中…</div>
+        </div>
+    </div>
+  </section>
+
+  <section class="tg-section" id="fonts">
+    <div class="tg-section__head"><span class="tg-section__num">04</span><h2 class="tg-section__title">字体</h2></div>
+    <p class="tg-section__note">字体集与配色是两根正交的轴。这里显示的是本配色的「原配」<code>impact-sans</code>，
+      在 course.meta.md 里写 <code>fontset:</code> 可以单独换掉。</p>
+    
+    <div class="tg-fonts">
+      <div class="tg-font">
+        <p class="tg-font__role">Display · 标题</p>
+        <p class="tg-font__stack" data-tg-font="--font-display">'Archivo Black', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif</p>
+        <p class="tg-font__sample-en" style="font-family:var(--font-display)">Handoff Ag 0123</p>
+        <p class="tg-font__sample-cn" style="font-family:var(--font-display)">从会聊天到会办事</p>
+        <div class="tg-font__weights" style="font-family:var(--font-display)">
+          <span class="tg-font__w" style="font-weight:400"><small>400</small>常规 Regular</span>
+          <span class="tg-font__w" style="font-weight:700"><small>700</small>加粗 Bold</span>
+          <span class="tg-font__w" style="font-weight:900"><small>900</small>特粗 Black</span>
+        </div>
+      </div>
+      <div class="tg-font">
+        <p class="tg-font__role">Body · 正文</p>
+        <p class="tg-font__stack" data-tg-font="--font-body">'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif</p>
+        <p class="tg-font__sample-cn" style="font-family:var(--font-body);font-size:1.5rem">把 AI 从参谋变成助理</p>
+        <p class="tg-font__para" style="font-family:var(--font-body)">
+          大模型是发动机，智能体是整车。你在聊天框里问它"这份合同有什么风险"，它给你一段分析；
+          你在智能体里给同样的指令，它会把二十份合同逐条读完，把风险点整理成一张表，
+          然后把表存到你指定的目录里。1234567890 —— 数字与中文混排的字重表现看这一行。
+        </p>
+        <div class="tg-font__weights" style="font-family:var(--font-body)">
+          <span class="tg-font__w" style="font-weight:400"><small>400</small>常规正文</span>
+          <span class="tg-font__w" style="font-weight:500"><small>500</small>中等强调</span>
+          <span class="tg-font__w" style="font-weight:700"><small>700</small>加粗强调</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tg-section" id="components">
+    <div class="tg-section__head"><span class="tg-section__num">05</span><h2 class="tg-section__title">组件实景</h2></div>
+    <p class="tg-section__note">同样是真实 DOM，用来检查"设了背景的组件有没有显式配对文字色"——
+      这是配色最容易漏的地方。</p>
+      <div class="tg-stage-wrap">
+        <div class="reveal"><div class="slides"><section>
+
+          <p class="tg-sublabel">卡片四态</p>
+          <div class="tg-grid2">
+            <div class="card"><h3>标准卡片</h3><p>正文用 --text-body，标题用 --primary。这是 deck 里出现频率最高的容器。</p></div>
+            <div class="card card-primary"><h3>主色卡片</h3><p>底色 --primary，文字必须显式配对，不能靠继承。</p></div>
+            <div class="card card-secondary"><h3>辅助色卡片</h3><p>底色 --secondary，用于示例、tip。</p></div>
+            <div class="card card-accent"><h3>强调色卡片</h3><p>底色 --accent，用于警示与次级强调。</p></div>
+          </div>
+
+          <p class="tg-sublabel">概念定义卡</p>
+          <div class="concept-card">
+            <h3 class="concept-card__term">办公智能体 (Agent)</h3>
+            <p class="concept-card__def">能调用工具、能读写文件、能把一串动作跑完的 AI —— 区别于只能在对话框里出主意的聊天 AI。</p>
+            <div class="concept-card__example"><strong>示例：</strong>聊天 AI 告诉你发票该怎么整理；智能体直接把二十张发票整理成一张明细表。</div>
+          </div>
+
+          <p class="tg-sublabel">对比框</p>
+          <div class="vs-box vs-box--columns">
+            <div class="vs-bad"><h3>❌ 含糊指令</h3><ul><li>"帮我写个宣传文案"</li><li>产出泛泛而谈，还得重写</li></ul></div>
+            <div class="vs-neutral"><h3>中性项</h3><ul><li>不好不坏的第三种选择</li><li>用于三栏比较</li></ul></div>
+            <div class="vs-good"><h3>✅ 五要素指令</h3><ul><li>角色 + 对象 + 目标 + 约束 + 格式</li><li>产出可直接用</li></ul></div>
+          </div>
+
+          <p class="tg-sublabel">提示词对比</p>
+          <div class="prompt-compare">
+            <div class="prompt-compare__col prompt-compare__col--before">
+              <div class="prompt-compare__label">❌ 改前</div>
+              <p class="prompt-compare__text">承载提示词原文的小字段落，检查 --bg-vs-bad 底上 --text-body 是否读得清；这里刻意写长一点，让行距 1.85 的效果显出来。</p>
+              <div class="prompt-compare__verdict">判语用 --danger，压在 --bg-vs-bad 上</div>
+            </div>
+            <div class="prompt-compare__col prompt-compare__col--after">
+              <div class="prompt-compare__label">✅ 改后</div>
+              <p class="prompt-compare__text">同一段小字换到 --bg-vs-good 底上。两栏的正文色都取 --text-body，只有标签和判语走语义色。</p>
+              <div class="prompt-compare__verdict">判语用 --success，压在 --bg-vs-good 上</div>
+            </div>
+          </div>
+
+          <p class="tg-sublabel">统计数字墙</p>
+          <div class="stats-wall">
+            <div class="stat-item"><span class="stat-item__number">85%</span><span class="stat-item__label">默认色号的数字</span><span class="stat-item__source">--primary</span></div>
+            <div class="stat-item stat-item--accent"><span class="stat-item__number">3×</span><span class="stat-item__label">强调色的数字</span><span class="stat-item__source">--accent</span></div>
+            <div class="stat-item stat-item--secondary"><span class="stat-item__number">12</span><span class="stat-item__label">辅助色的数字</span><span class="stat-item__source">--secondary</span></div>
+            <div class="stat-item stat-item--danger"><span class="stat-item__number">-40%</span><span class="stat-item__label">危险色的数字</span><span class="stat-item__source">--danger</span></div>
+          </div>
+
+          <p class="tg-sublabel">高亮框 / 标签 / 徽章</p>
+          <div class="highlight-box">高亮框：底色 --bg-highlight，文字 --text-body，左侧色条 --primary。用于补充说明。</div>
+          <p style="margin-top:1rem">
+            <span class="badge badge--primary">主色</span>
+            <span class="badge badge--secondary">辅助</span>
+            <span class="badge badge--accent">强调</span>
+            <span class="badge badge--success">成功</span>
+            <span class="badge badge--danger">危险</span>
+            <span class="tag">tag</span>
+          </p>
+
+          <p class="tg-sublabel">时间轴</p>
+          <div class="timeline">
+            <div class="timeline__item"><div class="timeline__dot"></div><div class="timeline__period">2017</div><div class="timeline__label">Transformer</div></div>
+            <div class="timeline__item timeline__item--secondary"><div class="timeline__dot"></div><div class="timeline__period">2020</div><div class="timeline__label">GPT-3</div></div>
+            <div class="timeline__item timeline__item--accent"><div class="timeline__dot"></div><div class="timeline__period">2022</div><div class="timeline__label">ChatGPT</div></div>
+            <div class="timeline__item timeline__item--muted"><div class="timeline__dot"></div><div class="timeline__period">2025</div><div class="timeline__label">办公智能体</div></div>
+          </div>
+
+        </section></div></div>
+      </div>
+  </section>
+
+  <section class="tg-section" id="diagnostics">
+    <div class="tg-section__head"><span class="tg-section__num">06</span><h2 class="tg-section__title">体检</h2></div>
+    <p class="tg-section__note">浏览器实测，不是人工维护的清单。</p>
+    <div class="tg-diag" data-tg-diagnostics>读取中…</div>
+  </section>
+
+</div>
+
+<script src="gallery.js"></script>
+</body>
+</html>
