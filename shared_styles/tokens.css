@@ -36,6 +36,12 @@
     --z-fixed:   100;
     --z-modal:   200;
 
+    /* ===== 内容栏宽 =====
+       幻灯片级块组件(直接放在 section 下的那一层)统一用这个上限,
+       同一页上下叠放的两个组件才会左右对齐。
+       例外只有 .quote-slide —— 金句刻意收窄, 见 components.css §7 */
+    --content-max-width: 80rem;
+
     /* ===== 卡片组件 ===== */
     --card-padding: 1.5rem;
     --card-radius:  var(--radius-lg);
@@ -63,4 +69,11 @@
     /* ===== 表格对比 ===== */
     --table-header-padding: 0.75rem 1rem;
     --table-cell-padding:   0.65rem 1rem;
+
+    /* ===== 图片等式 =====
+       素材与成品刻意不等高: 素材只是"有这么几份材料"的信号,
+       成品才是要看清的东西。两者拉开约 1.8 倍, 差距再小就读成一排缩略图。
+       成品 340px 是 16:9 页面上"标题 + 等式 + 一个 callout"能容下的上限。 */
+    --img-equation-input-h:  170px;
+    --img-equation-result-h: 360px;
 }

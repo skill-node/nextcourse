@@ -6,26 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{COURSE_TITLE}}</title>
 
-    <!-- ===== Reveal.js 核心 ===== -->
+    <!-- ===================================================================
+         样式层级契约（顺序即优先级，越靠后权力越大，改动前先读 DESIGN-SYSTEM.md「样式层级」）
+
+           1. reveal.css        第三方运行时基线
+           2. base_layout.css   画布与响应式变量
+           3. themes/*.css      通用主题：所有配色共享的排版与结构
+           4. tokens.css        设计令牌
+           5. components.css    组件库
+           6. color-schemes/*   ← 配色特化：颜色 + 字重/字距/斜体等排版特化
+           7. font-sets/*       ← 字体族最终裁定（与配色正交，course.meta.md 的 fontset: 可换）
+           8. animations.css    纯工具类，不参与配色博弈
+
+         为什么配色排最后：它是「这一门课长什么样」的最终决定者，语义上比通用主题更具体。
+         早期它排在 themes 之前，导致同特异性 + !important 时一律输给 standard.css——
+         各配色为 h1/h2 写的 font-weight、以及 --font-body，全部静默失效。
+         CSS 自定义属性在「使用时」解析，把 :root 令牌块挪后不影响任何 var(--*) 消费方。
+         =================================================================== -->
+
+    <!-- ===== 1. Reveal.js 核心 ===== -->
     <link rel="stylesheet" href="../../lib/dist/reveal.css">
 
-    <!-- ===== 基础布局 ===== -->
+    <!-- ===== 2. 基础布局 ===== -->
     <link rel="stylesheet" href="../../shared_styles/base_layout.css">
 
-    <!-- ===== 配色方案（由 {{COLOR_SCHEME}} 指定） ===== -->
-    <link rel="stylesheet" href="../../shared_styles/color-schemes/{{COLOR_SCHEME}}.css">
-
-    <!-- ===== 主题样式（由 {{TEMPLATE}} 指定，当前仅 standard） ===== -->
+    <!-- ===== 3. 主题样式（由 {{TEMPLATE}} 指定，当前仅 standard） ===== -->
     <link rel="stylesheet" href="../../shared_styles/themes/{{TEMPLATE}}.css">
 
-    <!-- ===== V2 设计系统 ===== -->
+    <!-- ===== 4-5. V2 设计系统 ===== -->
     <link rel="stylesheet" href="../../shared_styles/tokens.css">
     <link rel="stylesheet" href="../../shared_styles/components.css">
+
+    <!-- ===== 6. 配色方案（由 {{COLOR_SCHEME}} 指定）— 特化层，压在最上 ===== -->
+    <link rel="stylesheet" href="../../shared_styles/color-schemes/{{COLOR_SCHEME}}.css">
+
+    <!-- ===== 7. 字体集（由 {{FONT_SET}} 指定）— 字体族的最终裁定者 ===== -->
+    <link rel="stylesheet" href="../../shared_styles/font-sets/{{FONT_SET}}.css">
 
     <!-- ===== 图标字体（本地化） ===== -->
     <link rel="stylesheet" href="../../lib/fonts/fontawesome/css/all.min.css">
 
-    <!-- ===== 动画工具库 ===== -->
+    <!-- ===== 8. 动画工具库 ===== -->
     <link rel="stylesheet" href="../../shared_styles/animations.css">
 </head>
 

@@ -1,0 +1,25 @@
+/* ===================================
+   字体集: editorial-serif
+   思源宋体标题 + 思源黑体正文 — 编辑感/克制/顾问气质 (skillnode 设计系统同款)
+   规则: 中文字体显式入栈; 衬线配衬线; 只引本地字体文件
+   =================================== */
+
+@import url('../../lib/fonts/display/noto-serif-sc.css');
+@import url('../../lib/fonts/display/noto-sans-sc.css');
+:root {
+    --font-display: 'Noto Serif SC', 'Songti SC', serif;
+    --font-body:    'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+}
+
+/* 字体集是字体族的最终裁定者, 排在配色之后加载(见 templates/master_template.html 的层级契约)。
+   只管 font-family; 字重/字距/斜体属于配色的排版特化, 留在 color-schemes/*.css 里。 */
+body {
+    font-family: var(--font-body);
+}
+
+.reveal h1,
+.reveal h2 {
+    /* 不带 !important: 本层排在配色之后, 而且没有任何一层给 h1/h2 设过 font-family,
+       (0,1,1) 靠顺序就赢。配色层若要给某级标题换字体族, 写 .reveal h1 即可接管。 */
+    font-family: var(--font-display);
+}

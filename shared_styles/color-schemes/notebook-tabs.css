@@ -2,24 +2,37 @@
    Notebook Tabs — 纸质 + 彩色标签页
    灵感来源: frontend-slides Notebook Tabs preset
    适用于: 工作坊、互动培训、笔记风格
-   字体: Bodoni Moda (Display) + DM Sans (Body)
+   默认字体集: didone-serif (Bodoni Moda + 思源宋体) — 可在 course.meta.md 用 fontset: 覆盖
    =================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;700&family=DM+Sans:wght@400;500;700&display=swap');
 
 :root {
     /* ===== 主色系 ===== */
-    --primary: #8f7ac2;
-    /* 加深的笔记紫 - 白底标题/强调需足够对比度; 模块底色仍为粉彩(见 --module-*) */
+    /* 这套配色的分工: 粉彩是标签纸, 深色是笔迹。
+       原先五个语义色直接取了粉彩值, 但它们在 standard.css / components.css 里
+       全都被当【文字色】用 —— .vs-good h3 / .vs-bad h3 / .text-* /
+       .stat-item__number / .icon-card__icon。粉彩压在米色纸底 #f8f6f1 上只有 1.6:1,
+       等于那些规则全都白写。
+       现在语义色一律换成同色相的墨水版(≥4.5:1), 粉彩继续做 --module-* 标签底
+       和 --bg-vs-* / --bg-highlight 的填充色, 各归各位。 */
+    --primary: #6d57a8;
+    /* 笔记紫墨水 (标签 #c7b8ea 的深色版)  5.43:1 */
     --primary-dark: #5b4a8a;
-    --secondary: #98d4bb;
-    /* 柔和绿色 */
-    --accent: #f4b8c5;
-    /* 柔和粉色 */
-    --success: #98d4bb;
-    --danger: #f4b8c5;
+    /* h1 文字色。与 --primary-dark 分家: 后者是"深色底", 这个是"标题文字"。 */
+    --text-title: #5b4a8a;
+    --secondary: #2e7d6b;
+    /* 青绿墨水 (标签 #98d4bb 的深色版)    4.56:1 */
+    --accent: #a8455e;
+    /* 玫瑰墨水 (标签 #f4b8c5 的深色版)    5.29:1 */
+    --success: #2f7a45;
+    /* 绿墨水 —— 比 --secondary 更偏纯绿, 两者不再同色  4.87:1 */
+    --danger: #a93741;
+    /* 红墨水 —— 比 --accent 更偏正红, 两者不再同色      5.87:1 */
 
-    /* ===== 模块封面颜色（10套）— 柔和色调 ===== */
+    /* ===== 模块封面颜色（10套）— 粉彩标签纸 =====
+       一个都没动。整族 C* 19~24, 远低于 R1 的高彩度红阈值 60, 本来就没有刺眼的红;
+       相邻两位色相至少差 61°, 翻章看得出换色; 配 --text-on-module #1a1a1a
+       全部 10:1 以上。原先 m1 = --success、m3 = --danger 的撞车,
+       在语义色改成墨水版之后自动解除。 */
     --module-1: #98d4bb;
     --module-2: #c7b8ea;
     --module-3: #f4b8c5;
@@ -52,6 +65,10 @@
     --text-muted: #6b6b6b;
     --text-inverse: #1a1a1a;
     /* 反色文字 - 在浅色卡片背景上用深色 */
+    /* 模块封面(全屏彩色底)上的文字。与 --text-inverse 分开:
+       后者是"深色底上的文字", 这个是"10 个模块色底上的文字"。
+       深色字压粉彩标签底 */
+    --text-on-module: #1a1a1a;
     --text-tag: #5b4a8a;
 
     /* ===== 阴影 ===== */
@@ -61,52 +78,45 @@
     /* ===== 布局变量 ===== */
     --footer-height: 60px;
 
-    /* ===== 字体 ===== */
-    --font-display: 'Bodoni Moda', serif;
-    --font-body: 'DM Sans', sans-serif;
 }
 
-/* ===== 字体覆盖 ===== */
+/* ===== 排版特化（字体族由 font-sets 决定，这里只管字重/字距/斜体） ===== */
+/* !important 承重，别删：reveal.js 会把 .reveal-viewport 类挂到 <body> 上，
+   而 reveal.css 的 `.reveal-viewport { background-color: #fff }` (0,1,0)
+   打得过 `body` (0,0,1)。属 DESIGN-SYSTEM.md 的 A 类例外（压第三方高特异性规则）。 */
 body {
-    font-family: var(--font-body);
     background: #2d2d2d !important;
 }
 
 .reveal h1 {
-    font-family: var(--font-display) !important;
-    font-weight: 700 !important;
+    font-weight: 700;
     letter-spacing: -0.02em;
 }
 
 .reveal h2 {
-    font-family: var(--font-display) !important;
-    font-weight: 700 !important;
+    font-weight: 700;
 }
 
-/* ===== 幻灯片纸质感 ===== */
+/* ===== 幻灯片纸质感 =====
+   刻意不写 background-color: 它等于 --bg-slide (#f8f6f1)，standard.css 已经取了这个令牌。
+   在这里重复一遍还带 !important 的话，会连 .module-N 的模块底色一起压掉
+   （本规则 (0,2,1) 带 ! 打得过 .reveal .slides>section.module-N (0,3,1) 不带 !），
+   模块分隔页会全部退成纸白。 */
 .reveal .slides>section {
-    background-color: #f8f6f1 !important;
     border-radius: 4px;
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* ===== 封面页优雅感 ===== */
 .cover-slide .divider {
-    background: #c7b8ea !important;
-    height: 3px !important;
-    width: 80px !important;
-}
-
-/* ===== 模块封面深色文字（浅色背景） ===== */
-.module-cover h1,
-.module-cover p {
-    color: #1a1a1a !important;
-    text-shadow: none;
+    background: #c7b8ea;
+    height: 3px;
+    width: 80px;
 }
 
 /* ===== 页码增强 ===== */
 .footer-nav .slide-num {
-    color: #6b6b6b !important;
-    background: #f8f6f1 !important;
-    border: 1px solid #e0ddd5 !important;
+    color: #6b6b6b;
+    background: #f8f6f1;
+    border: 1px solid #e0ddd5;
 }

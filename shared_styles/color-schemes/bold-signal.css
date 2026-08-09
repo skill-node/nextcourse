@@ -2,31 +2,60 @@
    Bold Signal — 高对比深色 + 亮色卡片
    灵感来源: frontend-slides Bold Signal preset
    适用于: 高管演讲、影响力展示
-   字体: Archivo Black (Display) + Space Grotesk (Body)
+   默认字体集: impact-sans (Archivo Black + 思源黑体) — 可在 course.meta.md 用 fontset: 覆盖
    =================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap');
 
 :root {
     /* ===== 主色系 ===== */
     --primary: #FF5722;
     --primary-dark: #E64A19;
-    --secondary: #ffffff;
-    --accent: #FF5722;
+    /* h1 文字色。与 --primary-dark 分家: 后者是"深色底", 这个是"标题文字"。
+       原来直接用 --primary-dark #E64A19, 压在 #1a1a1a 上只有 4.44:1, 差一点点
+       够不到 R4 的 4.5:1。提一档到 DeepOrange 600, 5.01:1, 观感几乎没变。 */
+    --text-title: #F4511E;
+    --secondary: #00BCD4;
+    /* Cyan 500 —— 第二品牌色。
+       原为 #ffffff, 与 --text-heading 同色, "辅助色强调"和普通白字看不出区别;
+       中途试过 #E64A19, 但那只是更深的主色, primary/primary-dark/secondary
+       挨在一起是三块橘。
+       取 Cyan 的依据: --primary Deep Orange 色相 14°, 互补色在 194° 附近。
+       橘 × 青是深底上最强的一组对撞, 配"高管演讲、影响力展示"的定位;
+       与 --accent 琥珀 45° 一起构成橘-琥珀-青的分裂互补, 三个色各司其职。 */
+    --accent: #FFC107;
+    /* 原为 #FF5722, 是 --primary 的克隆, 等于没有强调色。
+       .card-accent 本来就硬编码 #FFC107 琥珀, 现在把令牌对上。 */
     --success: #4CAF50;
     --danger: #F44336;
 
-    /* ===== 模块封面颜色（10套）===== */
-    --module-1: #FF5722;
-    --module-2: #E64A19;
-    --module-3: #2196F3;
-    --module-4: #FF9800;
-    --module-5: #9C27B0;
-    --module-6: #E91E63;
-    --module-7: #009688;
-    --module-8: #F44336;
-    --module-9: #3F51B5;
-    --module-10: #8BC34A;
+    /* ===== 模块封面颜色（10套）=====
+       按 DESIGN-SYSTEM「配色红线 R1-R4」重排:
+       - 红/橘红只留品牌橘 #FF5722 一个, 放末位 module-10 (R1)
+         原先 1/2/6/8 四个红系, 授课连翻几个章节封面全是红, 太刺激
+       - 不再占用 --danger #F44336 / --success #4CAF50 (R2)
+       - 色相依次拉开, 相邻模块不撞 (R3)
+       - 全部对 --text-on-module #1a1a1a 达到 4.5:1 以上 (R4)
+         原 module-5 紫 #9C27B0 只有 2.76:1、module-9 靛 #3F51B5 只有 2.53:1,
+         投影会糊, 这里换成 Material 300 档的提亮版本 */
+    --module-1: #2196F3;
+    /* 蓝  Blue 500        5.57:1 */
+    --module-2: #FFB300;
+    /* 琥珀 Amber 600      9.70:1 */
+    --module-3: #26A69A;
+    /* 青绿 Teal 400       5.80:1 */
+    --module-4: #BA68C8;
+    /* 紫  Purple 300      4.89:1 */
+    --module-5: #8BC34A;
+    /* 黄绿 LightGreen 500 8.29:1 */
+    --module-6: #4FC3F7;
+    /* 亮蓝 LightBlue 300  8.69:1 */
+    --module-7: #9575CD;
+    /* 深紫 DeepPurple 300 4.73:1 */
+    --module-8: #CDDC39;
+    /* 酸橙 Lime 500      11.51:1 */
+    --module-9: #66BB6A;
+    /* 绿  Green 400       7.36:1（避开 --success #4CAF50）*/
+    --module-10: #FF5722;
+    /* 品牌橘 DeepOrange 500 5.50:1 —— 唯一的红系, 按 R1 固定在末位 */
 
     /* ===== 背景 ===== */
     --bg-page: #1a1a1a;
@@ -48,6 +77,10 @@
     --text-body: rgba(255, 255, 255, 0.85);
     --text-muted: rgba(255, 255, 255, 0.5);
     --text-inverse: #1a1a1a;
+    /* 模块封面(全屏彩色底)上的文字。与 --text-inverse 分开:
+       后者是"深色底上的文字", 这个是"10 个模块色底上的文字"。
+       深色字压亮橘/亮蓝底 */
+    --text-on-module: #1a1a1a;
     --text-tag: #FF5722;
 
     /* ===== 阴影 ===== */
@@ -57,57 +90,44 @@
     /* ===== 布局变量 ===== */
     --footer-height: 60px;
 
-    /* ===== 字体 ===== */
-    --font-display: 'Archivo Black', sans-serif;
-    --font-body: 'Space Grotesk', sans-serif;
 }
 
-/* ===== 字体覆盖 ===== */
+/* ===== 排版特化（字体族由 font-sets 决定，这里只管字重/字距/斜体） ===== */
+/* !important 承重，别删：reveal.js 会把 .reveal-viewport 类挂到 <body> 上，
+   而 reveal.css 的 `.reveal-viewport { background-color: #fff }` (0,1,0)
+   打得过 `body` (0,0,1)。属 DESIGN-SYSTEM.md 的 A 类例外（压第三方高特异性规则）。 */
 body {
-    font-family: var(--font-body);
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%) !important;
 }
 
-.reveal h1 {
-    font-family: var(--font-display) !important;
-}
-
-.reveal h2 {
-    font-family: var(--font-display) !important;
-}
-
-/* ===== 封面页增强 ===== */
-.cover-slide {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
-}
-
-/* ===== 模块封面文字覆盖 ===== */
-.module-cover h1,
-.module-cover p {
-    color: #ffffff !important;
+/* ===== 封面页增强 =====
+   选择器要写全：standard.css 的页面底色来自 `.reveal .slides>section` (0,2,1)，
+   光写 `.cover-slide` (0,1,0) 赢不了，从前是靠 !important 硬压的。 */
+.reveal .slides>section.cover-slide {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
 }
 
 /* ===== 普通卡片增强 ===== */
 .card {
-    background: #3d3d3d !important;
-    border-color: rgba(255, 87, 34, 0.2) !important;
+    background: #3d3d3d;
+    border-color: rgba(255, 87, 34, 0.2);
 }
 
 .card h3 {
-    color: #FF5722 !important;
+    color: var(--primary);
 }
 
 .card p,
 .card ul,
 .card ol,
 .card li {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: var(--text-body);
 }
 
 /* ===== 主色卡片增强 ===== */
 .card-primary {
-    background: #FF5722 !important;
-    color: #1a1a1a !important;
+    background: var(--primary);
+    color: var(--text-inverse);
 }
 
 .card-primary h3,
@@ -115,24 +135,26 @@ body {
 .card-primary ul,
 .card-primary ol,
 .card-primary li {
-    color: #1a1a1a !important;
+    color: var(--text-inverse);
 }
 
 /* ===== 辅助色卡片 ===== */
 .card-secondary {
-    background: #E64A19 !important;
+    background: var(--secondary);
 }
 
+/* 底色从深橘换成青之后必须翻成深色字: #FFFFFF 压在 #00BCD4 上只有 2.40:1,
+   #1A1A1A 是 7.58:1 */
 .card-secondary h3,
 .card-secondary p,
 .card-secondary ul,
 .card-secondary ol,
 .card-secondary li {
-    color: #ffffff !important;
+    color: var(--text-inverse);
 }
 
 .card-accent {
-    background: #FFC107 !important;
+    background: var(--accent);
 }
 
 .card-accent h3,
@@ -140,11 +162,11 @@ body {
 .card-accent ul,
 .card-accent ol,
 .card-accent li {
-    color: #1a1a1a !important;
+    color: var(--text-inverse);
 }
 
 /* ===== 页码增强 ===== */
 .footer-nav .slide-num {
-    color: rgba(255, 255, 255, 0.5) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.05);
 }

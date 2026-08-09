@@ -2,31 +2,55 @@
    Dark Botanical — 深色 + 暖色调
    灵感来源: frontend-slides Dark Botanical preset
    适用于: 高端场合、优雅主题、品牌展示
-   字体: Cormorant (Display serif) + IBM Plex Sans (Body)
+   默认字体集: garamond-serif (Cormorant + 思源宋体) — 可在 course.meta.md 用 fontset: 覆盖
    =================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Cormorant:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
 
 :root {
     /* ===== 主色系 ===== */
     --primary: #d4a574;
     --primary-dark: #c9956a;
+    /* h1 文字色。与 --primary-dark 分家: 后者是"深色底", 这个是"标题文字"。 */
+    --text-title: #c9956a;
     --secondary: #e8b4b8;
     --accent: #c9b896;
     --success: #8fbc8f;
     --danger: #cd5c5c;
 
     /* ===== 模块封面颜色（10套）— 暖色调 ===== */
+    /* 按 DESIGN-SYSTEM「配色红线 R1-R4」重排。
+       这套配色是干花标本册: 低彩度大地色, 整族落在 L* 51~78 / C* 12~50。
+       改动只在族内取值, 没有引入任何新色相家族。
+
+       三件事:
+       1) 原 module-2 陶土棕 #6b4423 是 L*33 的深巧克力色, 配 --text-on-module #0f0f0f
+          只有 2.26:1, 投影全糊。提亮成同色相的陶土 #C4794E (L*58, 5.65:1)。
+       2) 原 module-3 = --success 鼠尾草、module-8 = --danger 砖红, 违反 R2。
+          换成族内还没用过的苔绿与……砖红整个撤出模块序列(它继续做 --danger)。
+       3) 顺序改为冷暖交替。原先 1/2 连着两个暖棕、6/8 连着两个粉红,
+          连翻两章色感没变化, 等于没换章。
+
+       R1 在这套里天然满足: 全族最高彩度 C*44(陶土), 离"高彩度红"的 60 还很远,
+       所以 10 个位置一个红都不需要留 —— 这套配色本来就没有刺眼的红。 */
     --module-1: #d4a574;
-    --module-2: #6b4423;
-    --module-3: #8fbc8f;
-    --module-4: #c9b896;
-    --module-5: #b088a5;
-    --module-6: #e8b4b8;
-    --module-7: #7da58f;
-    --module-8: #cd5c5c;
-    --module-9: #6b7b8d;
+    /* 沙金 = --primary   L*71 C*34  暖   8.61:1 */
+    --module-2: #7fa8a6;
+    /* 黛青               L*66 C*15  冷   7.35:1 */
+    --module-3: #c4794e;
+    /* 陶土               L*58 C*44  暖   5.65:1 */
+    --module-4: #8595a6;
+    /* 蓝灰               L*61 C*11  冷   6.25:1 */
+    --module-5: #c9b896;
+    /* 燕麦 = --accent    L*75 C*20  暖   9.84:1 */
+    --module-6: #b088a5;
+    /* 藕紫               L*61 C*22  冷   6.31:1 */
+    --module-7: #8fa97c;
+    /* 苔绿               L*66 C*27  冷   7.42:1 */
+    --module-8: #e8b4b8;
+    /* 灰粉 = --secondary L*78 C*20  暖  10.64:1 */
+    --module-9: #7da58f;
+    /* 灰绿               L*64 C*20  冷   6.98:1 */
     --module-10: #a5946b;
+    /* 橄榄               L*62 C*24  暖   6.43:1 */
 
     /* ===== 背景 ===== */
     --bg-page: #0f0f0f;
@@ -48,6 +72,10 @@
     --text-body: rgba(232, 228, 223, 0.85);
     --text-muted: #9a9590;
     --text-inverse: #0f0f0f;
+    /* 模块封面(全屏彩色底)上的文字。与 --text-inverse 分开:
+       后者是"深色底上的文字", 这个是"10 个模块色底上的文字"。
+       深色字压暖木/陶土底 */
+    --text-on-module: #0f0f0f;
     --text-tag: #d4a574;
 
     /* ===== 阴影 ===== */
@@ -57,61 +85,58 @@
     /* ===== 布局变量 ===== */
     --footer-height: 60px;
 
-    /* ===== 字体 ===== */
-    --font-display: 'Cormorant', serif;
-    --font-body: 'IBM Plex Sans', sans-serif;
 }
 
-/* ===== 字体覆盖 ===== */
+/* ===== 排版特化（字体族由 font-sets 决定，这里只管字重/字距/斜体） ===== */
 body {
-    font-family: var(--font-body);
     font-weight: 300;
     background: #0f0f0f !important;
 }
 
 .reveal h1 {
-    font-family: var(--font-display) !important;
-    font-weight: 600 !important;
+    font-weight: 600;
     font-style: italic;
     letter-spacing: 0.02em;
 }
 
 .reveal h2 {
-    font-family: var(--font-display) !important;
-    font-weight: 600 !important;
+    font-weight: 600;
     letter-spacing: 0.01em;
 }
 
-.reveal h3 {
-    color: #d4a574 !important;
-}
+/* 这里原有一条 `.reveal h3 { color: var(--primary) !important }`，已删。
+   它和 standard.css 的默认值一字不差（h3 本来就取 --primary），唯一的实际效果是
+   顺带压掉了 components.css 给 .case-study__title 定的 --text-heading——
+   于是本配色成了 8 套里唯一案例卡标题是陶土色的。删掉后与其余 7 套对齐。
+   连带解锁：下面 .card-primary / .card-secondary 的文字色不必再带 !important，
+   它们当初就是为了从这条规则手里抢回控制权才加的。 */
 
 /* ===== 封面页 — 优雅感 ===== */
 .cover-slide .divider {
-    background: linear-gradient(90deg, #d4a574, #e8b4b8, #c9b896) !important;
-    height: 2px !important;
-    width: 120px !important;
+    background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+    height: 2px;
+    width: 120px;
 }
 
 /* ===== 卡片暖色边框 ===== */
 .card {
-    border-color: rgba(212, 165, 116, 0.15) !important;
-    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: rgba(212, 165, 116, 0.15);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .card h3 {
-    color: #d4a574 !important;
+    color: var(--primary);
 }
 
 .card p,
 .card ul,
 .card ol,
 .card li {
-    color: rgba(232, 228, 223, 0.9) !important;
+    color: var(--text-body);
 }
 
 .card-primary {
-    background: linear-gradient(135deg, #d4a574, #c9956a) !important;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
 }
 
 .card-primary h3,
@@ -119,12 +144,15 @@ body {
 .card-primary ul,
 .card-primary ol,
 .card-primary li {
-    color: #0f0f0f !important;
+    color: var(--text-inverse);
 }
 
-/* ===== 辅助色卡片 ===== */
+/* ===== 辅助色卡片 =====
+   刻意不用 var(--secondary): 那是灰粉 #e8b4b8, 适合做前景强调(badge / 数字 / 时间轴点),
+   但在深色配色里铺成一整块卡片会发飘。这里用调色板里的深陶土棕 —— 它原本是
+   --module-2, 改红线时因为 L*33 太暗做不了全屏底而撤出模块序列, 当卡片底正合适。 */
 .card-secondary {
-    background: #6b4423 !important;
+    background: #6b4423;
 }
 
 .card-secondary h3,
@@ -132,11 +160,11 @@ body {
 .card-secondary ul,
 .card-secondary ol,
 .card-secondary li {
-    color: #e8e4df !important;
+    color: var(--text-heading);
 }
 
 .card-accent {
-    background: #c9b896 !important;
+    background: var(--accent);
 }
 
 .card-accent h3,
@@ -144,26 +172,14 @@ body {
 .card-accent ul,
 .card-accent ol,
 .card-accent li {
-    color: #0f0f0f !important;
-}
-
-/* ===== 模块封面 ===== */
-.module-cover {
-    color: #e8e4df !important;
-}
-
-.module-cover h1,
-.module-cover h2,
-.module-cover h3,
-.module-cover p {
-    color: #e8e4df !important;
+    color: var(--text-inverse);
 }
 
 /* ===== 页码暖色调 ===== */
 .footer-nav .slide-num {
-    color: #9a9590 !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* ===== 背景装饰 — 柔和光晕 ===== */

@@ -2,31 +2,59 @@
    Creative Voltage — 电蓝 + 荧光黄
    灵感来源: frontend-slides Creative Voltage preset
    适用于: 创意分享、年轻受众、创新主题
-   字体: Syne (Display) + Space Mono (Mono accent)
+   默认字体集: voltage-sans (Syne + 思源黑体) — 可在 course.meta.md 用 fontset: 覆盖
    =================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Space+Mono:wght@400;700&display=swap');
 
 :root {
     /* ===== 主色系 ===== */
-    --primary: #0066ff;
+    --primary: #3d8bff;
+    /* 电蓝提亮一档。原 #0066ff 落在 --bg-slide #1a1a2e 上只有 3.53:1, 而它被当文字色用
+       (.text-* / h3 / 统计数字 / 图标卡), 不达标 (R5)。#3d8bff 是 5.15:1,
+       同色相同性格, 只是把"电光"调亮了半格。深色底本来就该配更亮的电蓝。 */
     --primary-dark: #0052cc;
+    /* h1 文字色。与 --primary-dark 分家: 后者是"深色底", 这个是"标题文字"。
+       原 #0052cc 在深navy底上只有 2.50:1；提亮到同色相的 6.70:1 */
+    --text-title: #66a3ff;
     --secondary: #d4ff00;
     --accent: #d4ff00;
     --success: #00ff88;
     --danger: #ff3366;
 
-    /* ===== 模块封面颜色（10套）===== */
-    --module-1: #0066ff;
-    --module-2: #4f46e5;
-    --module-3: #00cc66;
-    --module-4: #d4ff00;
-    --module-5: #9933ff;
-    --module-6: #ff3366;
-    --module-7: #00cccc;
-    --module-8: #ff6600;
-    --module-9: #6600ff;
-    --module-10: #33cc33;
+    /* ===== 模块封面颜色（10套）=====
+       整族收进亮档, 配深色字 —— 这是这套配色唯一解得开的方向。
+
+       原来的十个色横跨 L* 38(#6600ff) 到 94(#d4ff00), 而 --text-on-module 只有一个值:
+       配白字挂 5 个(荧光黄 #d4ff00 只有 1.16:1), 换成黑字照样挂 5 个(只是换了另外 5 个)。
+       跨度这么大的族, 任何单一文字色都服务不了。
+
+       所以把十个位置全部选在 L* 62~94 的亮霓虹档, --text-on-module 改成深色 #1a1a2e。
+       亮霓虹块压黑字, 本来就是电音海报 / 创意分享的标准语汇, 比原来的暗底白字更贴
+       "Creative Voltage" 这个名字。
+
+       R1: 只留 m10 珊瑚红一个高彩度红(原来 m6 热粉 = --danger、m8 橙 两个)。
+       R2: m2 = --accent 荧光黄, 这是这套配色的签名色, 占用 1 处在允许范围内。
+       R3/R4: 无重复, 相邻色相最小差 22°, 全部 5.7:1 以上。 */
+    --module-1: #33a1ff;
+    /* 电蓝亮档  h208  L*64   6.24:1 */
+    --module-2: #d4ff00;
+    /* 荧光黄 = --accent 签名色  h 70  L*94  14.70:1 */
+    --module-3: #ff5ce1;
+    /* 品红      h311  L*65   6.39:1 */
+    --module-4: #00e5ff;
+    /* 青        h186  L*84  11.09:1 */
+    --module-5: #b388ff;
+    /* 紫        h262  L*65   6.40:1 */
+    --module-6: #3ee66b;
+    /* 绿        h136  L*81  10.34:1 */
+    --module-7: #7c8cff;
+    /* 蓝紫      h233  L*62   5.73:1 */
+    --module-8: #9dff4d;
+    /* 黄绿      h 93  L*91  13.68:1 */
+    --module-9: #ffb833;
+    /* 金        h 39  L*79   9.87:1 —— h39 刚好在红区(≤35)之外 */
+    --module-10: #ff7a45;
+    /* 珊瑚红    h 17  L*66   6.60:1 —— 唯一的高彩度红, 按 R1 固定在末位。
+       不等于 --danger #ff3366 */
 
     /* ===== 背景 ===== */
     --bg-page: #1a1a2e;
@@ -36,10 +64,10 @@
     --bg-vs-good: rgba(0, 255, 136, 0.08);
     --bg-vs-bad: rgba(255, 51, 102, 0.08);
     --bg-code: #0d0d1a;
-    --bg-tag: rgba(0, 102, 255, 0.2);
+    --bg-tag: rgba(61, 139, 255, 0.2);
 
     /* ===== 边框 ===== */
-    --border-card: rgba(0, 102, 255, 0.2);
+    --border-card: rgba(61, 139, 255, 0.2);
     --border-vs-good: rgba(0, 255, 136, 0.3);
     --border-vs-bad: rgba(255, 51, 102, 0.3);
 
@@ -48,6 +76,10 @@
     --text-body: rgba(255, 255, 255, 0.85);
     --text-muted: rgba(255, 255, 255, 0.5);
     --text-inverse: #ffffff;
+    /* 模块封面(全屏彩色底)上的文字。与 --text-inverse 分开:
+       后者是"深色底上的文字", 这个是"10 个模块色底上的文字"。
+       原为 #ffffff, 但模块色整族收进亮霓虹档之后必须翻成深色字, 见上面的说明。 */
+    --text-on-module: #1a1a2e;
     --text-on-secondary: #1a1a2e;
     --text-on-accent: #1a1a2e;
     /* secondary/accent 均为亮荧光色, 配深字 */
@@ -61,70 +93,56 @@
     /* ===== 布局变量 ===== */
     --footer-height: 60px;
 
-    /* ===== 字体 ===== */
-    --font-display: 'Syne', sans-serif;
-    --font-body: 'Space Mono', monospace;
 }
 
-/* ===== 字体覆盖 ===== */
+/* ===== 排版特化（字体族由 font-sets 决定，这里只管字重/字距/斜体） ===== */
+/* !important 承重，别删：reveal.js 会把 .reveal-viewport 类挂到 <body> 上，
+   而 reveal.css 的 `.reveal-viewport { background-color: #fff }` (0,1,0)
+   打得过 `body` (0,0,1)。属 DESIGN-SYSTEM.md 的 A 类例外（压第三方高特异性规则）。 */
 body {
-    font-family: var(--font-body);
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%) !important;
 }
 
 .reveal h1 {
-    font-family: var(--font-display) !important;
-    font-weight: 800 !important;
+    font-weight: 800;
 }
 
 .reveal h2 {
-    font-family: var(--font-display) !important;
-    font-weight: 700 !important;
+    font-weight: 700;
 }
 
 /* ===== 霓虹发光效果 (卡片底色/文字色由 --text-on-* 配对令牌控制) ===== */
 .reveal .slides section .card-primary {
-    box-shadow: 0 0 20px rgba(0, 102, 255, 0.4) !important;
+    box-shadow: 0 0 20px rgba(0, 102, 255, 0.4);
 }
 
 /* ===== 封面页增强 ===== */
 .cover-slide .divider {
-    background: #d4ff00 !important;
+    background: var(--accent);
     box-shadow: 0 0 15px rgba(212, 255, 0, 0.5);
 }
 
 /* ===== 页码增强 ===== */
 .footer-nav .slide-num {
-    color: rgba(212, 255, 0, 0.8) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(0, 102, 255, 0.3) !important;
+    color: rgba(212, 255, 0, 0.8);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 102, 255, 0.3);
 }
 
 /* ===== 普通卡片增强 ===== */
 .card {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(0, 102, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(0, 102, 255, 0.3);
 }
 
 .card h3 {
-    color: #d4ff00 !important;
+    color: var(--accent);
 }
 
 .card p,
 .card ul,
 .card ol,
 .card li {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: var(--text-body);
 }
 
-/* ===== 模块封面白色文字 ===== */
-.module-cover {
-    color: #ffffff !important;
-}
-
-.module-cover h1,
-.module-cover h2,
-.module-cover h3,
-.module-cover p {
-    color: #ffffff !important;
-}

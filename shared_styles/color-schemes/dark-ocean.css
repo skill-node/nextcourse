@@ -1,6 +1,7 @@
 /* ===================================
    深海配色方案 (Dark Ocean Color Scheme)
    适用于：投影仪暗场、低光环境
+   默认字体集: modern-sans (思源黑体) — 可在 course.meta.md 用 fontset: 覆盖
    可通过 data-color-scheme="dark-ocean" 激活
    =================================== */
 
@@ -11,19 +12,30 @@
     /* 淡紫 - 主色（调亮） */
     --primary-dark: #1e293b;
     /* 深灰蓝 */
+    /* h1 文字色。与 --primary-dark 分家: 后者是"深色底", 这个是"标题文字"。
+       原 #1e293b 与 --bg-slide 完全同色，h1 隐形；改用提亮的靛紫 9.81:1 */
+    --text-title: #c7d2fe;
     --secondary: #5eead4;
     /* 青绿 - 辅助色（调亮） */
     --accent: #fcd34d;
     /* 金黄 - 强调色（调亮） */
     --danger: #fda4af;
     /* 粉红 - 警示色（调亮） */
+    --success: #4ade80;
+    /* 亮绿 - 成功色。原先根本没定义, 导致 standard.css 的 .vs-good 标题 /
+       .check-list 对勾 / .text-success 三处 var(--success) 全部解析失败 */
 
     /* 模块封面颜色（10套）- 深色模式用亮色 */
     --module-1: #a5b4fc;
     --module-2: #5eead4;
     --module-3: #fcd34d;
     --module-4: #818cf8;
-    --module-5: #fda4af;
+    --module-5: #bef264;
+    /* lime-300。原为 #fda4af, 与 --danger 完全同色(R2) —— 章节封面和"错误/反面例子"
+       共用一个色。换成 lime-300 有两个理由: 它填上了这套色相环 60~120° 的空档
+       (原来 10 个模块挤在 43/46/158/171/187/212/230/234/291 加一个 353),
+       而且与前后邻居 indigo-400(234) / cyan-300(187) 都拉开 100° 以上。
+       仍是 Tailwind 300 档的浅亮色, 没有跳出这套配色的档位。11.20:1 */
     --module-6: #67e8f9;
     --module-7: #f0abfc;
     --module-8: #fbbf24;
@@ -40,6 +52,23 @@
     --bg-header: #0f172a;
     /* 顶部导航栏纯色 */
 
+    /* 以下 8 个令牌原先缺失, 而 standard.css / components.css 是裸用 var() 无兜底,
+       等于这些规则在本配色下静默失效:
+         --bg-slide  → 每一页的 background-color 都解析不出来, 只是碰巧透出 body 才没露馅
+         --bg-highlight → highlight-box / callout / key-takeaway 一律透明底
+         --bg-tag / --text-tag → tag 与 badge 无底色
+         --bg-vs-* / --border-vs-* → 好坏对比框没有色彩区分 */
+    --bg-slide: #1e293b;
+    /* 单页背景 - 与页面底同色 */
+    --bg-highlight: rgba(165, 180, 252, 0.12);
+    /* 高亮框底 - 主色淡染 */
+    --bg-tag: rgba(165, 180, 252, 0.18);
+    --text-tag: #a5b4fc;
+    --bg-vs-good: rgba(74, 222, 128, 0.12);
+    --bg-vs-bad: rgba(253, 164, 175, 0.12);
+    --border-vs-good: rgba(74, 222, 128, 0.35);
+    --border-vs-bad: rgba(253, 164, 175, 0.35);
+
     /* 卡片背景色（带色调）- 深色模式下更透明 */
     --bg-card-primary: rgba(165, 180, 252, 0.08);
     --bg-card-secondary: rgba(94, 234, 212, 0.08);
@@ -55,6 +84,10 @@
     /* 弱化文字 */
     --text-inverse: #f8fafc;
     /* 反色文字 - 深色模式下也用浅色 */
+    /* 模块封面(全屏彩色底)上的文字。与 --text-inverse 分开:
+       后者是"深色底上的文字", 这个是"10 个模块色底上的文字"。
+       深板岩字压浅粉彩底 —— 原 .module-cover 死代码里写的就是这个值 */
+    --text-on-module: #1e293b;
     --text-code: #e2e8f0;
     --text-code-accent: #5eead4;
 
@@ -77,34 +110,37 @@
 /* ===== 深色模式下的样式覆盖 ===== */
 
 /* 强制覆盖 body 背景为纯色 */
+/* !important 承重，别删：reveal.js 会把 .reveal-viewport 类挂到 <body> 上，
+   而 reveal.css 的 `.reveal-viewport { background-color: #fff }` (0,1,0)
+   打得过 `body` (0,0,1)。属 DESIGN-SYSTEM.md 的 A 类例外（压第三方高特异性规则）。 */
 body {
     background: #1e293b !important;
 }
 
 /* 顶部导航栏文字颜色 */
 .header-bar {
-    color: #f8fafc !important;
+    color: #f8fafc;
 }
 
 .header-bar .title {
-    color: #f8fafc !important;
+    color: #f8fafc;
 }
 
 /* 普通卡片增强 */
 .card {
-    background: #3d4f65 !important;
-    border-color: rgba(165, 180, 252, 0.2) !important;
+    background: #3d4f65;
+    border-color: rgba(165, 180, 252, 0.2);
 }
 
 .card h3 {
-    color: #a5b4fc !important;
+    color: #a5b4fc;
 }
 
 .card p,
 .card ul,
 .card ol,
 .card li {
-    color: rgba(248, 250, 252, 0.9) !important;
+    color: rgba(248, 250, 252, 0.9);
 }
 
 /* 卡片内所有标题和文字 */
@@ -120,20 +156,20 @@ body {
 .card-amber h3,
 .card-danger h3,
 .card-coral h3 {
-    color: #f8fafc !important;
+    color: #f8fafc;
 }
 
 /* 课程目标卡片的标签文字 */
 .icon-card h3,
 .icon-card p,
 .icon-card span {
-    color: #f8fafc !important;
+    color: #f8fafc;
 }
 
 /* 结语页的大标题 */
 .reveal section h1.closing-title,
 .reveal section .closing-title {
-    color: #f8fafc !important;
+    color: #f8fafc;
 }
 
 /* 通用强调文字 - 确保可见 */
@@ -146,22 +182,13 @@ body {
 
 /* 引用文字 */
 .quote {
-    color: rgba(248, 250, 252, 0.8) !important;
+    color: rgba(248, 250, 252, 0.8);
 }
 
-/* 分隔线 */
-.divider {
-    background: var(--secondary) !important;
+/* 分隔线。选择器要写全 `.cover-slide .divider`：standard.css 给的是
+   `.cover-slide .divider { background: var(--primary) }` (0,1,1)，
+   光写 `.divider` (0,1,0) 赢不了，从前是靠 !important 硬压的。 */
+.cover-slide .divider {
+    background: var(--secondary);
 }
 
-/* ===== 模块封面白色文字 ===== */
-.module-cover {
-    color: #1e293b !important;
-}
-
-.module-cover h1,
-.module-cover h2,
-.module-cover h3,
-.module-cover p {
-    color: #1e293b !important;
-}

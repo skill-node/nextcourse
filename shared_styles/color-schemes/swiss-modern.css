@@ -2,53 +2,89 @@
    Swiss Modern — 极简黑白 + 红色强调
    灵感来源: frontend-slides Swiss Modern preset
    适用于: 专业技术培训、数据驱动型展示
-   字体: Archivo (Display) + Nunito (Body)
+   默认字体集: grotesk-sans (Archivo + 思源黑体) — 可在 course.meta.md 用 fontset: 覆盖
    =================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Nunito:wght@400;500;700&display=swap');
 
 :root {
     /* ===== 主色系 ===== */
-    --primary: #ff3300;
+    /* 品牌红从 #ff3300 深一档到 #dd2c00。
+       原因是 R5: 这五个语义色在 standard.css / components.css 里全都被当文字色用
+       (.text-* / .vs-bad h3 / .stat-item__number / .icon-card__icon),
+       #ff3300 压在白底上只有 3.67:1, 正文级尺寸不达标。#dd2c00 是 4.74:1,
+       比退到 #cc2900 温和得多, 肉眼几乎看不出差别, 瑞士红的身份不受影响。 */
+    --primary: #dd2c00;
     --primary-dark: #cc2900;
+    /* h1 文字色。与 --primary-dark 分家: 后者是"深色底", 这个是"标题文字"。 */
+    --text-title: #cc2900;
     --secondary: #000000;
-    --accent: #ff3300;
-    --success: #00cc66;
-    --danger: #ff3300;
+    /* 刻意保持纯黑。别的配色里"secondary = 更深的主色"是缺陷,
+       但在黑白红体系里黑就是名正言顺的第二色, 不需要造一个新色相。 */
+    --accent: #dd2c00;
+    /* 同理, accent = primary 在这里不是缺陷: 这套配色只有一个强调色, 就是红。 */
+    --success: #007A33;
+    /* 原为 #00cc66 薄荷绿 —— 黑白红体系里唯一的外来色, 且压在白底上只有 2.2:1。
+       换成压暗降饱和的深绿: 保住"正面/成功"的语义必需性, 白底 5.14:1 达标,
+       视觉上不再从这套极简体系里跳出来。 */
+    --danger: #dd2c00;
 
-    /* ===== 模块封面颜色（10套）— 极简配色 ===== */
-    --module-1: #ff3300;
-    --module-2: #000000;
-    --module-3: #333333;
-    --module-4: #ff3300;
-    --module-5: #666666;
-    --module-6: #cc2900;
-    --module-7: #1a1a1a;
-    --module-8: #ff5533;
-    --module-9: #444444;
-    --module-10: #ff3300;
+    /* ===== 模块封面颜色（10套）=====
+       按 DESIGN-SYSTEM「配色红线 R1-R4」重排为「黑→中灰九阶 + 末位一次红」。
+
+       为什么是纯中性阶而不是引入蓝/绿: 这套配色的自我定义就是「极简黑白 + 红色强调」,
+       红是唯一的强调色, 用一次才叫强调。原先 10 个里 5 个红(1/4/6/8/10, 其中三个还是
+       同一个 #ff3300), 连着翻几个章节封面全是红, 强调也就不成其为强调了。
+       九阶灰按 CIE L* 均匀取值(0/6/14/21/28/33/38/43/48), 相邻约差 5 L*, 单独出现时可辨;
+       而且满屏深色块压在白底正文页之间, 本身就是很强的换章信号。
+
+       末位的红用 #CC2900 而不是品牌红 #dd2c00: 后者配白字只有 4.74:1 余量太薄, 全屏大面积更稳妥。
+       #CC2900 是这套配色自己的 --primary-dark, 5.41:1, 不是新造的色。 */
+    --module-1: #000000;
+    /* 纯黑     21.00:1 */
+    --module-2: #141414;
+    /* 近黑     18.42:1 */
+    --module-3: #242424;
+    /* 炭黑     15.52:1 */
+    --module-4: #333333;
+    /* 深灰     12.63:1 */
+    --module-5: #414141;
+    /* 深中灰   10.21:1 */
+    --module-6: #4E4E4E;
+    /* 中灰      8.32:1 */
+    --module-7: #5A5A5A;
+    /* 中灰偏亮  6.90:1 */
+    --module-8: #666666;
+    /* 灰        5.74:1 */
+    --module-9: #727272;
+    /* 浅中灰    4.81:1 —— 白字 4.5:1 的临界, 再亮就不达标了 */
+    --module-10: #CC2900;
+    /* 深红      5.41:1 —— 唯一的红, 按 R1 固定在末位 */
 
     /* ===== 背景 ===== */
     --bg-page: #ffffff;
     --bg-slide: #ffffff;
     --bg-card: #ffffff;
-    --bg-highlight: rgba(255, 51, 0, 0.04);
-    --bg-vs-good: #f0fff4;
-    --bg-vs-bad: #fff5f5;
+    --bg-highlight: rgba(221, 44, 0, 0.04);
+    --bg-vs-good: rgba(0, 122, 51, 0.05);
+    --bg-vs-bad: rgba(221, 44, 0, 0.05);
     --bg-code: #0a0a0a;
-    --bg-tag: rgba(255, 51, 0, 0.08);
+    --bg-tag: rgba(221, 44, 0, 0.08);
 
     /* ===== 边框 ===== */
     --border-card: #e5e5e5;
-    --border-vs-good: #c6f6d5;
-    --border-vs-bad: #fed7d7;
+    /* 底/框都改用 --success / --danger 的淡染, 跟着语义色走, 不再是另配的薄荷与粉 */
+    --border-vs-good: rgba(0, 122, 51, 0.25);
+    --border-vs-bad: rgba(221, 44, 0, 0.25);
 
     /* ===== 文字 ===== */
     --text-heading: #000000;
     --text-body: #1a1a1a;
     --text-muted: #666666;
     --text-inverse: #ffffff;
-    --text-tag: #ff3300;
+    /* 模块封面(全屏彩色底)上的文字。与 --text-inverse 分开:
+       后者是"深色底上的文字", 这个是"10 个模块色底上的文字"。
+       白字压红/黑/灰底 */
+    --text-on-module: #ffffff;
+    --text-tag: #dd2c00;
 
     /* ===== 阴影 ===== */
     --shadow-card: none;
@@ -57,39 +93,30 @@
     /* ===== 布局变量 ===== */
     --footer-height: 60px;
 
-    /* ===== 字体 ===== */
-    --font-display: 'Archivo', sans-serif;
-    --font-body: 'Nunito', sans-serif;
 }
 
-/* ===== 字体覆盖 ===== */
-body {
-    font-family: var(--font-body);
-}
-
+/* ===== 排版特化（字体族由 font-sets 决定，这里只管字重/字距/斜体） ===== */
 .reveal h1 {
-    font-family: var(--font-display) !important;
-    font-weight: 900 !important;
+    font-weight: 900;
     text-transform: uppercase;
     letter-spacing: -0.03em;
 }
 
 .reveal h2 {
-    font-family: var(--font-display) !important;
-    font-weight: 800 !important;
+    font-weight: 800;
     letter-spacing: -0.02em;
 }
 
 /* ===== 极简风格卡片 ===== */
 .card {
-    border: 2px solid #000000 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
+    border: 2px solid var(--secondary);
+    border-radius: 0;
+    box-shadow: none;
 }
 
 /* ===== 主色卡片 ===== */
 .card-primary {
-    background: #ff3300 !important;
+    background: var(--primary);
 }
 
 .card-primary h3,
@@ -97,11 +124,11 @@ body {
 .card-primary ul,
 .card-primary ol,
 .card-primary li {
-    color: #ffffff !important;
+    color: var(--text-inverse);
 }
 
 .card-secondary {
-    background: #000000 !important;
+    background: var(--secondary);
 }
 
 .card-secondary h3,
@@ -109,40 +136,29 @@ body {
 .card-secondary ul,
 .card-secondary ol,
 .card-secondary li {
-    color: #ffffff !important;
+    color: var(--text-inverse);
 }
 
 /* ===== 封面红色强调线 ===== */
 .cover-slide .divider {
-    background: #ff3300 !important;
-    height: 8px !important;
-    width: 60px !important;
-    border-radius: 0 !important;
+    background: var(--primary);
+    height: 8px;
+    width: 60px;
+    border-radius: 0;
 }
 
 /* ===== 高亮框红色边框 ===== */
 .highlight-box {
-    border-left-color: #ff3300 !important;
-    border-radius: 0 !important;
+    border-left-color: var(--primary);
+    border-radius: 0;
 }
 
 /* ===== 页码极简 ===== */
 .footer-nav .slide-num {
-    color: #666666 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    font-family: var(--font-display) !important;
+    color: var(--text-muted);
+    background: transparent;
+    box-shadow: none;
+    font-family: var(--font-display);
     font-weight: 800;
 }
 
-/* ===== 模块封面白色文字 ===== */
-.module-cover {
-    color: #ffffff !important;
-}
-
-.module-cover h1,
-.module-cover h2,
-.module-cover h3,
-.module-cover p {
-    color: #ffffff !important;
-}

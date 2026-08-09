@@ -1,11 +1,31 @@
 /* ===================================
    Standard 风格主题
    全屏画布、简洁活泼、模块分隔页
+
+   ───── !important 使用规约（改这个文件前必读）─────
+   本层是「通用主题」，在样式层级里排第 3，components.css / color-schemes / font-sets
+   都排在它后面。**只要靠文件顺序就能赢的，都不写 !important**——写了反而变成枷锁：
+   配色层必须同样端出 !important 才压得动，而它们特异性通常更低（`.card-primary`
+   对 `.reveal .slides section .card-primary`），端出来也照样输，结果是静默失效。
+
+   只有两种情况允许 !important：
+     A. 压 reveal.js 写在元素上的**行内样式**——除了 !important 没有别的办法。
+        本文件目前只有一处：`.reveal .slides>section` 的 display。
+     B. `.text-*` / `.font-bold` 这类**工具类**——语义上就是「最后一句话」，
+        且特异性 (0,1,0) 低于 `.reveal p` (0,1,1)，不带 !important 根本不生效。
+
+   需要压过本文件自己的规则时（如 .cover-slide h2 要压 .reveal h2），
+   用**特异性**解决：加 `.reveal ` 前缀提到 (0,2,1)，这样配色层的 `.reveal h2` (0,1,1)
+   也压不动它，而配色层若真想改，写 `.reveal .cover-slide h2` 即可——博弈是可谈的，
+   不像 !important 是一堵墙。
    =================================== */
 
 /* ===== 全局背景 ===== */
 body {
-    font-family: "Microsoft YaHei", "PingFang SC", -apple-system, sans-serif;
+    /* 兜底而已: 正常构建里 font-sets/*.css 排在本文件之后, 会接管字体族。
+       这里保留一份栈是为了单独打开 slides/*.html 片段时不至于无字体。
+       刻意不含 Microsoft YaHei——它被用滥了, 且 Windows 上 sans-serif 本就会落到它。 */
+    font-family: 'PingFang SC', 'Hiragino Sans GB', system-ui, sans-serif;
     background-color: var(--bg-page);
     color: var(--text-heading);
     margin: 0;
@@ -14,7 +34,7 @@ body {
 
 /* ===== Reveal.js 容器调整 ===== */
 .reveal {
-    height: 100vh !important;
+    height: 100vh;
 }
 
 .reveal .slides {
@@ -22,14 +42,20 @@ body {
 }
 
 .reveal .slides>section {
-    background-color: var(--bg-slide) !important;
-    padding: 3rem 5rem !important;
-    padding-bottom: calc(var(--footer-height) + 1rem) !important;
+    background-color: var(--bg-slide);
+    padding: 3rem 5rem;
+    padding-bottom: calc(var(--footer-height) + 1rem);
     height: 100%;
+
+    /* 唯一合法的 A 类 !important：reveal.js 会往每个 section 上写行内
+       style="display: block"（Reveal 的 config.display，见 reveal.js showSlide()）。
+       行内样式的优先级高于任何选择器，只有 !important 压得住。
+       删掉它整份 deck 会退回 block 布局，所有页的垂直居中失效。 */
     display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    align-items: center !important;
+
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 /* ===== 底部页码 ===== */
@@ -57,49 +83,58 @@ body {
     box-shadow: var(--shadow-card);
 }
 
-/* ===== 标题样式 ===== */
+/* ===== 标题样式 =====
+   h1 取 --text-title 而不是 --primary-dark。
+   --primary-dark 有两个用途: 一是"更深的主色底"(table-compare 首列表头),
+   二是被当成 h1 的文字色。深色配色里这两件事互相排斥 —— dark-ocean 的
+   --primary-dark 就是 #1e293b, 恰好等于页面底色, 于是所有 h1 隐形。
+   现在文字色单独立一个令牌, --primary-dark 回归"深色底"本职。 */
 .reveal h1 {
-    font-size: 3.5rem !important;
-    font-weight: 900 !important;
-    color: var(--primary-dark) !important;
-    line-height: 1.2 !important;
-    margin-bottom: 1.5rem !important;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--text-title, var(--primary-dark));
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
 }
 
 .reveal h2 {
-    font-size: 2.8rem !important;
-    font-weight: 700 !important;
-    color: var(--text-heading) !important;
-    margin-bottom: 2rem !important;
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin-bottom: 2rem;
 }
 
 .reveal h3 {
-    font-size: 1.4rem !important;
-    font-weight: 700 !important;
-    color: var(--primary) !important;
-    margin-bottom: 0.8rem !important;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.8rem;
 }
 
 .reveal p,
 .reveal li {
     font-size: 1.1rem;
     line-height: 1.8;
-    color: var(--text-body) !important;
+    color: var(--text-body);
     margin-bottom: 0.8rem;
 }
 
-/* ===== 封面页 ===== */
-.cover-slide {
-    text-align: center !important;
+/* ===== 封面页 =====
+   加 .reveal 前缀把选择器提到 (0,2,1)，压过本文件的 .reveal h2 (0,1,1)——
+   不加就得靠 !important，那正是要清掉的东西。
+   注意：配色层的 .reveal h2 目前还带着 !important（swiss-modern 800 /
+   dark-botanical 600 / notebook-tabs 700），所以封面副标题现在仍然跟随配色字重，
+   而不是这里的 300 —— 这是既有行为，没有改动。等配色层的 !important 也清掉之后，
+   这条 (0,2,1) 才会真正接管，届时需要确认 300 是不是想要的效果。
+   原来的 .cover-slide h1 规则已删：它和 .reveal h1 同值，纯冗余，
+   留着反而挡住配色层给 h1 换色。 */
+.reveal .cover-slide {
+    text-align: center;
 }
 
-.cover-slide h1 {
-    color: var(--primary-dark) !important;
-}
-
-.cover-slide h2 {
-    font-weight: 300 !important;
-    color: var(--text-muted) !important;
+.reveal .cover-slide h2 {
+    font-weight: 300;
+    color: var(--text-muted);
 }
 
 .cover-slide .divider {
@@ -109,78 +144,61 @@ body {
     margin: 3rem auto;
 }
 
-/* ===== 模块封面页 ===== */
-.module-cover {
-    text-align: center !important;
-    color: var(--text-inverse) !important;
-}
-
-.module-cover h1,
-.module-cover h2,
-.module-cover p {
-    color: var(--text-inverse) !important;
-}
-
-.module-cover .module-label {
-    opacity: 0.8;
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
-}
-
-.module-cover h1 {
-    border-bottom: none;
-}
+/* ===== 模块封面页 =====
+   模块封面的文字色由 components.css 的 .module-divider__* 负责,
+   取 --text-on-module (各配色定义)。
+   V1 的 .module-cover / .module-label 一族已删: 实际 slide 用的是
+   <section class="module-N"> + .module-divider, 从来没挂过这两个类。 */
 
 /* 模块颜色（10套） */
 .reveal .slides>section.module-1 {
-    background-color: var(--module-1) !important;
+    background-color: var(--module-1);
 }
 
 .reveal .slides>section.module-2 {
-    background-color: var(--module-2) !important;
+    background-color: var(--module-2);
 }
 
 .reveal .slides>section.module-3 {
-    background-color: var(--module-3) !important;
+    background-color: var(--module-3);
 }
 
 .reveal .slides>section.module-4 {
-    background-color: var(--module-4) !important;
+    background-color: var(--module-4);
 }
 
 .reveal .slides>section.module-5 {
-    background-color: var(--module-5) !important;
+    background-color: var(--module-5);
 }
 
 .reveal .slides>section.module-6 {
-    background-color: var(--module-6) !important;
+    background-color: var(--module-6);
 }
 
 .reveal .slides>section.module-7 {
-    background-color: var(--module-7) !important;
+    background-color: var(--module-7);
 }
 
 .reveal .slides>section.module-8 {
-    background-color: var(--module-8) !important;
+    background-color: var(--module-8);
 }
 
 .reveal .slides>section.module-9 {
-    background-color: var(--module-9) !important;
+    background-color: var(--module-9);
 }
 
 .reveal .slides>section.module-10 {
-    background-color: var(--module-10) !important;
+    background-color: var(--module-10);
 }
 
-/* ===== 结语页 ===== */
-.ending-slide {
-    text-align: center !important;
+/* ===== 结语页 =====
+   同封面：加 .reveal 前缀提到 (0,2,1)，压过本文件的 .reveal h1 和配色层的 .reveal h1。 */
+.reveal .ending-slide {
+    text-align: center;
 }
 
-.ending-slide h1 {
-    font-size: 5rem !important;
+.reveal .ending-slide h1 {
+    font-size: 5rem;
 }
 
 .ending-slide .qr-placeholder {
@@ -308,77 +326,14 @@ body {
 }
 
 .card h3 {
-    color: var(--primary) !important;
+    color: var(--primary);
 }
 
 .card p,
 .card li {
     font-size: 1rem;
     line-height: 1.8;
-    color: var(--text-body) !important;
-}
-
-/* 主色卡片 - 使用更高的 specificity */
-.reveal .slides section .card-primary {
-    background: var(--primary) !important;
-    color: var(--text-inverse);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-card);
-}
-
-.reveal .slides section .card-primary h3,
-.reveal .slides section .card-primary h4,
-.reveal .slides section .card-primary p,
-.reveal .slides section .card-primary ul,
-.reveal .slides section .card-primary ol,
-.reveal .slides section .card-primary li,
-.reveal .slides section .card-primary span {
-    color: var(--text-on-primary, var(--text-inverse)) !important;
-}
-
-.reveal .slides section .card-primary p {
-    font-size: 1rem;
-    line-height: 1.8;
-}
-
-/* 辅助色卡片 - 新增定义 */
-.reveal .slides section .card-secondary {
-    background: var(--secondary) !important;
-    color: var(--text-inverse);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-card);
-}
-
-.reveal .slides section .card-secondary h3,
-.reveal .slides section .card-secondary h4,
-.reveal .slides section .card-secondary p,
-.reveal .slides section .card-secondary ul,
-.reveal .slides section .card-secondary ol,
-.reveal .slides section .card-secondary li,
-.reveal .slides section .card-secondary span {
-    /* --text-on-secondary: 配色方案可覆盖的配对令牌 (如 secondary 为亮色时配深字) */
-    color: var(--text-on-secondary, var(--text-inverse)) !important;
-}
-
-/* 强调色卡片 - 新增定义 */
-.reveal .slides section .card-accent {
-    background: var(--accent) !important;
-    color: var(--text-inverse);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: var(--shadow-card);
-}
-
-.reveal .slides section .card-accent h3,
-.reveal .slides section .card-accent h4,
-.reveal .slides section .card-accent p,
-.reveal .slides section .card-accent ul,
-.reveal .slides section .card-accent ol,
-.reveal .slides section .card-accent li,
-.reveal .slides section .card-accent span {
-    color: var(--text-on-accent, var(--text-inverse)) !important;
+    color: var(--text-body);
 }
 
 /* ===== 高亮框 ===== */
@@ -406,9 +361,14 @@ body {
     border-radius: 8px;
 }
 
+/* 刻意停在 (0,1,1) 不加 `.reveal ` 前缀：提上去会反过来压住 .card-primary 一族，
+   而 slide 里存在 <div class="card-primary"><div class="vs-bad"> 这种嵌套
+   （见 openclaw_2/slides/slide-12.html）。卡片自带任意底色，它的 --text-on-* 配对
+   令牌必须拥有最终解释权，否则 success 的鼠尾草绿会直接糊在 primary 的浅陶土底上。
+   语义色卡片一族因此排在本节之后——顺序即优先级，靠的就是这一点。 */
 .vs-bad h3,
 .vs-bad h4 {
-    color: var(--danger) !important;
+    color: var(--danger);
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
 }
@@ -430,7 +390,7 @@ body {
 
 .vs-good h3,
 .vs-good h4 {
-    color: var(--success) !important;
+    color: var(--success);
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
 }
@@ -441,6 +401,80 @@ body {
 .vs-good li {
     font-size: 1rem;
     line-height: 1.8;
+}
+
+/* ===== 语义色卡片 =====
+   曾经写成 `.reveal .slides section .card-primary` + !important（注释还写着
+   "使用更高的 specificity"）。那是反的：配色层写的是 `.card-primary` (0,1,0)，
+   即使带 !important 也压不过 (0,3,1) + !important，于是 dark-botanical 的渐变卡片、
+   bold-signal 的封面渐变全部静默失效。这里降回 (0,1,0)，让配色层靠文件顺序接管。
+   `.card-primary` 是独立类，实际 slide 从不与 `.card` 同时出现，不存在互压问题。
+
+   ⚠ 本节必须排在「对比组件」之后，不要往上挪。
+   slide 里有 <div class="card-primary"><div class="vs-bad"> 这种嵌套，
+   两边的 h3/h4 规则特异性都是 (0,1,1)，谁在后面谁赢。卡片自带任意底色，
+   它的 --text-on-* 配对令牌必须赢——否则 vs-good 的绿色标题会直接糊在
+   primary 的浅色卡面上（dark-botanical 尤其明显，实测几乎读不出字）。 */
+.card-primary {
+    background: var(--primary);
+    color: var(--text-inverse);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+}
+
+.card-primary h3,
+.card-primary h4,
+.card-primary p,
+.card-primary ul,
+.card-primary ol,
+.card-primary li,
+.card-primary span {
+    color: var(--text-on-primary, var(--text-inverse));
+}
+
+.card-primary p {
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+/* 辅助色卡片 */
+.card-secondary {
+    background: var(--secondary);
+    color: var(--text-inverse);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+}
+
+.card-secondary h3,
+.card-secondary h4,
+.card-secondary p,
+.card-secondary ul,
+.card-secondary ol,
+.card-secondary li,
+.card-secondary span {
+    /* --text-on-secondary: 配色方案可覆盖的配对令牌 (如 secondary 为亮色时配深字) */
+    color: var(--text-on-secondary, var(--text-inverse));
+}
+
+/* 强调色卡片 */
+.card-accent {
+    background: var(--accent);
+    color: var(--text-inverse);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-card);
+}
+
+.card-accent h3,
+.card-accent h4,
+.card-accent p,
+.card-accent ul,
+.card-accent ol,
+.card-accent li,
+.card-accent span {
+    color: var(--text-on-accent, var(--text-inverse));
 }
 
 /* ===== 标签 ===== */
@@ -483,7 +517,10 @@ body {
     font-size: 1rem;
 }
 
-/* ===== 文字颜色辅助类 ===== */
+/* ===== 文字颜色辅助类 =====
+   B 类 !important：工具类语义上就是「写在元素上的最后一句话」，
+   且 (0,1,0) 低于 .reveal p / .reveal h3 (0,1,1)，不带 !important 挂上去等于没写。
+   它们取的都是 var(--*)，配色层改令牌即可换色，!important 没有挡住任何人。 */
 .text-primary {
     color: var(--primary) !important;
 }
@@ -508,8 +545,5 @@ body {
     font-weight: 700 !important;
 }
 
-/* ===== 隐藏 Reveal 默认控件 ===== */
-.reveal .controls,
-.reveal .progress {
-    display: none !important;
-}
+/* 隐藏 Reveal 默认控件的规则已删：base_layout.css 里有一份一模一样的，
+   而 base_layout.css 每份 deck 都会加载，这里是纯重复。 */

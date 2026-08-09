@@ -3,6 +3,24 @@
    铁律: 只用 var(--*) 令牌, 禁止写死颜色/字体/内联 style
    本文件与 themes/standard.css 配合使用, 不重复其定义
    新组件在此追加, 好布局沉淀回此文件
+
+   ───── 为什么很多组件写成「一对规则」─────
+   例如:
+       .callout        { ...盒子样式... }
+       .reveal .callout { color: var(--text-body); }
+
+   BEM 类名是 (0,1,0), 而 themes/standard.css 的 .reveal p / .reveal h2 是 (0,1,1) ——
+   光写 `.callout { color: … }` 压不过它, 文字色会静默失效。从前是靠 !important 硬压,
+   现在改成把「必须赢」的那几条声明单独放进带 `.reveal ` 前缀的 (0,2,1) 规则里。
+   两者的区别在于可谈判性: !important 是一堵墙, 配色层端出同样的 !important 也常常
+   因为特异性更低而输; 而 (0,2,1) 是明码标价——配色层写 `.reveal .callout` 就能接管。
+
+   所以: **不要把这两条规则合并回去。** 合并等于把上面那条盒子规则也提到 (0,2,1),
+   它里面的 font-size / line-height / background 会跟着一起翻身压过 standard.css,
+   那是另一回事(见 DESIGN-SYSTEM.md 「样式层级 → !important 使用规约」末尾的待办)。
+
+   新增组件时按同样的方式写: 盒子样式留在裸类名上, 只有会和 standard.css 的
+   .reveal h*/p/li 撞车的属性(基本就是 color, 偶尔 font-size/font-weight)才加前缀。
    =================================== */
 
 /* ============================================================
@@ -21,9 +39,22 @@
         不能依赖 CSS 继承链——主题切换或嵌套层级变化时继承会失稳。
    ============================================================ */
 
+/* slide 根文字色。
+   reveal.css 给 body 挂了 .reveal-viewport{color:#000}, 类选择器压过
+   standard.css 的 body{color:var(--text-heading)}, 于是继承链的起点是黑色——
+   凡是自己不声明 color、靠 inherit 的组件(如 .workflow-node__label)
+   在深色配色下就变成黑字贴黑底。在 section 上把配对色显式落一次。 */
+.reveal .slides > section {
+    color: var(--text-heading);
+}
+
 /* highlight-box: bg=--bg-highlight, 配对文字=--text-body */
 .highlight-box {
     color: var(--text-body);
+    /* 不给宽度会被 section 的 align-items:center 收缩成内容宽,
+       比它上面那个块组件窄一截 */
+    width: 100%;
+    max-width: var(--content-max-width);
 }
 
 /* code-block: bg=--bg-code (深色), 配对文字=--text-code */
@@ -55,7 +86,7 @@
     grid-template-columns: repeat(4, 1fr);
     gap: var(--space-4);
     width: 100%;
-    max-width: 80rem;
+    max-width: var(--content-max-width);
 }
 
 /* 左文右图 — 要求右侧有实际 <img src="..."> 而非占位符 */
@@ -64,7 +95,7 @@
     grid-template-columns: 1.4fr 1fr;
     gap: var(--space-12);
     width: 100%;
-    max-width: 80rem;
+    max-width: var(--content-max-width);
     align-items: center;
 }
 
@@ -126,6 +157,14 @@
         用于 2 栏或 3 栏横向对比
    ============================================================ */
 
+/* 同 .highlight-box: 不给宽度会被 section 的 align-items:center 收缩成内容宽,
+   于是每一页的卡片宽度都跟着文案长短漂移——连续几页同类对比翻页时会看到卡片
+   忽宽忽窄, 而且窄栏里两三个字就要换行。锁到统一的内容宽度。 */
+.vs-box {
+    width: 100%;
+    max-width: var(--content-max-width);
+}
+
 /* 在 .vs-box 上加 .vs-box--columns 即变为横向排列 */
 .vs-box--columns {
     flex-direction: row;
@@ -147,9 +186,13 @@
 
 .vs-neutral h3,
 .vs-neutral h4 {
-    color: var(--primary) !important;
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
+}
+
+.reveal .vs-neutral h3,
+.reveal .vs-neutral h4 {
+    color: var(--primary);
 }
 
 .vs-neutral p,
@@ -158,19 +201,30 @@
 .vs-neutral li {
     font-size: 1rem;
     line-height: 1.8;
-    color: var(--text-body) !important;
+}
+
+.reveal .vs-neutral p,
+.reveal .vs-neutral ul,
+.reveal .vs-neutral ol,
+.reveal .vs-neutral li {
+    color: var(--text-body);
 }
 
 /* ============================================================
    § 3. 模块分隔页 (.module-divider)
         章节切换页, 配合 section.module-N 使用彩色背景
-   ============================================================ */
 
+   文字色一律取 --text-on-module, 不再取 --text-inverse。
+   两者语义不同: --text-inverse 是"深色底上的文字", --text-on-module 是
+   "10 个模块彩色底上的文字"。一个令牌背两个活, 会逼着模块色和深色底
+   互相迁就 —— dark-ocean 的浅粉彩模块底配近白 --text-inverse, 十个封面
+   全部读不清, 就是这么来的。
+   ============================================================ */
 .module-divider {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    justify-content: center !important;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
     position: relative;
     overflow: hidden;
 }
@@ -181,27 +235,27 @@
     letter-spacing: 0.15em;
     text-transform: uppercase;
     opacity: 0.7;
-    color: var(--text-inverse);
+    color: var(--text-on-module, var(--text-inverse));
     margin-bottom: var(--space-3);
     display: block;
 }
 
-/* 加 .reveal 前缀提升特异性: 需要压过 themes/*.css 的 .reveal h2 / .reveal p (!important) */
+/* 这两条本来就带 .reveal 前缀 (0,2,1), 所以不用像别处那样拆成两条规则 */
 .reveal .module-divider__title {
-    font-size: clamp(2rem, 5vw, 3.5rem) !important;
-    font-weight: 900 !important;
-    color: var(--text-inverse) !important;
-    line-height: 1.2 !important;
-    margin-bottom: var(--space-6) !important;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    color: var(--text-on-module, var(--text-inverse));
+    line-height: 1.2;
+    margin-bottom: var(--space-6);
     max-width: 70%;
 }
 
 .reveal .module-divider__hook {
     font-size: clamp(1rem, 2vw, 1.3rem);
-    color: var(--text-inverse) !important;
     opacity: 0.85;
     max-width: 60%;
     line-height: 1.7;
+    color: var(--text-on-module, var(--text-inverse));
 }
 
 /* 大号装饰数字 (可选, 放在右下角) */
@@ -210,7 +264,7 @@
     font-weight: 900;
     line-height: 1;
     opacity: 0.1;
-    color: var(--text-inverse);
+    color: var(--text-on-module, var(--text-inverse));
     position: absolute;
     right: 4rem;
     bottom: 2rem;
@@ -225,28 +279,39 @@
 
 .concept-card {
     width: 100%;
-    max-width: 72rem;
+    max-width: var(--content-max-width);
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
 }
 
 .concept-card__term {
-    font-size: clamp(1.8rem, 4vw, 3rem) !important;
-    font-weight: 900 !important;
-    color: var(--primary) !important;
     border-left: var(--quote-border-width) solid var(--primary);
     padding-left: var(--space-6);
-    margin: 0 !important;
-    line-height: 1.2 !important;
+}
+
+.reveal .concept-card__term {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 900;
+    color: var(--primary);
+    margin: 0;
+    line-height: 1.2;
 }
 
 .concept-card__def {
+    padding-left: calc(var(--quote-border-width) + var(--space-6));
+}
+
+/* font-size / margin 也得放在带前缀的这条里。
+   定义正文的标签是 <p>, 而 themes/standard.css 的 .reveal p (0,1,1) 同时管着
+   font-size: 1.1rem 和 margin-bottom: 0.8rem —— 写在裸类名 (0,1,0) 上一直是静默失效:
+   上面那行 clamp 到 1600px 宽本该给到 20px, 实际一直渲染成 17.6px, 和普通正文一样大,
+   "定义"这一行在概念卡里就没了分量; margin: 0 同理被 0.8rem 顶开。 */
+.reveal .concept-card__def {
     font-size: clamp(1rem, 1.8vw, 1.25rem);
     line-height: 1.8;
-    color: var(--text-body) !important;
-    padding-left: calc(var(--quote-border-width) + var(--space-6));
     margin: 0;
+    color: var(--text-body);
 }
 
 .concept-card__example {
@@ -256,7 +321,10 @@
     border-radius: 0 var(--radius-md) var(--radius-md) 0;
     font-size: 1rem;
     line-height: 1.8;
-    color: var(--text-body) !important;
+}
+
+.reveal .concept-card__example {
+    color: var(--text-body);
 }
 /* 注意: 不使用 ::before 自动插入前缀。
    如需"示例"标签，在 HTML 中显式写 <strong>示例</strong>。 */
@@ -272,7 +340,7 @@
     align-items: stretch;
     gap: var(--space-8);
     width: 100%;
-    max-width: 80rem;
+    max-width: var(--content-max-width);
     flex-wrap: wrap;
 }
 
@@ -301,14 +369,20 @@
 
 .stat-item__label {
     font-size: var(--stat-label-size);
-    color: var(--text-body) !important;
     line-height: 1.5;
+}
+
+.reveal .stat-item__label {
+    color: var(--text-body);
 }
 
 .stat-item__source {
     font-size: 0.7rem;
-    color: var(--text-muted) !important;
     margin-top: auto;
+}
+
+.reveal .stat-item__source {
+    color: var(--text-muted);
 }
 
 /* 数字颜色变体 */
@@ -337,11 +411,14 @@
     font-size: var(--quote-font-size);
     font-weight: 700;
     line-height: 1.45;
-    color: var(--text-heading) !important;
     position: relative;
     padding: var(--space-8) var(--space-10);
     margin: 0;
     font-style: normal;
+}
+
+.reveal .quote-slide__text {
+    color: var(--text-heading);
 }
 
 .quote-slide__text::before {
@@ -368,10 +445,13 @@
 
 .quote-slide__source {
     font-size: 1rem;
-    color: var(--text-muted) !important;
     font-style: normal;
     letter-spacing: 0.05em;
     margin: 0;
+}
+
+.reveal .quote-slide__source {
+    color: var(--text-muted);
 }
 
 /* ============================================================
@@ -382,7 +462,7 @@
     display: flex;
     align-items: flex-start;
     width: 100%;
-    max-width: 80rem;
+    max-width: var(--content-max-width);
     position: relative;
     padding-top: var(--space-8);
 }
@@ -436,16 +516,22 @@
 .timeline__label {
     font-size: clamp(0.8rem, 1.2vw, 1rem);
     font-weight: 600;
-    color: var(--text-heading) !important;
     text-align: center;
     line-height: 1.3;
 }
 
+.reveal .timeline__label {
+    color: var(--text-heading);
+}
+
 .timeline__desc {
     font-size: 0.8rem;
-    color: var(--text-muted) !important;
     text-align: center;
     line-height: 1.4;
+}
+
+.reveal .timeline__desc {
+    color: var(--text-muted);
 }
 
 /* ============================================================
@@ -455,7 +541,7 @@
 
 .quadrant {
     width: 100%;
-    max-width: 72rem;
+    max-width: var(--content-max-width);
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -507,19 +593,24 @@
 .quadrant__cell--b { border-top: 3px solid var(--accent); }     /* 右上: 重要不紧急 */
 .quadrant__cell--c { border-top: 3px solid var(--secondary); }  /* 左下: 紧急不重要 */
 .quadrant__cell--d { border-top: 3px solid var(--text-muted); } /* 右下: 不重要不紧急 */
-
 .quadrant__cell-title {
     font-weight: 700;
     font-size: 0.9rem;
-    color: var(--text-heading) !important;
     line-height: 1.3;
+}
+
+.reveal .quadrant__cell-title {
+    color: var(--text-heading);
 }
 
 .quadrant__cell-items {
     font-size: 0.8rem;
-    color: var(--text-body) !important;
     line-height: 1.5;
     margin: 0;
+}
+
+.reveal .quadrant__cell-items {
+    color: var(--text-body);
 }
 
 /* 轴标签行 (X 轴, 放在 .quadrant 内 .quadrant__cells 之前/后) */
@@ -527,11 +618,14 @@
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.05em;
-    color: var(--text-muted) !important;
     text-transform: uppercase;
     display: flex;
     justify-content: space-between;
     padding: 0 var(--space-2);
+}
+
+.reveal .quadrant__axis-label {
+    color: var(--text-muted);
 }
 
 /* ============================================================
@@ -541,7 +635,7 @@
 
 .case-study {
     width: 100%;
-    max-width: 80rem;
+    max-width: var(--content-max-width);
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
@@ -553,11 +647,11 @@
     gap: var(--space-4);
 }
 
-.case-study__title {
-    font-size: 1.3rem !important;
-    font-weight: 700 !important;
-    color: var(--text-heading) !important;
-    margin: 0 !important;
+.reveal .case-study__title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0;
 }
 
 .case-study__body {
@@ -582,20 +676,26 @@
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--text-muted) !important;
+}
+
+.reveal .case-study__panel-label {
+    color: var(--text-muted);
 }
 
 /* 结果面板用主色背景突出 */
 .case-study__panel--outcome {
-    background: var(--primary) !important;
     border-color: transparent;
 }
 
-.case-study__panel--outcome .case-study__panel-label,
-.case-study__panel--outcome p,
-.case-study__panel--outcome ul,
-.case-study__panel--outcome li {
-    color: var(--text-inverse) !important;
+.reveal .case-study__panel--outcome {
+    background: var(--primary);
+}
+
+.reveal .case-study__panel--outcome .case-study__panel-label,
+.reveal .case-study__panel--outcome p,
+.reveal .case-study__panel--outcome ul,
+.reveal .case-study__panel--outcome li {
+    color: var(--text-inverse);
 }
 
 /* ============================================================
@@ -605,7 +705,7 @@
 
 .table-compare {
     width: 100%;
-    max-width: 76rem;
+    max-width: var(--content-max-width);
     border-collapse: collapse;
     font-size: 1rem;
 }
@@ -615,9 +715,13 @@
     padding: var(--table-cell-padding);
     text-align: left;
     border-bottom: 1px solid var(--border-card);
-    color: var(--text-body) !important;
     vertical-align: middle;
     line-height: 1.5;
+}
+
+.reveal .table-compare th,
+.reveal .table-compare td {
+    color: var(--text-body);
 }
 
 /* 表头行 */
@@ -627,7 +731,10 @@
     letter-spacing: 0.04em;
     padding: var(--table-header-padding);
     background: var(--primary);
-    color: var(--text-inverse) !important;
+}
+
+.reveal .table-compare thead th {
+    color: var(--text-inverse);
 }
 
 .table-compare thead th:first-child {
@@ -642,8 +749,11 @@
 /* 行标签列 */
 .table-compare td:first-child {
     font-weight: 600;
-    color: var(--text-heading) !important;
     background: var(--bg-card);
+}
+
+.reveal .table-compare td:first-child {
+    color: var(--text-heading);
 }
 
 /* 斑马行 */
@@ -653,9 +763,15 @@
 
 /* 强调列 (推荐方案, 加 class 到 <th> 和对应 <td>) */
 .table-compare .col--highlight {
-    background: var(--bg-highlight) !important;
+    /* 必须显式配对: 该 class 也会盖在 thead 的主色表头上,
+       不改文字色会让表头那一格变成深色底 + 深色字 */
     border-left: 3px solid var(--accent);
     border-right: 3px solid var(--accent);
+}
+
+.reveal .table-compare .col--highlight {
+    background: var(--bg-highlight);
+    color: var(--text-body);
 }
 
 /* ============================================================
@@ -664,7 +780,7 @@
 
 .key-takeaway {
     width: 100%;
-    max-width: 72rem;
+    max-width: var(--content-max-width);
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
@@ -679,12 +795,12 @@
     display: block;
 }
 
-.key-takeaway__title {
-    font-size: clamp(1.5rem, 3vw, 2.2rem) !important;
-    font-weight: 900 !important;
-    color: var(--text-heading) !important;
-    margin: 0 !important;
-    line-height: 1.2 !important;
+.reveal .key-takeaway__title {
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 900;
+    color: var(--text-heading);
+    margin: 0;
+    line-height: 1.2;
 }
 
 .key-takeaway__list {
@@ -704,7 +820,10 @@
     gap: var(--space-4);
     font-size: clamp(1rem, 1.5vw, 1.15rem);
     line-height: 1.6;
-    color: var(--text-body) !important;
+}
+
+.reveal .key-takeaway__list li {
+    color: var(--text-body);
 }
 
 .key-takeaway__list li::before {
@@ -716,11 +835,14 @@
     height: 2rem;
     border-radius: var(--radius-pill);
     background: var(--primary);
-    color: var(--text-inverse) !important;
     font-size: 0.85rem;
     font-weight: 700;
     flex-shrink: 0;
     margin-top: 0.1rem;
+}
+
+.reveal .key-takeaway__list li::before {
+    color: var(--text-inverse);
 }
 
 .key-takeaway__next {
@@ -730,7 +852,10 @@
     border-radius: 0 var(--radius-md) var(--radius-md) 0;
     font-size: 1rem;
     font-weight: 600;
-    color: var(--text-body) !important;
+}
+
+.reveal .key-takeaway__next {
+    color: var(--text-body);
 }
 /* 注意: 不使用 ::before 自动插入"下一步"。
    在 HTML 中显式写，例如: <div class="key-takeaway__next">下一步 → 文字</div> */
@@ -747,7 +872,7 @@
     flex-direction: column;
     gap: var(--space-3);
     width: 100%;
-    max-width: 72rem;
+    max-width: var(--content-max-width);
     counter-reset: pill;
 }
 
@@ -758,12 +883,15 @@
     gap: var(--space-5);
     font-size: clamp(1rem, 1.5vw, 1.15rem);
     line-height: 1.5;
-    color: var(--text-body) !important;
     padding: var(--space-4) var(--space-6);
     background: var(--bg-card);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
     border: 1px solid var(--border-card);
+}
+
+.reveal .pill-list li {
+    color: var(--text-body);
 }
 
 .pill-list li::before {
@@ -780,19 +908,25 @@
    § 13. 标注框 (.callout)
          三种变体: --tip / --warning / --insight
    ============================================================ */
-
 .callout {
     display: flex;
     align-items: flex-start;
     gap: var(--space-4);
     padding: var(--space-5) var(--space-6);
-    border-radius: var(--radius-md);
+    /* 左侧色条组件一律左直角右圆角(同 .concept-card__example / .highlight-box),
+       四角全圆会让色条看着是弧线, 与相邻的示例块对不上 */
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
     border-left: var(--callout-border-width) solid var(--primary);
     background: var(--bg-highlight);
     font-size: 1rem;
     line-height: 1.8;
-    color: var(--text-body) !important;
     width: 100%;
+    /* 无上限时会比同页其它块组件宽出一截, 上下叠放时明显不齐 */
+    max-width: var(--content-max-width);
+}
+
+.reveal .callout {
+    color: var(--text-body);
 }
 
 .callout__icon {
@@ -811,8 +945,11 @@
     letter-spacing: 0.07em;
     text-transform: uppercase;
     margin-bottom: var(--space-1);
-    color: var(--text-heading) !important;
     display: block;
+}
+
+.reveal .callout__title {
+    color: var(--text-heading);
 }
 
 .callout--tip {
@@ -885,8 +1022,15 @@
 /* 横向节点 + 连接线, 步骤 ≤6; 见 DESIGN-SYSTEM.md § 4 */
 .workflow {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    /* section 是 align-items:center 的 flex 列, 不显式给宽度会收缩成内容宽,
+       节点挤成一小团、连接线退到 min-width */
+    width: 100%;
+    max-width: var(--content-max-width);
+    /* center + 连接线限长: 节点数少时不会被拉到两侧边缘, 节点数多时自然收紧 */
+    justify-content: center;
+    /* flex-start: 节点顶部对齐, 连接线靠 margin-top 与图标中线对齐;
+       用 center 会让多行 label 把图标推得高低不齐 */
+    align-items: flex-start;
     margin: var(--space-4) 0;
 }
 
@@ -894,6 +1038,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* 必须限宽: 否则 label 会横向撑开并与相邻节点重叠 */
+    flex: 0 1 auto;
+    max-width: 132px;
+    text-align: center;
     z-index: var(--z-base);
 }
 
@@ -919,19 +1067,245 @@
 .workflow-node__label {
     font-size: 0.85rem;
     font-weight: 600;
+    line-height: 1.35;
+    max-width: 132px;
+    text-align: center;
+    overflow-wrap: break-word;
     /* 跟随容器的配对文字色: 直接放在 slide 上时为 text-heading(见 §0b),
        嵌入 card 等有底色容器时继承该容器的显式文字色 */
     color: inherit;
 }
 
 .workflow-line {
-    flex-grow: 1;
+    flex: 1 1 auto;
+    min-width: var(--space-4);
+    /* 上限防止 3~4 节点时连接线拉成长条, 视觉上比节点还抢眼 */
+    max-width: 120px;
     height: 4px;
     background: linear-gradient(90deg, var(--primary), var(--secondary));
-    margin: 0 -10px;
+    /* 26px = 图标高度 56 的一半 - 线高 4 的一半, 使连接线穿过图标中线 */
+    margin: 26px var(--space-2) 0;
 }
 
 /* 全幅包裹容器 (无最大宽度限制时使用) */
 .full-width {
     width: 100%;
+}
+
+/* ============================================================
+   § 15. 图片等式 (.img-equation) — 多份素材 → 一个成品
+   ============================================================
+   用途: 演示「AI 一次把 N 份原始材料合成一个可交付成品」。
+   素材图是"有这么几份东西"的信号, 成品图才是要看清的对象——
+   所以两者不等大: 素材受 --img-equation-input-h 压制并压暗,
+   成品用 --img-equation-result-h 并带主色描边。等大会读成一排缩略图,
+   看不出"合成"这层意思。
+
+   DOM 必须是平铺的 (item / op 都是 .img-equation 的直接子元素),
+   不要包 __inputs 中间层: animate-slides.js 的 seq 规则按直接子元素
+   排 stagger, 有中间层就只会整块淡入, 等式的书写节奏没了。 */
+.img-equation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    width: 100%;
+    max-width: var(--content-max-width);
+    margin: var(--space-4) 0;
+}
+
+/* figure 自带 margin, 不清掉会把等式撑歪 */
+.img-equation__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    /* 不等分宽度: 等分会让窄图两侧留出 contain 的信箱条, 在深色配色下
+       是两块显眼的深灰, 读起来像图没加载完。改成"统一高度、宽度随比例",
+       卡片贴合图片本身, 三张素材的上下沿也自然对齐。 */
+    flex: 0 1 auto;
+    min-width: 0;
+}
+
+.img-equation__item img {
+    width: auto;
+    max-width: 100%;
+    height: var(--img-equation-input-h);
+    /* 素材是扫描件/长图, cover 会切掉正中的金额和结论, 只能 contain */
+    object-fit: contain;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+}
+
+/* 成品: 脱离等分, 按自身比例放大, 主色描边把视线钉在这里 */
+.img-equation__item--result {
+    flex: 0 0 auto;
+}
+
+.img-equation__item--result img {
+    width: auto;
+    max-width: 100%;
+    height: var(--img-equation-result-h);
+    border: 2px solid var(--primary);
+    box-shadow: var(--shadow-hover);
+}
+
+.img-equation__caption {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.img-equation__item--result .img-equation__caption {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* 运算符跟着容器的 align-items:center 走, 因此对齐的是"图+说明"整块的中线,
+   比图片中线低半行说明文字 (≈13px)。单行 caption 下看不出来;
+   如果哪页 caption 写到两行, 缩短它, 不要在这里加 margin 补偿。 */
+.img-equation__op {
+    flex: 0 0 auto;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+/* 等号是"这一步产生结果"的分界, 比加号重 */
+.img-equation__op--eq {
+    font-size: 2rem;
+    color: var(--accent);
+    margin: 0 var(--space-2);
+}
+
+/* ============================================================
+   § 16. 提示词对比 (.prompt-compare) — 承载逐字原文
+   ============================================================
+   与 .vs-box--columns 的分工: vs-box 放的是提炼过的短句要点
+   (规范写死 ≤4 条 li、不嵌图片); 本组件放的是**未经改写的提示词原文**,
+   通常 100~200 字, 让学员看见真实写法而不是老师的摘要。
+   因此正文用小一号字 + 更松的行距, 并在 lint-slides.js 的
+   long-paragraph 检查里豁免 (原文长度不是版面失控)。 */
+.prompt-compare {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-4);
+    width: 100%;
+    max-width: var(--content-max-width);
+}
+
+.prompt-compare__col {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: 1.2rem 1.5rem;
+    border-radius: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    color: var(--text-body);
+}
+
+/* 改前/改后与 vs-bad/vs-good 共用同一套配对令牌, 保证同一份 deck 里
+   "改前=暖红底 / 改后=绿底"的语义在两个组件之间不串味。
+   两个方向都显式写出来, 不把 before 做成基类的默认值——
+   隐式默认既读不出对称关系, 也会让 lint 的 class 白名单收不到 --before。 */
+.prompt-compare__col--before {
+    background: var(--bg-vs-bad);
+    border-color: var(--border-vs-bad);
+}
+
+.prompt-compare__col--after {
+    background: var(--bg-vs-good);
+    border-color: var(--border-vs-good);
+}
+
+.prompt-compare__label {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.prompt-compare__col--before .prompt-compare__label {
+    color: var(--danger);
+}
+
+.prompt-compare__col--after .prompt-compare__label {
+    color: var(--success);
+}
+
+/* 原文: 比 vs-box 的 1rem 略小, 行距放到 1.85——
+   整段中文没有列表的视觉抓手, 行距不够就成一堵墙。
+   0.95 是实测下限: 再小后排学员读不动, 而这一页的内容就是让人读原文的。 */
+.prompt-compare__text {
+    font-size: 0.95rem;
+    line-height: 1.85;
+    color: var(--text-body);
+    margin: 0;
+    /* 顶掉上下的空白让判语贴住原文, 两者是一组 */
+    flex: 1 1 auto;
+}
+
+/* 判语: 一句话说清这条提示词缺什么/补了什么, 讲课时的落点 */
+.prompt-compare__verdict {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.5;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border-card);
+}
+
+.prompt-compare__col--before .prompt-compare__verdict {
+    border-top-color: var(--border-vs-bad);
+    color: var(--danger);
+}
+
+.prompt-compare__col--after .prompt-compare__verdict {
+    border-top-color: var(--border-vs-good);
+    color: var(--success);
+}
+
+/* ============================================================
+   §N  相邻块组件的垂直呼吸
+   ============================================================
+   `.reveal .slides>section` 是 flex 列且没有 gap（见 themes/standard.css），
+   块与块之间的距离历来靠组件各自的 margin。但 14 个块级组件里只有
+   .workflow (margin: --space-4 0) 和 .highlight-box (margin-top) 写了外边距，
+   其余全是 0 —— 于是两个「都没写」的组件相邻就会贴死。
+   workbuddy slide-05 的 .concept-card + .callout 即是：两块都是「左侧色条 +
+   右圆角」的样式，零间距时会被读成一整块。
+
+   这里补的是兜底，不是重排版，所以刻意限制了触发条件：
+
+   1. 上家 `:not(h1):not(h2):not(h3)` —— 标题到首块的间距由 h2 自己的
+      margin-bottom 决定，保持原样不动。
+   2. 上家 `:not(.workflow)` —— workflow 自带 margin-bottom，再叠一层会过宽。
+   3. 下家只列块级组件 —— 不写成 `+ *`，否则封面页的 h2、结束页的 p/span
+      也会被推开，那是与本问题无关的页面。
+
+   新增块级组件时把类名加进下面这张表（与 animate-slides.js 的组件清单同源）。 */
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .concept-card,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .callout,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .case-study,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .key-takeaway,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .table-compare,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .code-block,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .quote-slide,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .icon-card-grid,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .stats-wall,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .timeline,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .quadrant,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .check-list,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .pill-list,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .vs-box,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .prompt-compare,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .img-equation,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .workflow {
+    margin-top: var(--space-6);
 }

@@ -94,14 +94,16 @@ let fileCount = 1; // index.html
 
 // Reveal.js 运行时: dist/ + 图标字体 + notes 插件 (演讲者视图)
 // lib/ 其余为开发文件 (examples/test/js/css 等), 不进交付包
-for (const sub of ['dist', 'fonts', path.join('plugin', 'notes')]) {
+// 注意 lib/fonts/display 不在这里整目录拷贝 —— 那里放着全部字体族(含两套 ~5MB 的中文),
+// 一门课只用得上其中一套, 下面按本课字体集实际引用的文件挑。
+for (const sub of ['dist', path.join('fonts', 'fontawesome'), path.join('plugin', 'notes')]) {
     fileCount += copyDir(
         path.join(ROOT, 'lib', sub),
         path.join(EXPORT_DIR, 'lib', sub)
     );
 }
 
-// 设计系统 CSS: 只拷贝 index.html 实际引用的文件 (theme/template 各 1 套)
+// 设计系统 CSS: 只拷贝 index.html 实际引用的文件 (template/配色/字体集 各 1 套)
 const cssRefs = [...html.matchAll(/\.\/shared_styles\/([\w./-]+\.css)/g)]
     .map(m => m[1]);
 for (const rel of new Set(cssRefs)) {
@@ -114,6 +116,32 @@ for (const rel of new Set(cssRefs)) {
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.copyFileSync(src, dest);
     fileCount++;
+
+    // 字体集会 @import lib/fonts/display/<slug>.css, 那个 CSS 又引一堆 .woff2 分片。
+    // 顺着这条链把用到的字体文件挑出来 —— 中文字体动辄 100 个分片 5MB, 不能整目录搬。
+    if (!rel.startsWith('font-sets/')) continue;
+    const setCss = fs.readFileSync(src, 'utf8');
+    for (const m of setCss.matchAll(/@import url\('\.\.\/\.\.\/lib\/fonts\/display\/([\w.-]+\.css)'\)/g)) {
+        const faceRel  = path.join('fonts', 'display', m[1]);
+        const faceSrc  = path.join(ROOT, 'lib', faceRel);
+        const faceDest = path.join(EXPORT_DIR, 'lib', faceRel);
+        if (!fs.existsSync(faceSrc)) {
+            console.error(`ERROR: 字体集引用的 @font-face 文件不存在: lib/${faceRel}`);
+            process.exit(1);
+        }
+        fs.mkdirSync(path.dirname(faceDest), { recursive: true });
+        fs.copyFileSync(faceSrc, faceDest);
+        fileCount++;
+
+        const faceCss = fs.readFileSync(faceSrc, 'utf8');
+        for (const w of faceCss.matchAll(/url\('\.\/([\w.-]+\.woff2)'\)/g)) {
+            fs.copyFileSync(
+                path.join(path.dirname(faceSrc),  w[1]),
+                path.join(path.dirname(faceDest), w[1])
+            );
+            fileCount++;
+        }
+    }
 }
 
 // 课程图片素材 (如果有)

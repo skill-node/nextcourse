@@ -1,6 +1,7 @@
 /* ===================================
    Standard 模板 - 默认配色方案
    全屏画布风格，简洁活泼
+   默认字体集: modern-sans (思源黑体) — 可在 course.meta.md 用 fontset: 覆盖
    =================================== */
 
 :root {
@@ -9,36 +10,56 @@
     /* 核心蓝 */
     --primary-dark: #1e3a8a;
     /* 深蓝 */
+    /* h1 文字色。与 --primary-dark 分家: 后者是"深色底", 这个是"标题文字"。 */
+    --text-title: #1e3a8a;
     --secondary: #0f172a;
     /* 深色字 */
-    --accent: #f59e0b;
-    /* 强调黄 */
-    --success: #10b981;
-    /* 成功绿 */
-    --danger: #ef4444;
-    /* 危险红 */
+    /* 三个语义色整体压深一档。它们在 standard.css / components.css 里全都被当【文字色】用
+       (.text-* / .vs-good h3 / .vs-bad h3 / .stat-item__number / .icon-card__icon),
+       而 --bg-slide 是纯白 —— 500 档压在白底上根本读不出来 (R5):
+         amber-500  #f59e0b  2.15:1
+         emerald-500 #10b981 2.54:1
+         red-500    #ef4444  3.76:1
+       换成 700/600 档, 色相一度没动, 只是把明度拉到能当文字用的位置。
+       需要浅色大面积铺底的地方本来就有 --bg-highlight / --bg-vs-good / --bg-vs-bad。 */
+    --accent: #b45309;
+    /* 强调黄 amber-700   5.02:1 */
+    --success: #15803d;
+    /* 成功绿 green-700   5.02:1 */
+    --danger: #dc2626;
+    /* 危险红 red-600     4.83:1 */
 
-    /* ===== 模块封面颜色（10套） ===== */
+    /* ===== 模块封面颜色（10套） =====
+       按 DESIGN-SYSTEM「配色红线 R1-R5」重排。全部取自同一个 Tailwind 色板, 只换档位与顺序。
+
+       1) --text-on-module 是白字, 而原来整族取 500/600 档 —— 十个里八个不达标 (R4),
+          最差的 lime-500 只有 1.98:1。判断顺序应该是"先定文字色明暗, 再选模块色档位":
+          白字 → 模块底必须够深 → Tailwind 700 档。m1/m2 本来就够深, 原样保留。
+       2) 原 m4 = --accent、m8 = --danger, 且 m8 是唯一的红却排在第 8 位 (R1/R2)。
+          现在语义色不再被占用, 唯一的红挪到末位。
+       3) 顺序按色相家族交替, 相邻两位最小差 58°。 */
     --module-1: #2563eb;
-    /* 蓝色 - Primary Blue */
-    --module-2: #0f172a;
-    /* 深灰 - Dark Slate */
-    --module-3: #059669;
-    /* 绿色 - Emerald */
-    --module-4: #f59e0b;
-    /* 橙色 - Amber */
-    --module-5: #8b5cf6;
-    /* 紫色 - Violet */
-    --module-6: #ec4899;
-    /* 粉色 - Pink */
-    --module-7: #14b8a6;
-    /* 青色 - Teal */
-    --module-8: #ef4444;
-    /* 红色 - Red */
-    --module-9: #6366f1;
-    /* 靛蓝 - Indigo */
-    --module-10: #84cc16;
-    /* 黄绿 - Lime */
+    /* 蓝   blue-600 = --primary   L*46  白字 5.17:1 */
+    --module-2: #047857;
+    /* 翠绿 emerald-700            L*44  白字 5.48:1 */
+    --module-3: #a16207;
+    /* 芥黄 yellow-700             L*47  白字 4.92:1
+       色相 35° 落在红区边界上, 但 C*57 低于高彩度红的 60 —— 它是芥末黄不是橘红 */
+    --module-4: #7e22ce;
+    /* 紫   purple-700             L*38  白字 6.98:1 */
+    --module-5: #0f766e;
+    /* 青绿 teal-700               L*44  白字 5.47:1 */
+    --module-6: #be185d;
+    /* 玫红 pink-700               L*42  白字 6.04:1 */
+    --module-7: #4338ca;
+    /* 靛   indigo-700             L*35  白字 7.90:1 */
+    --module-8: #4d7c0f;
+    /* 黄绿 lime-700               L*47  白字 4.99:1 */
+    --module-9: #0f172a;
+    /* 深板岩 slate-900 = --secondary  L*8  白字 17.85:1 —— 十个饱和色里的中性喘息位 */
+    --module-10: #b91c1c;
+    /* 红   red-700                L*40  白字 6.47:1 —— 唯一的高彩度红, 按 R1 固定在末位。
+       不等于 --danger #dc2626 */
 
     /* ===== 背景 ===== */
     --bg-page: #f1f5f9;
@@ -75,6 +96,10 @@
     /* 次要文字 */
     --text-inverse: #ffffff;
     /* 反色文字 */
+    /* 模块封面(全屏彩色底)上的文字。与 --text-inverse 分开:
+       后者是"深色底上的文字", 这个是"10 个模块色底上的文字"。
+       白字压中等明度纯色底 */
+    --text-on-module: #ffffff;
     --text-tag: #1e3a8a;
     /* 标签文字 */
 
@@ -86,21 +111,9 @@
     --footer-height: 60px;
 }
 
-/* ===== 模块封面白色文字 ===== */
-.module-cover {
-    color: #ffffff !important;
-}
-
-.module-cover h1,
-.module-cover h2,
-.module-cover h3,
-.module-cover p {
-    color: #ffffff !important;
-}
-
 /* ===== 卡片样式 ===== */
 .card-primary {
-    background: #2563eb !important;
+    background: var(--primary);
 }
 
 .card-primary h3,
@@ -108,11 +121,11 @@
 .card-primary ul,
 .card-primary ol,
 .card-primary li {
-    color: #ffffff !important;
+    color: var(--text-inverse);
 }
 
 .card-secondary {
-    background: #0f172a !important;
+    background: var(--secondary);
 }
 
 .card-secondary h3,
@@ -120,5 +133,5 @@
 .card-secondary ul,
 .card-secondary ol,
 .card-secondary li {
-    color: #ffffff !important;
+    color: var(--text-inverse);
 }

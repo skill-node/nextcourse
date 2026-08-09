@@ -58,14 +58,30 @@ function parseFrontmatter(content) {
     return fm;
 }
 
+// 配色 → 默认字体集。字体与配色是两根正交的轴，但每套配色有个「原配」搭档；
+// course.meta.md 写 fontset: 可以覆盖（例如给严肃课程配 editorial-serif）。
+// 这份映射与各配色文件头注释里的「默认字体集」保持一致。
+const DEFAULT_FONT_SET = {
+    'bold-signal':      'impact-sans',
+    'creative-voltage': 'voltage-sans',
+    'dark-botanical':   'garamond-serif',
+    'notebook-tabs':    'didone-serif',
+    'swiss-modern':     'grotesk-sans',
+    'dark-ocean':       'modern-sans',
+    'warm-sand':        'modern-sans',
+    'standard-default': 'modern-sans',
+};
+
 const meta     = parseFrontmatter(fs.readFileSync(META_PATH, 'utf8'));
 const title    = meta.title    || courseName;
 const template = meta.template || 'standard';
 const theme    = meta.theme    || 'standard-default';
+const fontSet  = meta.fontset  || DEFAULT_FONT_SET[theme] || 'modern-sans';
 
-// theme / template 必须对应实际存在的 CSS 文件，否则 deck 会静默无样式
+// theme / template / fontset 必须对应实际存在的 CSS 文件，否则 deck 会静默无样式
 const themeCss    = path.join(ROOT, 'shared_styles', 'color-schemes', `${theme}.css`);
 const templateCss = path.join(ROOT, 'shared_styles', 'themes', `${template}.css`);
+const fontSetCss  = path.join(ROOT, 'shared_styles', 'font-sets', `${fontSet}.css`);
 if (!fs.existsSync(themeCss)) {
     const available = fs.readdirSync(path.join(ROOT, 'shared_styles', 'color-schemes'))
         .filter(f => f.endsWith('.css')).map(f => f.replace(/\.css$/, '')).join(', ');
@@ -75,6 +91,13 @@ if (!fs.existsSync(themeCss)) {
 }
 if (!fs.existsSync(templateCss)) {
     console.error(`ERROR: template "${template}" 不存在 (course.meta.md), 可选: standard`);
+    process.exit(1);
+}
+if (!fs.existsSync(fontSetCss)) {
+    const available = fs.readdirSync(path.join(ROOT, 'shared_styles', 'font-sets'))
+        .filter(f => f.endsWith('.css')).map(f => f.replace(/\.css$/, '')).join(', ');
+    console.error(`ERROR: fontset "${fontSet}" 不存在 (course.meta.md)`);
+    console.error(`       可选: ${available}`);
     process.exit(1);
 }
 
@@ -104,6 +127,7 @@ const tmpl = fs.readFileSync(TMPL_PATH, 'utf8');
 const deck = tmpl
     .replace(/\{\{COURSE_TITLE\}\}/g,    escapeHtml(title))
     .replace(/\{\{COLOR_SCHEME\}\}/g,    theme)
+    .replace(/\{\{FONT_SET\}\}/g,        fontSet)
     .replace(/\{\{TEMPLATE\}\}/g,        template)
     .replace(/\{\{SLIDES_CONTENT\}\}/g,  () => slidesContent);
 
@@ -112,6 +136,7 @@ fs.writeFileSync(DECK_PATH, deck, 'utf8');
 console.log(`\nCourseFlow Build — ${courseName}`);
 console.log(`${'─'.repeat(40)}`);
 console.log(`  Theme    : ${theme}`);
+console.log(`  Font set : ${fontSet}${meta.fontset ? '' : ' (配色默认)'}`);
 console.log(`  Template : ${template}`);
 console.log(`  Slides   : ${slideFiles.length}`);
 console.log(`  Output   : ${DECK_PATH}`);

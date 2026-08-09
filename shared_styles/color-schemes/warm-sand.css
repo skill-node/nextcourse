@@ -2,6 +2,7 @@
    暖沙配色方案 (Warm Sand Color Scheme)
    实际观感: 米白底 + 紫(primary)/绿(secondary)点缀的商务浅色
    适用于: 企业管理/商业课、柔和护眼场景
+   默认字体集: modern-sans (思源黑体) — 可在 course.meta.md 用 fontset: 覆盖
    =================================== */
 
 :root,
@@ -11,24 +12,53 @@
     /* 紫罗兰 - 主色 */
     --primary-dark: #5b21b6;
     /* 深紫 */
-    --secondary: #059669;
-    /* 翠绿 - 辅助色 */
-    --accent: #ea580c;
-    /* 橙红 - 强调色 */
+    /* h1 文字色。与 --primary-dark 分家: 后者是"深色底", 这个是"标题文字"。 */
+    --text-title: #5b21b6;
+    --secondary: #047857;
+    /* 翠绿 - 辅助色。emerald-600 #059669 在米白底上只有 3.53:1,
+       而它被当文字色用(.text-secondary / 统计数字 / 图标卡), 压到 700 档 5.13:1 (R5) */
+    --accent: #c2410c;
+    /* 橙红 - 强调色。同上, orange-600 #ea580c 只有 3.33:1, 压到 700 档 4.85:1 (R5) */
     --danger: #dc2626;
     /* 红色 - 警示色 */
+    --success: #15803d;
+    /* 深绿 - 成功色。原先根本没定义, 导致 standard.css 的 .vs-good 标题 /
+       .check-list 对勾 / .text-success 三处 var(--success) 全部解析失败。
+       比 --secondary(#059669) 更深, 保证白底上正文级对比度 */
 
-    /* 模块封面颜色（10套）*/
+    /* 模块封面颜色（10套）
+       按 DESIGN-SYSTEM「配色红线 R1-R4」重排。这套配色是 Tailwind 系的珠宝色点在米白底上,
+       取值全部留在同一个色板里, 只换档位与顺序。
+
+       1) 原来整族取 Tailwind 600 档, 配 --text-on-module 白字普遍只有 3.5~4.4:1,
+          十个里七个不达标 (R4)。整体压到 700 档, 全部 5.4:1 以上。
+          唯一留在 600 档的是 module-1 —— violet-600 白字 5.70:1 本来就够, 且它就是 --primary,
+          按惯例第一个模块用品牌色。
+       2) 原 m3 = m8 = --accent 橙红 #ea580c（既重复又占用语义色）、m5 = --danger 红。
+          三个高彩度红全部撤出, 只在末位留一个 red-700 (R1/R2/R3)。
+       3) 顺序按色相家族交替: 紫→绿→蓝→品红→青绿→靛→青→黄绿→中性→红,
+          相邻两位色相至少差 50°, 翻章看得出换色。 */
     --module-1: #7c3aed;
-    --module-2: #059669;
-    --module-3: #ea580c;
-    --module-4: #6366f1;
-    --module-5: #dc2626;
-    --module-6: #0891b2;
-    --module-7: #c026d3;
-    --module-8: #ea580c;
-    --module-9: #0d9488;
-    --module-10: #8b5cf6;
+    /* violet-600  = --primary   L*43  白字 5.70:1 */
+    --module-2: #047857;
+    /* emerald-700               L*44  白字 5.48:1 */
+    --module-3: #1d4ed8;
+    /* blue-700                  L*39  白字 6.70:1 */
+    --module-4: #a21caf;
+    /* fuchsia-700               L*41  白字 6.32:1 */
+    --module-5: #0f766e;
+    /* teal-700                  L*44  白字 5.47:1 */
+    --module-6: #4338ca;
+    /* indigo-700                L*35  白字 7.90:1 */
+    --module-7: #0e7490;
+    /* cyan-700                  L*45  白字 5.36:1 */
+    --module-8: #92400e;
+    /* amber-800  暖棕。撤掉三个橙红后整族只剩冷色, "暖沙"的暖只剩米白底了,
+       在这里补一个暖色回来。C*54 < 60, 不算高彩度红  L*37  白字 7.09:1 */
+    --module-9: #44403c;
+    /* stone-700 中性喘息, 与 --text-heading 同色系  L*27  白字 10.27:1 */
+    --module-10: #b91c1c;
+    /* red-700  唯一的高彩度红, 按 R1 固定在末位。不等于 --danger #dc2626  白字 6.47:1 */
 
     /* 背景色 */
     --bg-page: #faf7f2;
@@ -38,6 +68,23 @@
     --bg-code: #292524;
     /* 代码块背景 - 深棕 */
     --bg-header: linear-gradient(90deg, #5b21b6 0%, #7c3aed 100%);
+
+    /* 以下 8 个令牌原先缺失, 而 standard.css / components.css 是裸用 var() 无兜底,
+       等于这些规则在本配色下静默失效:
+         --bg-slide  → 每一页的 background-color 都解析不出来, 只是碰巧透出 body 才没露馅
+         --bg-highlight → highlight-box / callout / key-takeaway 一律透明底
+         --bg-tag / --text-tag → tag 与 badge 无底色
+         --bg-vs-* / --border-vs-* → 好坏对比框没有色彩区分 */
+    --bg-slide: #faf7f2;
+    /* 单页背景 - 与页面底同色 */
+    --bg-highlight: rgba(124, 58, 237, 0.08);
+    /* 高亮框底 - 主色淡染 */
+    --bg-tag: rgba(124, 58, 237, 0.12);
+    --text-tag: #7c3aed;
+    --bg-vs-good: rgba(21, 128, 61, 0.08);
+    --bg-vs-bad: rgba(220, 38, 38, 0.08);
+    --border-vs-good: rgba(21, 128, 61, 0.28);
+    --border-vs-bad: rgba(220, 38, 38, 0.28);
 
     /* 卡片背景色（带色调） */
     --bg-card-primary: #f5f3ff;
@@ -52,12 +99,20 @@
     /* 文字色 */
     --text-heading: #44403c;
     /* 标题文字 - 深棕灰 */
-    --text-body: rgba(68, 64, 60, 0.75);
-    /* 正文文字 */
-    --text-muted: rgba(68, 64, 60, 0.45);
-    /* 弱化文字 */
+    /* 文字三档整体下压。原来 muted 是 α0.45, 压在米白底上只有 2.30:1, 注释和出处基本看不清;
+       而 body 的 α0.75 已经贴着 4.5:1 的线, muted 没有下探空间。
+       现在三档拉成 L* 27 / 35 / 47, 全部达标且彼此分得开 ——
+       原来的 body(α0.75) 正好降级成新的 muted。 */
+    --text-body: rgba(68, 64, 60, 0.90);
+    /* 正文文字  L*35  7.24:1 */
+    --text-muted: rgba(68, 64, 60, 0.75);
+    /* 弱化文字  L*47  4.73:1 */
     --text-inverse: #ffffff;
     /* 反色文字 */
+    /* 模块封面(全屏彩色底)上的文字。与 --text-inverse 分开:
+       后者是"深色底上的文字", 这个是"10 个模块色底上的文字"。
+       白字压中等明度纯色底 */
+    --text-on-module: #ffffff;
     --text-code: #fafaf9;
     /* 代码文字 */
     --text-code-accent: #34d399;
@@ -80,14 +135,3 @@
     --glass-border: rgba(124, 58, 237, 0.2);
 }
 
-/* ===== 模块封面白色文字 ===== */
-.module-cover {
-    color: #ffffff !important;
-}
-
-.module-cover h1,
-.module-cover h2,
-.module-cover h3,
-.module-cover p {
-    color: #ffffff !important;
-}
