@@ -8,14 +8,16 @@
 
 ## 如何引用设计系统
 
-每个 `slides/*.html` 片段会由 `build.js` 组装进 `deck.html`,deck.html 已包含以下 CSS(按此顺序):
+每个 `slides/*.html` 片段会由 `build.js` 组装进 `deck.html`,deck.html 已包含以下 CSS
+(**顺序即优先级,越靠后权力越大**,详见下面的「样式层级」):
 
 ```
 shared_styles/base_layout.css
-shared_styles/color-schemes/<theme>.css
+shared_styles/themes/<template>.css
 shared_styles/tokens.css
-shared_styles/themes/standard.css
 shared_styles/components.css
+shared_styles/color-schemes/<theme>.css
+shared_styles/font-sets/<fontset>.css
 shared_styles/animations.css
 ```
 
@@ -33,10 +35,38 @@ shared_styles/animations.css
 | `var(--bg-code)` | `var(--text-code)` | code-block |
 | `var(--bg-vs-bad)` | `var(--text-body)` | vs-bad 容器内正文 |
 | `var(--bg-vs-good)` | `var(--text-body)` | vs-good 容器内正文 |
-| `var(--primary)` | `var(--text-inverse)` | card-primary、module-divider、case-study__panel--outcome |
-| `var(--module-N)` | `var(--text-inverse)` | module-divider 彩色章节页 |
+| `var(--primary)` | `var(--text-inverse)` | card-primary、case-study__panel--outcome |
+| `var(--module-N)` | `var(--text-on-module)` | module-divider 彩色章节页 |
 
 `components.css` 的 §0b 已为 `standard.css` 的缺口补上了显式 color 声明。新组件请严格遵守此表。
+
+> **注意 `color: inherit` 的起点。** reveal.css 给 body 挂了 `.reveal-viewport { color: #000 }`,
+> 类选择器压过 `standard.css` 的 `body { color: … }`。§0b 已在 `.reveal .slides > section` 上
+> 显式落了 `var(--text-heading)`，继承链才有正确起点；不要移除这条，否则所有靠 inherit 取色的
+> 组件（如 `.workflow-node__label`）在深色配色下会变成黑字贴黑底。
+
+---
+
+## 内容栏宽原则
+
+> **同一页上下叠放的块组件必须等宽**，否则边缘参差，读起来像两套东西。
+
+幻灯片级块组件（直接放在 `section` 下那一层）一律：
+
+```css
+width: 100%;
+max-width: var(--content-max-width);   /* tokens.css，默认 80rem */
+```
+
+已按此收敛的组件：`grid-4` `layout-text-image` `concept-card` `stats-wall` `timeline`
+`quadrant` `case-study` `table-compare` `key-takeaway` `pill-list` `callout`
+`highlight-box` `workflow`。
+
+唯一例外是 `.quote-slide`（68rem）——金句刻意收窄，单独占一页，不与别的组件并排。
+
+**左侧色条类组件**（`callout` / `concept-card__example` / `highlight-box` / `key-takeaway__next`）
+统一用 `border-radius: 0 var(--radius-md) var(--radius-md) 0`：左直角右圆角。
+四角全圆会让左边的色条看着是弧线，与相邻的同类块对不上。
 
 ---
 
@@ -44,8 +74,10 @@ shared_styles/animations.css
 
 | 令牌 | 语义 |
 |---|---|
-| `var(--primary)` | 主色 — 标题、强调、数字、边框 |
-| `var(--primary-dark)` | 深主色 — 封面标题、深色背景 |
+| `var(--primary)` | 主色 — 强调、数字、边框 |
+| `var(--primary-dark)` | 深主色 — **只作背景**（table-compare 首列表头等），不作文字色 |
+| `var(--text-title)` | h1 文字色（封面标题、结语大标题） |
+| `var(--text-on-module)` | 模块封面（全屏彩色底）上的文字 |
 | `var(--secondary)` | 辅助色 — 示例、tip、时间轴结束端 |
 | `var(--accent)` | 强调色 — 警示、callout、次级强调 |
 | `var(--danger)` | 危险色 — vs-bad、错误 |
@@ -62,6 +94,47 @@ shared_styles/animations.css
 
 ---
 
+## 配色红线 (R1–R4)
+
+> 面向 **改 `color-schemes/*.css` 的人**，不是写 slide 的人。
+> 四条都由展板自动体检：`node courseflow.js themes` → 打开 `theme-gallery/<主题>.html`
+> → 「体检」区必须归零。
+
+**R1 · 全屏红色只留一次，且放末位**
+全屏铺色的页只有三类：封面、十个模块封面、封底。其中红/橘红家族
+（HSL 色相 `≤35°` 或 `≥340°` 且饱和度 `>25%`）最多允许 **1 个**，且必须是
+`--module-10`。授课时整屏红色过于刺激，连着翻到几次会让人疲劳；但完全没有红
+又丢掉了配色的性格，所以留一个、放在最少被课程用到的末位。
+*课程侧要用，直接在该页写 `class="module-10"` 即可，属于个性化微调。*
+注意：这条只管**全屏底色**。`--primary` / `--accent` / `--danger` 本身是不是红色不受限制
+（swiss-modern 的红就是它的身份），红色照常出现在标题、数字、边框、callout 上。
+
+**R2 · 模块色不得占用语义色**
+`--module-*` 不得与 `--danger` / `--success` 精确同色；与 `--accent` 同色最多 1 处。
+学员在一份 deck 里反复看到某个色代表"错误 / 正面 / 警示"，突然拿它当章节封面会串味。
+与 `--primary` / `--primary-dark` / `--secondary` 同色是惯例，不受限。
+
+**R3 · 十个模块色两两不得完全相同**
+否则翻到新模块时看不出换了章。
+
+**R4 · 全屏页标题对比度 ≥ 4.5:1**
+比 WCAG 大字的 3:1 严一档 —— 会议室投影 + 环境光下 3:1 会糊。
+量的是「实际渲染出来的标题色 vs 实际渲染出来的底色」，不是令牌的字面值。
+
+**R5 · 语义色必须能当文字用**
+`--primary` / `--secondary` / `--accent` / `--success` / `--danger` 落在 `--bg-slide` 上要 ≥4.5:1。
+这五个在 `standard.css` / `components.css` 里全都被当**文字色**引用——`.text-*`、
+`.vs-good h3` / `.vs-bad h3`、`.stat-item__number`、`.icon-card__icon`。
+不达标不会报错，只会让那些规则**看不见**（notebook-tabs 的五个粉彩语义色一度只有 1.6:1）。
+需要大面积铺色时用 `--bg-vs-good` / `--bg-vs-bad` / `--bg-highlight` 这类填充令牌，
+或在配色文件里单独覆盖 `.card-*`，**不要**为了铺色把语义色调浅。
+
+**必备令牌**
+`themes/` 和 `components/` 里凡是裸用 `var(--x)`（不写兜底值）的令牌，配色必须全部定义。
+少一个不会报错，只会让那条规则**静默失效**。`node courseflow.js themes` 会在结尾审计并退出码报错。
+
+---
+
 ## 间距令牌速查 (tokens.css 中定义)
 
 `--space-1(4px)` `--space-2(8px)` `--space-3(12px)` `--space-4(16px)` `--space-5(20px)` `--space-6(24px)` `--space-8(32px)` `--space-10(40px)` `--space-12(48px)` `--space-16(64px)`
@@ -72,9 +145,28 @@ shared_styles/animations.css
 
 ```
 .animate-fade-up    .animate-fade-left    .animate-fade-right    .animate-zoom-in
+.stagger-1 … .stagger-12                  （交错延迟，每级 0.1s）
 ```
 
-Reveal.js 逐步显示: 在元素上加 `class="fragment"`,可叠加动画类。
+**两套机制，触发路径不同，不要混淆：**
+
+| | class | 触发时机 |
+|---|---|---|
+| 翻页即播 | `animate-*` + `stagger-*` | CSS 的 `section.present`，切到这页自动跑 |
+| 按键才出 | `fragment`（Reveal.js 原生） | 按空格 / → / 点击，推进一次出一个 |
+
+同一页里不同元素各用各的完全没问题，这是推荐用法——A、B 翻页自动飞入，
+C、D 按空格再逐个出。两组选择器互不匹配，不会互相干扰。
+
+⚠️ **但同一个元素不能同时挂这两类 class。**
+`.reveal .slides section.present .animate-fade-up` 特异性 (0,4,1) 压过 reveal.css 的
+`.reveal .fragment:not(.custom){opacity:0}` (0,2,0)：翻页瞬间 opacity 就被解到 1，
+元素只剩 reveal 的 `visibility:hidden` 藏着，按键出现时是硬切、没有过渡。
+要「按键触发 + 平滑」，用 `class="fragment smooth"`（`.smooth` / `.bounce` 是
+animations.css 里专为 fragment 准备的缓动增强）。
+
+`animate-*` / `stagger-*` 不必手写，`courseflow animate <name>` 按组件结构批量生成，
+`--strip` 一键还原；它不会碰你手写的 `fragment`。见 CLI_MANUAL.md。
 
 ---
 
@@ -90,6 +182,147 @@ Reveal.js 逐步显示: 在元素上加 `class="fragment"`,可叠加动画类。
 | `warm-sand` | 米白 + 紫绿点缀 — 商务浅色、HR 培训 |
 | `notebook-tabs` | 奶油 + 衬线粉彩 — 工作坊、互动 |
 | `standard-default` | 白底学术蓝 — 严肃、学术、安全通用 |
+
+---
+
+## 样式层级
+
+> **顺序即优先级。** 同特异性下后加载者胜，`!important` 也一样。层级排错会让整层声明静默失效——
+> 早期配色排在主题之前，各配色为 h1/h2 写的 `font-weight` 和 `--font-body` 就是这么全体阵亡的。
+
+```
+1. lib/dist/reveal.css        第三方运行时基线
+2. base_layout.css            画布与响应式变量
+3. themes/<template>.css      通用主题：所有配色共享的排版与结构
+4. tokens.css                 设计令牌
+5. components.css             组件库
+6. color-schemes/<scheme>.css 配色特化：颜色 + 字重/字距/斜体
+7. font-sets/<set>.css        字体族最终裁定
+8. animations.css             纯工具类
+```
+
+权威定义在 `templates/master_template.html` 的注释里，改动前先读那段。
+
+两条推论：
+
+- **越具体的层排越后。** 配色比通用主题具体，字体集比配色更专一，所以是这个顺序。
+- **CSS 自定义属性在「使用时」解析**，不是声明时。所以把 `:root` 令牌块挪到后面
+  不会影响任何 `var(--*)` 消费方——重排只影响真正的属性规则。
+
+### `!important` 使用规约
+
+全库已清理完毕：`themes/standard.css` 55→7、`color-schemes/*.css` 91→5、`components.css` 54→2、
+`font-sets/*.css` 8→0、`animations.css` 10→9、`base_layout.css` 3→3，**合计 221 → 26**。
+**新写的规则默认不带 `!important`**，只有两类例外：
+
+| 类别 | 场景 | 现存位置 |
+|---|---|---|
+| **A. 压行内样式 / 压第三方的高特异性选择器** | 别无他法 | ① `standard.css` 的 `.reveal .slides>section { display: flex !important }`——reveal.js 给每个 section 写行内 `style="display:block"`；② 5 套深色配色的 `body { background: … !important }`——reveal.js 把 `.reveal-viewport` 挂在 `<body>` 上，reveal.css 的 `.reveal-viewport{background-color:#fff}` (0,1,0) 打得过 `body` (0,0,1)；③ `base_layout.css` 隐藏 reveal 自带控件 + `prefers-reduced-motion` 降级（无障碍惯例，必须压一切） |
+| **B. 工具类** | 语义上就是「最后一句话」，且特异性天生偏低 | `standard.css` 的 `.text-*` / `.font-bold` 6 条；`components.css` 的 `.text-secondary` / `.text-inverse` 2 条；`animations.css` 的 `.stagger-*`（要压同文件 `.reveal .slides section .animate-fade-up` 的 `transition` 简写）和 `.fragment.smooth/.bounce` |
+
+需要压过别的规则时用**特异性**和**文件内顺序**，不要用 `!important`：
+
+- 加 `.reveal ` 前缀把 (0,1,1) 提到 (0,2,1)——例如 `.reveal .cover-slide h2` 压 `.reveal h2`。
+- 选择器要写到能赢的长度——配色层想改整页底色得写 `.reveal .slides>section.cover-slide` (0,3,1)，
+  光写 `.cover-slide` (0,1,0) 赢不了 standard.css 的 `.reveal .slides>section` (0,2,1)。
+- 同特异性时靠先后顺序——`standard.css` 里 `.card-primary h3` 必须排在 `.vs-good h3` **之后**，
+  因为 slide 里存在 `.card-primary > .vs-good` 嵌套，卡片的 `--text-on-*` 配对令牌要有最终解释权。
+
+**为什么 `!important` 是有害的：** 它一旦写下，后面每一层都必须同样端出 `!important` 才压得动，
+而后面那层写的通常是 `.card-primary` (0,1,0) 这种低特异性选择器，端出来照样输——结果不是「覆盖失败」
+而是**静默失效**，没有任何报错。清理时挖出来的一串就是这么来的：dark-botanical 的渐变卡片、
+`.key-takeaway__title` / `.case-study__title` / `.concept-card__term` 的全部组件排版、
+`.text-muted` 工具类、notebook-tabs 的模块分隔页底色、swiss-modern 的 60px 封面短线。
+
+**另一个同样的坑是「最后一层写死具体值」**：`animations.css` 曾有一条
+`.reveal .slides section.present .divider { width: 100px }` (0,3,1)，作为最后一层把宽度焊死，
+逼得三套配色各自用 `!important` 抢回来。animations.css 是纯工具层，不该参与配色博弈。
+
+### 怎么判断一条 `!important` 还「承重」
+
+把它单独去掉，用 headless Chrome 重新 dump 全部元素的 `getComputedStyle`，与改动前逐字段比对
+（`shot.js` 同款手法，无差异 = 摆设）。这套 diff 比截图敏感得多，还能一眼看出「哪条规则终于生效了」。
+
+⚠️ **两个已知的假阴性，别被骗**：
+1. **dump 没取的属性测不出来**——最初的属性表里没有 `transition*`，于是 `animations.css`
+   的 `.stagger-*` 被误判成摆设。
+2. **课件里没用到的 markup 测不出来**——`.fragment.smooth` / `.fragment.bounce` 目前仍没有
+   任何课件在用，那几条无论如何都测不出差异。这类要靠人读规则判断。
+   （`.stagger-*` 曾经也在这一列，自 `courseflow animate` 上线后 workbuddy-insurance
+   已大量使用，不再是盲区。）
+
+### components.css 的「一对规则」写法
+
+`components.css` 的 BEM 类名是 (0,1,0)，天生压不过 `standard.css` 的 `.reveal p` / `.reveal h2` (0,1,1)，
+从前靠 `!important` 硬压。现在改成把**只有那几条必须赢的声明**单独拆进带 `.reveal ` 前缀的规则：
+
+```css
+.callout          { background: …; padding: …; }   /* 盒子样式，留在 (0,1,0) */
+.reveal .callout  { color: var(--text-body); }     /* 会和 .reveal p 撞车的，提到 (0,2,1) */
+```
+
+**别把两条合并回去。** 合并等于把盒子样式也一起提到 (0,2,1)，实测会踩两个坑：
+
+- `.callout--tip` / `--warning` / `--insight` 的背景色被 `.reveal .callout` 的 background 压掉，
+  三种语气的标注框变成同一个颜色；
+- `.table-compare` 的斑马行（`tbody tr:nth-child(even) td`）被 `.reveal .table-compare td` 压掉。
+
+新增组件按同样方式写：盒子样式留裸类名，只有 `color`（偶尔 `font-size` / `font-weight` / `margin`）才加前缀。
+
+**判断哪些属性要加前缀**：看这个组件的标签是什么。`.reveal h1/h2/h3` 管着
+`font-size / font-weight / color / line-height / margin-bottom`，`.reveal p, .reveal li` 管着
+`font-size / line-height / color / margin-bottom`——组件如果是这几个标签之一，
+凡是想覆盖这几个属性的声明都得进带前缀的那条，否则静默失效。
+`.concept-card__def` 就踩过这个坑：它是 `<p>`，`font-size` 的 clamp 上限 1.25rem 一直被
+`.reveal p` 的 1.1rem 压着，`margin: 0` 被 0.8rem 顶开，「定义」这一行在概念卡里没了分量。
+（已修）
+
+---
+
+## 字体
+
+字体是**独立于配色的一根轴**：配色决定「什么颜色」，字体集（`shared_styles/font-sets/*.css`）
+决定「什么字」。`course.meta.md` 里写 `fontset: <名称>` 即可换，不写则用配色的默认搭档
+（映射见 `build.js` 的 `DEFAULT_FONT_SET`，同时登记在各配色文件头注释里）。
+
+### 现有字体集
+
+| 名称 | 标题 | 正文 | 气质 | 默认配色 |
+|---|---|---|---|---|
+| `impact-sans` | Archivo Black + 思源黑体 | 思源黑体 | 冲击力、工具/技术培训 | bold-signal |
+| `grotesk-sans` | Archivo + 思源黑体 | 思源黑体 | 瑞士网格、理性、战略 | swiss-modern |
+| `voltage-sans` | Syne + 思源黑体 | 思源黑体 | 创意、年轻受众 | creative-voltage |
+| `modern-sans` | 思源黑体 | 思源黑体 | 现代中性，纯中文最稳 | dark-ocean / warm-sand / standard-default |
+| `editorial-serif` | 思源宋体 | 思源黑体 | 编辑感、克制、顾问气质 | —（skillnode 设计系统同款） |
+| `garamond-serif` | Cormorant + 思源宋体 | 思源黑体 | 优雅衬线、高端质感 | dark-botanical |
+| `didone-serif` | Bodoni Moda + 思源宋体 | 思源黑体 | 高对比衬线、时装/品牌感 | notebook-tabs |
+| `system` | 系统字体 | 系统字体 | 零下载，快速预览 | — |
+
+思源黑体 = Noto Sans SC，思源宋体 = Noto Serif SC，均为 SIL OFL 开源**可变字体**（单文件覆盖全字重）。
+
+### 三条铁律
+
+1. **禁止 CDN `@import`。** 课件要在无外网的教室里放，CSS `@import` 是渲染阻塞资源——
+   遇到「连了 wifi 但出不去」的网络会等到超时才出画面（实测 34s vs 3s）。一律引
+   `lib/fonts/display/` 下的本地文件。
+2. **中文字体必须显式写进栈里。** 拉丁字体没有汉字字形；只写 `'Archivo Black', sans-serif`
+   会让中文标题落到浏览器的通用默认字体，Mac 一套 Windows 一套，不受控。
+3. **衬线配衬线，非衬线配非衬线。** 拉丁 Display 是衬线，中文 Display 就得走宋体一路。
+   CSS 没法根据配色自动挑中文字体，所以字体集是**整套配对**，不拆成「配色管拉丁、字体集管中文」。
+
+### 本地字体资产
+
+`lib/fonts/display/`，共 11 MB：拉丁 Display 各 1 个 latin 分片（9.6–45 KB），
+两套中文各 101 个 unicode-range 分片（思源黑体 4.3 MB / 思源宋体 5.7 MB）。
+分片机制让浏览器**只下载页面真正用到的那几片**，一门课通常 10~20 片。
+
+新增字体：改 `vendor-fonts.js` 顶部的 `FAMILIES`（中文字体加 `sliced: true`），
+跑 `node vendor-fonts.js`（需联网），再写一个新的 `font-sets/*.css`。
+`export.js` 整目录拷贝 `lib/fonts/`，交付包自动带上。
+
+**正文不用拉丁 Web 字体。** 课件正文是中文，拉丁正文字体对中文一个字都管不着。
+原来 5 套配色各自 `@import` 的 Space Grotesk / Space Mono / IBM Plex Sans / DM Sans / Nunito
+还因为层级排错而**从未生效过**，已全部删除。
 
 ---
 
@@ -226,7 +459,9 @@ Reveal.js 逐步显示: 在元素上加 `class="fragment"`,可叠加动画类。
 ```
 
 ✅ DO: 步骤 ≤6; 节点用 emoji 或图标; 每步只写动词短语  
-❌ DON'T: 不要在工作流内嵌长段文字
+✅ DO: label 控制在 8 个汉字内 (节点限宽 132px, 超出会自动折行, 3 行以上会显得头重脚轻)  
+❌ DON'T: 不要在工作流内嵌长段文字  
+❌ DON'T: label 里不要手写 `<br>` 强制换行 — 组件已按 132px 自动折行, 手动换行会让各节点高度参差
 
 ---
 
@@ -637,6 +872,80 @@ Reveal.js 逐步显示: 在元素上加 `class="fragment"`,可叠加动画类。
 
 ---
 
+### § 20 图片等式 (.img-equation) — *components.css*
+
+多份原始素材 → 一个成品，用于展示「AI 一次合成」的结果。
+
+```html
+<section>
+  <h2>场景④：图文一次出成品</h2>
+  <div class="img-equation">
+    <figure class="img-equation__item">
+      <img src="assets/src-1.jpg" alt="住院结算单">
+      <figcaption class="img-equation__caption">① 住院结算单</figcaption>
+    </figure>
+    <span class="img-equation__op">+</span>
+    <figure class="img-equation__item">
+      <img src="assets/src-2.jpg" alt="费用明细">
+      <figcaption class="img-equation__caption">② 费用明细</figcaption>
+    </figure>
+    <span class="img-equation__op img-equation__op--eq">=</span>
+    <figure class="img-equation__item img-equation__item--result">
+      <img src="assets/output.jpg" alt="AI 生成的宣传长图">
+      <figcaption class="img-equation__caption">一次生成的宣传长图</figcaption>
+    </figure>
+  </div>
+</section>
+```
+
+✅ DO: 素材 2–3 份（含运算符最多 7 个直接子元素）；成品必须带 `--result`，它比素材大约 1.8 倍
+且有主色描边；caption 控制在一行；素材图先压到 800px 内、成品压到 1100px 内再入库
+❌ DON'T: 不要包 `__inputs` 中间层（会让入场动画退化成整块淡入）；不要用 `--result` 标两张图；
+素材超过 3 份改用 `.grid-4` + 一句结论，等式排不下
+
+尺寸令牌：`--img-equation-input-h` (190px) / `--img-equation-result-h` (340px)，在 `tokens.css`。
+这两个值是「标题 + 等式 + 一个 callout」在 16:9 页面上的上限，再加内容就该拆页。
+
+---
+
+### § 21 提示词对比 (.prompt-compare) — *components.css*
+
+承载**逐字原文**的提示词改前/改后对比。
+
+```html
+<section>
+  <h2>同一个需求，两种提示词</h2>
+  <div class="prompt-compare">
+    <div class="prompt-compare__col prompt-compare__col--before">
+      <div class="prompt-compare__label">❌ 第一次写的</div>
+      <p class="prompt-compare__text">…提示词原文，100~200 字…</p>
+      <div class="prompt-compare__verdict">数字全靠嘴报，三张图没交代分工</div>
+    </div>
+    <div class="prompt-compare__col prompt-compare__col--after">
+      <div class="prompt-compare__label">✅ 改后</div>
+      <p class="prompt-compare__text">…提示词原文…</p>
+      <div class="prompt-compare__verdict">每张图的身份、主次、成品用途全部写死</div>
+    </div>
+  </div>
+</section>
+```
+
+**与 `.vs-box--columns` 的分工**（别混用）：
+
+| | `.vs-box--columns` | `.prompt-compare` |
+|---|---|---|
+| 放什么 | 提炼过的短句要点（≤4 条 li） | 未经改写的提示词原文 |
+| 教学意图 | 讲清「差在哪几个维度」 | 让学员看见真实写法 |
+| 字号 | 1rem | 0.9rem / 行距 1.85 |
+| 密度 lint | 照常检查 | `__text` 豁免 long-paragraph |
+
+✅ DO: 固定两栏（改前在左）；每栏底部用 `__verdict` 落一句判语，这是讲课的落点；
+原文一字不改，包括错别字和口语
+❌ DON'T: 不要放三栏；不要把原文改写成要点（那是 vs-box 的活）；
+`__text` 超过 250 字就该截取核心段落，再长学员读不完
+
+---
+
 ## 组合示例 — 一页内的 B 档自由组合
 
 当没有现成组件时，用基础原子自由组合:
@@ -671,4 +980,21 @@ Reveal.js 逐步显示: 在元素上加 `class="fragment"`,可叠加动画类。
 
 1. 在 `shared_styles/components.css` 末尾添加新组件 CSS (只用 `var(--*)`)
 2. 在本文件对应章节添加 HTML 片段示例 + do/don't
-3. 下次同类内容直接复用, 不要重发明
+3. 若是块级组件, 把类名加进 components.css §N「相邻块组件的垂直呼吸」那张选择器表
+4. 在 `animate-slides.js` 的 `CONTAINER_RULES` / `SOLO_BLOCKS` 补一条入场动画规则
+5. 下次同类内容直接复用, 不要重发明
+
+> 第 3 步的背景：`.reveal .slides>section` 是没有 `gap` 的 flex 列，块间距全靠组件自己的
+> margin。历史上只有 `.workflow` 和 `.highlight-box` 写了外边距，于是两个都没写的组件
+> 相邻会贴死——workbuddy slide-05 的 `.concept-card + .callout` 就撞上过。
+> §N 那条规则是兜底，但它按类名点名，漏登记的新组件享受不到。
+
+> 第 4 步别跳过。漏了不会报错——`courseflow animate` 有通用兜底，
+> 会给这一页的块级子元素挨个打 `fade-up`，并在输出里标 `⚙ 通用兜底`。
+> 页面不会死板，但拿不到「左右对进」「沿流向推进」这类贴合结构的节奏。
+> 看到那个标记，就是在提醒你这里缺一条规则。
+
+> 第 3 步别跳过。漏了不会报错——`courseflow animate` 有通用兜底，
+> 会给这一页的块级子元素挨个打 `fade-up`，并在输出里标 `⚙ 通用兜底`。
+> 页面不会死板，但拿不到「左右对进」「沿流向推进」这类贴合结构的节奏。
+> 看到那个标记，就是在提醒你这里缺一条规则。

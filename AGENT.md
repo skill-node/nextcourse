@@ -16,6 +16,7 @@ CourseFlow/
 ├── courseflow.js         ← 统一 CLI 入口
 ├── build.js              ← 课程组装（courseflow build 内部调用）
 ├── lint-slides.js        ← 样式校验（courseflow lint 内部调用）
+├── animate-slides.js     ← 入场动画批量打入/剥离（courseflow animate 内部调用）
 ├── export.js             ← 离线打包（courseflow export 内部调用）
 ├── templates/
 │   └── master_template.html  ← deck.html 母版（build.js 使用）
@@ -28,7 +29,8 @@ CourseFlow/
 │   ├── components.css
 │   ├── animations.css
 │   ├── themes/standard.css
-│   └── color-schemes/    ← 8 套配色方案
+│   ├── color-schemes/    ← 8 套配色方案（颜色 + 排版特化）
+│   └── font-sets/        ← 8 套字体集（与配色正交，course.meta.md 的 fontset: 指定）
 └── courses/
     └── <course-name>/
         ├── course.meta.md      ← 课程元数据 + 大纲（frontmatter）
@@ -51,6 +53,7 @@ CourseFlow/
 node courseflow.js list                     # 列出所有课程及状态
 node courseflow.js new    <name>            # 初始化新课程目录
 node courseflow.js lint   <name>            # 校验幻灯片样式规范
+node courseflow.js animate <name> [--strip] # 批量打入/剥离组件入场动画（不碰手写 fragment）
 node courseflow.js build  <name>            # 组装生成 deck.html
 node courseflow.js render <name>            # lint + build 一步完成（推荐）
 node courseflow.js export <name> [outdir]   # 打包为可离线演示文件夹
@@ -65,6 +68,7 @@ node courseflow.js shot   <name> [--check]  # 溢出检测 + 逐页截图到 .re
 | `list` | 显示 courses/ 下所有课程，标注 meta/slides/deck/export 完成状态 |
 | `new <name>` | 创建 courses/\<name\>/ 目录结构 + course.meta.md 模板 |
 | `lint <name>` | 扫描 slide-*.html，检查 5 类违规（内联 style / 硬编码色 / 硬编码 RGB / 新字体 / 未注册 class） |
+| `animate <name>` | 按组件结构批量给 slides 打入场动画 class；`--strip` 一键剥离，`--dry` 只报告。幂等，且绝不改动手写的 `fragment`（详见 CLI_MANUAL.md） |
 | `build <name>` | 读 course.meta.md frontmatter + 拼接 slides/ → 生成 deck.html |
 | `render <name>` | lint 通过后再 build，是日常最常用的命令 |
 | `export <name>` | 生成 courses/\<name\>/export/，只含演示必需文件，双击 index.html 即可离线演示 |
@@ -138,6 +142,32 @@ theme: bold-signal
 
 ---
 
+### 流程四：更换字体集
+
+字体是**独立于配色的一根轴**。不写 `fontset` 就用配色的默认搭档；想换就在 frontmatter 里加：
+
+```yaml
+theme: dark-botanical
+fontset: editorial-serif
+```
+
+可选字体集（`shared_styles/font-sets/` 目录下）：
+
+| 名称              | 标题字体              | 气质                          | 默认配色 |
+|-------------------|-----------------------|-------------------------------|----------|
+| `impact-sans`     | Archivo Black + 思源黑体 | 冲击力、工具/技术培训         | bold-signal |
+| `grotesk-sans`    | Archivo + 思源黑体    | 瑞士网格、理性、战略          | swiss-modern |
+| `voltage-sans`    | Syne + 思源黑体       | 创意、年轻受众                | creative-voltage |
+| `modern-sans`     | 思源黑体              | 现代中性，纯中文场景最稳      | dark-ocean / warm-sand / standard-default |
+| `editorial-serif` | 思源宋体              | 编辑感、克制、顾问气质        | —（skillnode 设计系统同款）|
+| `garamond-serif`  | Cormorant + 思源宋体  | 优雅衬线、高端质感            | dark-botanical |
+| `didone-serif`    | Bodoni Moda + 思源宋体 | 高对比衬线、时装/品牌感      | notebook-tabs |
+| `system`          | 系统字体              | 零下载，快速预览              | — |
+
+正文一律思源黑体（`system` 除外）。配对规则与铁律见 DESIGN-SYSTEM.md「字体」。
+
+---
+
 ## 新建课程文件结构
 
 ### `course.meta.md` 格式
@@ -147,6 +177,7 @@ theme: bold-signal
 title: "课程标题"
 template: standard
 theme: bold-signal
+fontset: impact-sans      # 可省略，省略时用配色的默认字体集
 audience: "目标受众描述"
 positioning: "核心价值主张（1句话）"
 outcomes:
