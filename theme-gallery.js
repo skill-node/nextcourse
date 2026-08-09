@@ -339,6 +339,7 @@ function themePage(scheme, all, defaults) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${esc(meta.displayName || id)} · CourseFlow 主题展板</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 
 <!-- 加载顺序与 templates/master_template.html 保持一致，
      这样展板看到的层叠结果就是 deck 里的层叠结果 -->
@@ -531,6 +532,7 @@ function indexPage(all) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CourseFlow 主题展板</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../shared_styles/tokens.css">
 <link rel="stylesheet" href="gallery.css">
 <!-- 只引 @font-face 层：卡片标题按主题的 display 字体渲染，不引入任何 :root/body 规则 -->

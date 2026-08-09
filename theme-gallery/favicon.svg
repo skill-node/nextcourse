@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 和站内左上角字标同款：dark-ocean 的 primary 圆角方块 + 深底的 C -->
+  <rect width="32" height="32" rx="8" fill="#a5b4fc"/>
+  <text x="16" y="17" fill="#0f172a"
+        font-family="Archivo, 'Helvetica Neue', Helvetica, Arial, sans-serif"
+        font-size="20" font-weight="800"
+        text-anchor="middle" dominant-baseline="central">C</text>
+</svg>
