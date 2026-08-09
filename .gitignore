@@ -41,3 +41,7 @@ Thumbs.db
 
 # Claude Code 本机设置 (权限白名单等, 不共享)
 .claude/settings.local.json
+
+# 其他 AI 工具的本机配置 (与 .claude/settings.local.json 同理, 不共享)
+.agents/
+.codex/
