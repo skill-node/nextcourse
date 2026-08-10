@@ -1,5 +1,7 @@
 # NextCourse CLI 操作手册
 
+> [English version →](./CLI_MANUAL.en.md)
+
 ## 快速回答
 
 **修改 slide HTML 后，重建查看效果的命令是：**
@@ -61,13 +63,24 @@ npm run new python-basics
 npm run lint <course-name>
 ```
 
-检查幻灯片是否符合规范：
-- CSS 类名有效性
-- 字体密度警告
-- 颜色对比度
-- 布局规范
+扫描 `slides/*.html`。**只报告，不改文件。**
 
-可选择性修复问题，或仅输出报告。
+**五类违规（任一命中即 exit 1，`render` 会因此中止）：**
+
+| 违规 | 含义 |
+|---|---|
+| `inline-style` | 出现 `style="..."` 属性 |
+| `hardcoded-hex` | `<style>` 块内写死十六进制色值 |
+| `hardcoded-rgb` | `<style>` 块内写死 `rgb()` / `rgba()` |
+| `new-font` | `<style>` 块内声明 `font-family`（应改用 `var(--font-*)` 令牌） |
+| `unknown-class` | 用了未在设计系统登记的 CSS class |
+
+**四类密度警告（报告但不阻断）：** `h2-too-long`（标题 >15 字）、
+`item-too-long`（列表条目 >20 字）、`too-many-items`（单列表 >6 项）、
+`long-paragraph`（段落 >80 字，建议改为列表/组件）。
+
+> 密度阈值按中日韩全角字校准（一字一格）。英文等按词计的语言会大量误报——
+> 只是警告，不会让构建失败。
 
 ---
 
@@ -175,11 +188,16 @@ open courses/python-basics/deck.html
 npm run export <course-name> [outdir]
 ```
 
-生成自包含的演示包：
-- 所有资源已内联（字体、图片、CSS）
-- 包含完整的 Reveal.js 配置
-- 可在任何浏览器打开，无需网络连接
-- 文件大小约 4.4 MB
+生成自包含的演示文件夹：
+- 演示实际用到的资源全部拷进来（Reveal.js、本课那一套字体的分片、图片、CSS），
+  路径改写为相对路径 —— 不是内联进单个 HTML，而是一个可以整体拷走的文件夹
+- 只挑本课用得上的东西：`lib/fonts/display` 下放着全部字体族（含两套 ~5MB 的中文），
+  按本课字体集实际 `@import` 的文件挑，不整目录搬
+- 第三方协议文本一并拷入（Reveal.js 的 `lib/LICENSE`、各字体的 `<slug>.LICENSE.txt`、
+  FontAwesome 的 `LICENSE.txt`）—— MIT 与 SIL OFL 都要求副本随分发物走，
+  交付包是独立副本，见 [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md)
+- 双击 `index.html` 即可演示，无需联网、无需安装
+- 大小取决于字体：含中文字体子集的课约 9–10 MB（自带的 29 页示例课 9.4 MB / 174 个文件）
 
 **可选参数：**
 - `outdir` — 输出目录（默认为 `courses/<course-name>/export/`）
@@ -188,9 +206,14 @@ npm run export <course-name> [outdir]
 ```
 export/
 ├── index.html          （主演示文件）
-├── assets/            （内联的资源）
-└── lib/               （Reveal.js 库）
+├── assets/             （课程图片素材）
+├── shared_styles/      （本课用到的模板 / 配色 / 字体集）
+└── lib/                （Reveal.js + 字体 + 各自的协议文本）
 ```
+
+> 字体缺协议文本会直接让 `export` 失败。新增字体时按
+> [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md)「If you add a font」补上
+> `lib/fonts/display/<slug>.LICENSE.txt`。
 
 **示例：**
 ```bash
@@ -252,9 +275,24 @@ npm run shot <course-name> [--check]
 # 生成所有幻灯片的截图
 npm run shot python-basics
 
-# 仅运行检测，不生成截图
-npm run shot python-basics --check
+# 仅运行检测，不生成截图（走 npm 时以 - 开头的参数要用 -- 转交）
+npm run shot python-basics -- --check
+# 或直接走 CLI，不用 --
+node nextcourse.js shot python-basics --check
 ```
+
+---
+
+#### `themes` — 生成配色 / 字体展板
+```bash
+npm run themes
+```
+
+把 8 套配色 × 8 套字体集渲染成可视化展板，输出 `theme-gallery/index.html`：
+每套配色一页，语义色、模块封面色、字体、组件实景与自动体检摊开在同一页上。
+决定一门课长什么样时先看这里，不必逐个 CSS 文件去读令牌。
+
+不需要课程名参数——它描述的是设计系统本身。
 
 ---
 
@@ -348,6 +386,8 @@ npm run export my-course
 | `export <name>` | 打包交付 | 课程完成后交付 |
 | `notes <name>` | 讲师手册 | 整理演讲备注 |
 | `shot <name>` | 截图检查 | 交付前视觉审查 |
+| `animate <name>` | 打入/剥离入场动画 | 内容定稿后 |
+| `themes` | 配色/字体展板 | 决定视觉风格时 |
 
 ---
 
@@ -358,9 +398,11 @@ npm run export my-course
 # 终端执行
 npm run render my-course
 
-# 浏览器中已打开的 deck.html 会自动刷新（热加载）
-# 或手动按 F5 刷新
+# 然后回浏览器按 F5 / Cmd-R 刷新已打开的 deck.html
 ```
+
+> 没有热加载。`deck.html` 是一个静态文件，`render` 会重写它，但浏览器不会自己知道——
+> 每次都要手动刷新。刷新后 Reveal 会回到第一页，用 URL 里的 `#/12` 可以直接回到某页。
 
 ### 2. 快速编辑循环
 使用编辑器打开 `slides/` 目录，同时在浏览器中打开 `deck.html`：
@@ -388,9 +430,11 @@ npm run render my-course && npm run shot my-course && npm run export my-course
 
 ## 环境要求
 
-- **Node.js** 20.x 或更高版本
-- **npm** 或 **yarn**（用于运行脚本）
-- **Chrome**（仅用于 `shot` 命令）
+- **Node.js** 20.x
+- **零 npm 依赖** —— 整套 CLI 只用 Node 内置模块（`fs` / `path` / `child_process` / `https`），
+  clone 下来不用 `npm install` 就能跑。`npm run *` 只是 `node nextcourse.js *` 的快捷方式，
+  不用 npm 也可以。
+- **Chrome / Chromium / Edge**（仅 `shot` 命令需要；自定义路径用环境变量 `CHROME_PATH`）
 
 ---
 

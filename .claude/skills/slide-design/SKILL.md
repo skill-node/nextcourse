@@ -15,6 +15,14 @@ description: 读取 courses/<name>/course.meta.md，按 Merrill 第一原理逐�
 
 **两阶段、两道人审：** Phase 4 先产出 `slide-plan.md`（纯内容，人审），确认后 Phase 5 才写 HTML（视觉，人审）。**不要跳过 Phase 4 直接写 HTML**——内容问题在 plan 里改一行字，在 HTML 里改要重排版。
 
+## 对话语言
+
+**跟随用户的语言**，本文档是中文写的不代表对话和产出要用中文。
+幻灯片正文、讲师备注（`aside class="notes"`）、`slide-plan.md` 一律跟随
+`course.meta.md` 的语言；class 名和组件名是设计系统的一部分，永远是英文。
+下文所有字数上限（如「≤30 字」「≤20 字」）是按中日韩全角字计的，
+换成英文等按词计的语言时按等宽折算，别照搬字数。
+
 ---
 
 ## Phase 4：学习体验设计 → slide-plan.md（内容审阅关卡）

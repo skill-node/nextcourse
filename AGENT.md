@@ -5,6 +5,18 @@ NextCourse 是一个以 **AI-Native 工作流为核心的课程开发工具**。
 
 整套流程完全 CLI 驱动，任何 agent（Claude Code / OpenClaw / Hermes / 命令行）均可调用。
 
+> **本文档只有中文版**（约 300 行；连同 `DESIGN-SYSTEM.md` 共约 1300 行，全译是另一个量级的工程）。
+> 面向使用者的入口是 [README.md](./README.md)（英文）/ [README.zh-CN.md](./README.zh-CN.md)（中文），
+> CLI 参考两种语言都有：[CLI_MANUAL.md](./CLI_MANUAL.md) / [CLI_MANUAL.en.md](./CLI_MANUAL.en.md)。
+>
+> **语言约定：** 本项目的提示词和文档是中文写的，但**对话与产出跟随用户的语言**。
+> 用户用英文提问，就全程英文，`course.meta.md` 与幻灯片正文也用英文
+> （字段名、CSS class、组件名永远是英文，不随语言变）。
+>
+> 项目为 MIT 协议（[LICENSE](./LICENSE)）；vendored 的 Reveal.js / 字体 / FontAwesome
+> 各有协议，见 [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md)。
+> 改动 `lib/` 或 `export.js` 的拷贝逻辑时先读那一份。
+
 ---
 
 ## 目录结构
@@ -31,7 +43,9 @@ nextcourse/
 │   ├── themes/standard.css
 │   ├── color-schemes/    ← 8 套配色方案（颜色 + 排版特化）
 │   └── font-sets/        ← 8 套字体集（与配色正交，course.meta.md 的 fontset: 指定）
-└── courses/
+├── examples/             ← 随仓库分发的示例课程（脱敏版，入库）
+│   └── ai-agent-insurance/   ← 拷到 courses/ 下即可 render，用法见 README
+└── courses/              ← 用户自己的课程（整个目录 gitignore，不入库）
     └── <course-name>/
         ├── course.meta.md      ← 课程元数据 + 大纲（frontmatter）
         ├── slide-plan.md       ← 每页内容规划（Phase 4 产出，人审内容用）

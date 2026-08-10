@@ -1,7 +1,15 @@
 {
   "name": "nextcourse",
   "version": "2.0.0",
-  "description": "Agent-Native 课程开发工具 — 从大纲到 Reveal.js 离线幻灯片",
+  "description": "An agent that designs courses — positioning, learning outcomes and knowledge structure first, then a Reveal.js deck derived from them.",
+  "homepage": "https://course.skillnode.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skill-node/nextcourse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/skill-node/nextcourse/issues"
+  },
   "engines": {
     "node": "20.x"
   },
@@ -20,7 +28,18 @@
     "shot":   "node nextcourse.js shot",
     "themes": "node nextcourse.js themes"
   },
-  "keywords": ["nextcourse", "reveal.js", "slides", "presentation", "education"],
-  "author": "",
+  "keywords": [
+    "nextcourse",
+    "course-design",
+    "instructional-design",
+    "learning-outcomes",
+    "reveal.js",
+    "slides",
+    "presentation",
+    "education",
+    "training",
+    "agent"
+  ],
+  "author": "Kurtlee (https://skillnode.ai)",
   "license": "MIT"
 }
