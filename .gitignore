@@ -1,22 +1,34 @@
 # Dependencies and build
 node_modules/
 .DS_Store
+# .env: 本项目零 npm 依赖也不调用任何 LLM API, 已经不需要环境变量配置文件了
+# (唯一的环境变量是 shot 命令的 CHROME_PATH, 见 CLI_MANUAL.md)。
+# 这条规则留着纯属兜底 —— 别再往回加 .env.example。
 .env
 
-# Course content (user-generated, not project code)
+# Course content (user-generated, not project code).
+# 整个目录不入库 —— 里面是真实交付课程, 含客户素材。
+# 随仓库分发的示例课程放在 examples/ 而不是这里: 本机的 courses/ 往往自带
+# 一个独立的备份 git 仓库, 外层仓库只能把它记成 gitlink, 收不进文件。
 courses/
 
-# V1 legacy agent skills (replaced by skills/ in V2)
-.agent/
+# 示例课程的产物不入库 (render / export 生成, 跑一次就有)
+examples/*/deck.html
+examples/*/export/
+examples/*/.review/
 
 # IDE
 .vscode/
 .idea/
 
-# Resource files (reference only, not part of the product)
+# 参考资料 (只读素材, 不是产品的一部分)。
+# 里面的 frontend-slides 是第三方 MIT skill (© 2025 Zara Zhang), 留在本机作为
+# base_layout.css 与五套配色的出处凭据, 见 THIRD-PARTY-NOTICES.md。
 resource/
 
 # Reveal.js source & project files (only dist/plugin/fonts needed)
+# 注意: lib/LICENSE 必须入库 —— Reveal.js 是 MIT, 分发副本时要求保留声明。
+# 同理 lib/fonts/**/*.LICENSE.txt (SIL OFL 1.1 / FontAwesome) 也不能忽略。
 lib/js/
 lib/test/
 lib/examples/
@@ -25,7 +37,6 @@ lib/.github/
 lib/.codespellrc
 lib/.gitignore
 lib/.npmignore
-lib/LICENSE
 lib/README.md
 lib/gulpfile.js
 lib/demo.html
@@ -42,6 +53,8 @@ Thumbs.db
 # Claude Code 本机设置 (权限白名单等, 不共享)
 .claude/settings.local.json
 
-# 其他 AI 工具的本机配置 (与 .claude/settings.local.json 同理, 不共享)
+# 其他 AI 工具的本机配置 (与 .claude/settings.local.json 同理, 不共享)。
+# 注意: skill 定义的唯一来源是 .claude/skills/ —— 别再往 .agents/skills/ 拷副本,
+# 那份副本会静默漂移 (2026-08-10 清掉的那份还写着旧项目名 CourseFlow)。
 .agents/
 .codex/

@@ -103,6 +103,11 @@ for (const sub of ['dist', path.join('fonts', 'fontawesome'), path.join('plugin'
     );
 }
 
+// Reveal.js 的 MIT 声明。MIT 要求"副本或实质部分"都保留声明,
+// 交付包里带着 dist/ 就是一份副本, 所以这一个文件必须跟着走。
+fs.copyFileSync(path.join(ROOT, 'lib', 'LICENSE'), path.join(EXPORT_DIR, 'lib', 'LICENSE'));
+fileCount++;
+
 // 设计系统 CSS: 只拷贝 index.html 实际引用的文件 (template/配色/字体集 各 1 套)
 const cssRefs = [...html.matchAll(/\.\/shared_styles\/([\w./-]+\.css)/g)]
     .map(m => m[1]);
@@ -131,6 +136,18 @@ for (const rel of new Set(cssRefs)) {
         }
         fs.mkdirSync(path.dirname(faceDest), { recursive: true });
         fs.copyFileSync(faceSrc, faceDest);
+        fileCount++;
+
+        // 字体的协议文本跟着字体走: SIL OFL 1.1 要求副本随字体一起分发,
+        // 交付包是要发给客户的独立副本, 所以这里不能只留在仓库里。
+        // 约定文件名 <slug>.LICENSE.txt, 见 THIRD-PARTY-NOTICES.md。
+        const licSrc = faceSrc.replace(/\.css$/, '.LICENSE.txt');
+        if (!fs.existsSync(licSrc)) {
+            console.error(`ERROR: 字体缺少协议文本: ${path.relative(ROOT, licSrc)}`);
+            console.error('       见 THIRD-PARTY-NOTICES.md「If you add a font」。');
+            process.exit(1);
+        }
+        fs.copyFileSync(licSrc, faceDest.replace(/\.css$/, '.LICENSE.txt'));
         fileCount++;
 
         const faceCss = fs.readFileSync(faceSrc, 'utf8');
