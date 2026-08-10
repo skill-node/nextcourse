@@ -1,26 +1,26 @@
 {
-  "name": "courseflow",
+  "name": "nextcourse",
   "version": "2.0.0",
   "description": "Agent-Native 课程开发工具 — 从大纲到 Reveal.js 离线幻灯片",
   "engines": {
     "node": "20.x"
   },
-  "main": "courseflow.js",
+  "main": "nextcourse.js",
   "bin": {
-    "courseflow": "courseflow.js"
+    "nextcourse": "nextcourse.js"
   },
   "scripts": {
-    "list":   "node courseflow.js list",
-    "lint":   "node courseflow.js lint",
-    "animate": "node courseflow.js animate",
-    "build":  "node courseflow.js build",
-    "render": "node courseflow.js render",
-    "export": "node courseflow.js export",
-    "notes":  "node courseflow.js notes",
-    "shot":   "node courseflow.js shot",
-    "themes": "node courseflow.js themes"
+    "list":   "node nextcourse.js list",
+    "lint":   "node nextcourse.js lint",
+    "animate": "node nextcourse.js animate",
+    "build":  "node nextcourse.js build",
+    "render": "node nextcourse.js render",
+    "export": "node nextcourse.js export",
+    "notes":  "node nextcourse.js notes",
+    "shot":   "node nextcourse.js shot",
+    "themes": "node nextcourse.js themes"
   },
-  "keywords": ["courseflow", "reveal.js", "slides", "presentation", "education"],
+  "keywords": ["nextcourse", "reveal.js", "slides", "presentation", "education"],
   "author": "",
   "license": "MIT"
 }

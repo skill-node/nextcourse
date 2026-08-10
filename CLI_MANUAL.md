@@ -1,4 +1,4 @@
-# CourseFlow CLI 操作手册
+# NextCourse CLI 操作手册
 
 ## 快速回答
 
@@ -6,7 +6,7 @@
 ```bash
 npm run render <course-name>
 # 或
-courseflow render <course-name>
+nextcourse render <course-name>
 ```
 
 ---
@@ -27,7 +27,7 @@ npm run list
 
 **示例输出：**
 ```
-CourseFlow — 课程列表
+NextCourse — 课程列表
 ────────────────────────────────────────────────────────────
   python-basics               ✓ meta  ✓ 12 slides  ✓ deck  ✓ export
   advanced-django             ✓ meta  ✓ 8 slides   · deck  · export
@@ -39,7 +39,7 @@ CourseFlow — 课程列表
 ```bash
 npm run new <course-name>
 # 或
-courseflow new <course-name>
+nextcourse new <course-name>
 ```
 
 创建新课程目录结构：

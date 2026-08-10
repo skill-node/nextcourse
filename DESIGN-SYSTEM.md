@@ -1,4 +1,4 @@
-# CourseFlow V2 — 设计系统参考
+# NextCourse V2 — 设计系统参考
 
 > **唯一真相源。** `/slide-design` Skill 只读此文件。  
 > 铁律: 只用登记的 class + `var(--*)` 令牌。禁止内联 `style=` / 写死十六进制颜色 / 声明新 `font-family`。  
@@ -97,7 +97,7 @@ max-width: var(--content-max-width);   /* tokens.css，默认 80rem */
 ## 配色红线 (R1–R4)
 
 > 面向 **改 `color-schemes/*.css` 的人**，不是写 slide 的人。
-> 四条都由展板自动体检：`node courseflow.js themes` → 打开 `theme-gallery/<主题>.html`
+> 四条都由展板自动体检：`node nextcourse.js themes` → 打开 `theme-gallery/<主题>.html`
 > → 「体检」区必须归零。
 
 **配色文件的头注释是展板的数据源**，新增配色时这几行不是装饰：
@@ -147,7 +147,7 @@ max-width: var(--content-max-width);   /* tokens.css，默认 80rem */
 
 **必备令牌**
 `themes/` 和 `components/` 里凡是裸用 `var(--x)`（不写兜底值）的令牌，配色必须全部定义。
-少一个不会报错，只会让那条规则**静默失效**。`node courseflow.js themes` 会在结尾审计并退出码报错。
+少一个不会报错，只会让那条规则**静默失效**。`node nextcourse.js themes` 会在结尾审计并退出码报错。
 
 ---
 
@@ -181,7 +181,7 @@ C、D 按空格再逐个出。两组选择器互不匹配，不会互相干扰�
 要「按键触发 + 平滑」，用 `class="fragment smooth"`（`.smooth` / `.bounce` 是
 animations.css 里专为 fragment 准备的缓动增强）。
 
-`animate-*` / `stagger-*` 不必手写，`courseflow animate <name>` 按组件结构批量生成，
+`animate-*` / `stagger-*` 不必手写，`nextcourse animate <name>` 按组件结构批量生成，
 `--strip` 一键还原；它不会碰你手写的 `fragment`。见 CLI_MANUAL.md。
 
 ---
@@ -264,7 +264,7 @@ animations.css 里专为 fragment 准备的缓动增强）。
    的 `.stagger-*` 被误判成摆设。
 2. **课件里没用到的 markup 测不出来**——`.fragment.smooth` / `.fragment.bounce` 目前仍没有
    任何课件在用，那几条无论如何都测不出差异。这类要靠人读规则判断。
-   （`.stagger-*` 曾经也在这一列，自 `courseflow animate` 上线后 workbuddy-insurance
+   （`.stagger-*` 曾经也在这一列，自 `nextcourse animate` 上线后 workbuddy-insurance
    已大量使用，不再是盲区。）
 
 ### components.css 的「一对规则」写法
@@ -1005,12 +1005,12 @@ animations.css 里专为 fragment 准备的缓动增强）。
 > 相邻会贴死——workbuddy slide-05 的 `.concept-card + .callout` 就撞上过。
 > §N 那条规则是兜底，但它按类名点名，漏登记的新组件享受不到。
 
-> 第 4 步别跳过。漏了不会报错——`courseflow animate` 有通用兜底，
+> 第 4 步别跳过。漏了不会报错——`nextcourse animate` 有通用兜底，
 > 会给这一页的块级子元素挨个打 `fade-up`，并在输出里标 `⚙ 通用兜底`。
 > 页面不会死板，但拿不到「左右对进」「沿流向推进」这类贴合结构的节奏。
 > 看到那个标记，就是在提醒你这里缺一条规则。
 
-> 第 3 步别跳过。漏了不会报错——`courseflow animate` 有通用兜底，
+> 第 3 步别跳过。漏了不会报错——`nextcourse animate` 有通用兜底，
 > 会给这一页的块级子元素挨个打 `fade-up`，并在输出里标 `⚙ 通用兜底`。
 > 页面不会死板，但拿不到「左右对进」「沿流向推进」这类贴合结构的节奏。
 > 看到那个标记，就是在提醒你这里缺一条规则。

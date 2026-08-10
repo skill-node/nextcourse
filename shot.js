@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * shot.js — CourseFlow 视觉自校验（截图 + 溢出检测）
+ * shot.js — NextCourse 视觉自校验（截图 + 溢出检测）
  *
  * 用系统已安装的 Chrome/Chromium (headless) 完成两件事，零 npm 依赖：
  *   1. 溢出检测 : 加载 deck.html?check=overflow，读取模板内置自检脚本的报告
@@ -71,7 +71,7 @@ function chrome(args) {
 const slideCount = fs.readdirSync(path.join(COURSE_DIR, 'slides'))
     .filter(f => f.endsWith('.html')).length;
 
-console.log(`\nCourseFlow Shot — ${courseName} (${slideCount} slides)`);
+console.log(`\nNextCourse Shot — ${courseName} (${slideCount} slides)`);
 console.log('─'.repeat(50));
 
 // ─── 1. 溢出检测 ─────────────────────────────────────────────────────────────

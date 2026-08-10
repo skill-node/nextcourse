@@ -463,9 +463,9 @@ function themePage(scheme, all, defaults) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${name} · CourseFlow 主题展板</title>
+<title>${name} · NextCourse 主题展板</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-${langBoot(`${meta.displayName || id} · CourseFlow 主题展板`, `${meta.displayName || id} · CourseFlow Theme Gallery`)}
+${langBoot(`${meta.displayName || id} · NextCourse 主题展板`, `${meta.displayName || id} · NextCourse Theme Gallery`)}
 
 <!-- 加载顺序与 templates/master_template.html 保持一致，
      这样展板看到的层叠结果就是 deck 里的层叠结果 -->
@@ -705,9 +705,9 @@ function indexPage(all) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CourseFlow 主题展板</title>
+<title>NextCourse 主题展板</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-${langBoot('CourseFlow 主题展板', 'CourseFlow Theme Gallery')}
+${langBoot('NextCourse 主题展板', 'NextCourse Theme Gallery')}
 <link rel="stylesheet" href="../shared_styles/tokens.css">
 <link rel="stylesheet" href="gallery.css">
 <!-- 只引 @font-face 层：卡片标题按主题的 display 字体渲染，不引入任何 :root/body 规则 -->
@@ -733,7 +733,7 @@ ${faceLinks}
 <div class="tg-idx-bar">${LANG_BUTTON}</div>
 
 <header class="tg-idx-head">
-  <h1>${L('CourseFlow 主题展板', 'CourseFlow Theme Gallery')}</h1>
+  <h1>${L('NextCourse 主题展板', 'NextCourse Theme Gallery')}</h1>
   <p>${L(
         `${all.length} 套配色，每套一页：语义色、背景与文字、十个模块封面色、字体、组件实景、自动体检。
      色带是该配色的 <code>--module-1</code> 到 <code>--module-10</code>，按顺序排。`,

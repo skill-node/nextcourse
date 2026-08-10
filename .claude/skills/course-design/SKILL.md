@@ -3,7 +3,7 @@ name: course-design
 description: 对话式设计课程大纲——定位 → 学习成果 → 知识架构，输出 courses/<name>/course.meta.md。适用于任何主题（领导力 / AI 技术 / HR 管理等）。
 ---
 
-# /course-design — CourseFlow 课程大纲设计 Skill
+# /course-design — NextCourse 课程大纲设计 Skill
 
 ## 触发方式
 

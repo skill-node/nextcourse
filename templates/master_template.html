@@ -94,7 +94,7 @@
 
         // 溢出自检模式：deck.html?check=overflow
         // 遍历所有页，报告内容超出画布的页码；结果写入页尾的 pre#overflow-report 节点，
-        // 供 courseflow shot 用 headless Chrome --dump-dom 读取，也可人工在浏览器打开查看。
+        // 供 nextcourse shot 用 headless Chrome --dump-dom 读取，也可人工在浏览器打开查看。
         if (new URLSearchParams(location.search).has('check')) {
             deck.on('ready', () => {
                 const limit = document.querySelector('.reveal .slides').clientHeight;

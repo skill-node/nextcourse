@@ -377,7 +377,7 @@ if (files.length === 0) {
 }
 
 const mode = STRIP_ONLY ? '剥离动画' : '打入动画';
-console.log(`\nCourseFlow Animate — ${courseName}  [${mode}${DRY_RUN ? ' · dry-run' : ''}]`);
+console.log(`\nNextCourse Animate — ${courseName}  [${mode}${DRY_RUN ? ' · dry-run' : ''}]`);
 console.log('─'.repeat(62));
 
 let changedFiles = 0, totalTokens = 0, fragmentGuarded = 0;
@@ -429,4 +429,4 @@ if (fallbackFiles.length > 0) {
     console.log(`     这些页没匹配到任何组件规则, 动画节奏可能偏平。`);
     console.log(`     若用的是常见组件, 建议在 animate-slides.js 的 CONTAINER_RULES 里补一条专属规则。`);
 }
-console.log(`\n  下一步: node courseflow.js render ${courseName}\n`);
+console.log(`\n  下一步: node nextcourse.js render ${courseName}\n`);

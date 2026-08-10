@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * export.js — CourseFlow 课程导出工具
+ * export.js — NextCourse 课程导出工具
  *
  * 将课程打包成独立文件夹，可直接拷贝到 U 盘 / 云盘 / 其他电脑使用。
  * 打开 export/index.html 即可演示，无需网络、无需安装任何依赖。
@@ -153,7 +153,7 @@ if (fs.existsSync(assetsDir)) {
 // ─── 4. 结果报告 ─────────────────────────────────────────────────────────────
 const sizeMB = (dirSize(EXPORT_DIR) / 1024 / 1024).toFixed(1);
 
-console.log(`\nCourseFlow Export — ${courseName}`);
+console.log(`\nNextCourse Export — ${courseName}`);
 console.log(`${'─'.repeat(50)}`);
 console.log(`  输出目录 : ${EXPORT_DIR}`);
 console.log(`  文件总数 : ${fileCount}`);

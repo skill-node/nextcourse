@@ -3,7 +3,7 @@ name: slide-design
 description: 读取 courses/<name>/course.meta.md，按 Merrill 第一原理逐页设计幻灯片并生成 deck.html。需要一个课程名参数。
 ---
 
-# /slide-design — CourseFlow V2 Slide Design Skill
+# /slide-design — NextCourse V2 Slide Design Skill
 
 ## 触发方式
 

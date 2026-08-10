@@ -1,5 +1,5 @@
 /* ===================================
-   CourseFlow 动画工具库 (Animations)
+   NextCourse 动画工具库 (Animations)
    为 Reveal.js fragment 和组件提供增强动画
    =================================== */
 
@@ -60,7 +60,7 @@
 /* ===== 交错延迟（卡片依次入场）=====
    级数上限 12：workflow 页把节点与连接线逐个错开入场，一页 4 节点 + 3 连线
    已经吃掉 7 级，再加同页的 highlight-box 就超过原来的 6 级。
-   courseflow animate 按「同一页内文档顺序」统一编号，编号超过上限时不再补 stagger
+   nextcourse animate 按「同一页内文档顺序」统一编号，编号超过上限时不再补 stagger
    （元素照常入场，只是不延迟），所以这里的上限只影响节奏，不会让元素消失。 */
 .stagger-1  { transition-delay: 0.1s !important; }
 .stagger-2  { transition-delay: 0.2s !important; }

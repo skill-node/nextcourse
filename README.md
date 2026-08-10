@@ -1,4 +1,4 @@
-# CourseFlow V2
+# NextCourse V2
 
 **AI-Native 课程开发工具** — 从一句话主题到可离线演示的 Reveal.js HTML 幻灯片，全流程 CLI 驱动。
 
@@ -11,8 +11,8 @@
 ### 1. 安装
 
 ```bash
-git clone https://github.com/skill-node/Course_Flow.git
-cd Course_Flow
+git clone https://github.com/skill-node/nextcourse.git
+cd nextcourse
 npm install
 ```
 
@@ -37,8 +37,8 @@ AI 按大纲逐页生成幻灯片 HTML 片段，自动组装成 `deck.html`。
 ### 4. 加入场动画（可选）
 
 ```bash
-node courseflow.js animate <course-name>            # 按组件结构批量打上入场动画
-node courseflow.js animate <course-name> --strip    # 一键剥离，回到静态
+node nextcourse.js animate <course-name>            # 按组件结构批量打上入场动画
+node nextcourse.js animate <course-name> --strip    # 一键剥离，回到静态
 ```
 
 翻到某页时组件依次入场（左右对进 / 沿流程推进 / 依次升起），规则按组件结构自动匹配。
@@ -48,9 +48,9 @@ node courseflow.js animate <course-name> --strip    # 一键剥离，回到静�
 ### 5. 校验 / 构建 / 导出
 
 ```bash
-node courseflow.js render <course-name>   # 校验 + 生成 deck.html（推荐）
-node courseflow.js shot   <course-name>   # 溢出检测 + 逐页截图自查
-node courseflow.js export <course-name>   # 打包为可离线演示文件夹
+node nextcourse.js render <course-name>   # 校验 + 生成 deck.html（推荐）
+node nextcourse.js shot   <course-name>   # 溢出检测 + 逐页截图自查
+node nextcourse.js export <course-name>   # 打包为可离线演示文件夹
 ```
 
 完整命令参考见 [CLI_MANUAL.md](./CLI_MANUAL.md)。
@@ -60,11 +60,11 @@ node courseflow.js export <course-name>   # 打包为可离线演示文件夹
 ## 项目结构
 
 ```
-CourseFlow/
+nextcourse/
 ├── AGENT.md           ← 完整文档（所有 Agent 入口）
 ├── CLI_MANUAL.md      ← CLI 操作手册（完整命令参考）
 ├── DESIGN-SYSTEM.md   ← 组件参考手册（19 个 B 档组件）
-├── courseflow.js      ← 统一 CLI 入口
+├── nextcourse.js      ← 统一 CLI 入口
 ├── build.js           ← 课程组装
 ├── lint-slides.js     ← 样式校验（5 类违规检测）
 ├── animate-slides.js  ← 入场动画批量打入 / 剥离

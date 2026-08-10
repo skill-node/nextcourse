@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * lint-slides.js — CourseFlow V2 样式闸
+ * lint-slides.js — NextCourse V2 样式闸
  *
  * 扫描 courses/<name>/slides/*.html, 发现违规即报告并以 exit 1 结束
  *
@@ -218,7 +218,7 @@ const checked = htmlFiles.length;
 const failed  = violationLog.length;
 const passed  = checked - failed;
 
-console.log(`\nCourseFlow Lint — ${courseName}/slides/`);
+console.log(`\nNextCourse Lint — ${courseName}/slides/`);
 console.log(`${'─'.repeat(50)}`);
 
 // 先输出通过的文件 (无违规; 有密度警告标 ⚠)

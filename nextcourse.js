@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 /**
- * courseflow — CourseFlow V2 统一 CLI
+ * nextcourse — NextCourse V2 统一 CLI
  *
  * 命令:
- *   courseflow list                     列出所有课程及状态
- *   courseflow new    <name>            初始化新课程目录
- *   courseflow lint   <name>            校验幻灯片样式规范
- *   courseflow animate <name> [--strip] 批量打入/剥离组件入场动画
- *   courseflow build  <name>            组装生成 deck.html
- *   courseflow render <name>            lint + build 一步完成
- *   courseflow export <name> [outdir]   打包为可离线演示文件夹
- *   courseflow themes                   生成配色/字体展板（theme-gallery/）
+ *   nextcourse list                     列出所有课程及状态
+ *   nextcourse new    <name>            初始化新课程目录
+ *   nextcourse lint   <name>            校验幻灯片样式规范
+ *   nextcourse animate <name> [--strip] 批量打入/剥离组件入场动画
+ *   nextcourse build  <name>            组装生成 deck.html
+ *   nextcourse render <name>            lint + build 一步完成
+ *   nextcourse export <name> [outdir]   打包为可离线演示文件夹
+ *   nextcourse themes                   生成配色/字体展板（theme-gallery/）
  *
  * 工作流:
  *   1. /course-design              设计课程大纲（Claude Code Skill）
  *   2. /slide-design <name>        生成幻灯片（Claude Code Skill）
- *   3. courseflow render <name>    校验 + 构建
- *   4. courseflow export <name>    打包交付
+ *   3. nextcourse render <name>    校验 + 构建
+ *   4. nextcourse export <name>    打包交付
  */
 
 'use strict';
@@ -45,7 +45,7 @@ function die(msg) {
 }
 
 function requireName(cmd) {
-    if (!rest[0]) die(`Usage: courseflow ${cmd} <course-name>`);
+    if (!rest[0]) die(`Usage: nextcourse ${cmd} <course-name>`);
     return rest[0];
 }
 
@@ -66,7 +66,7 @@ const commands = {
             return;
         }
 
-        console.log('\nCourseFlow — 课程列表');
+        console.log('\nNextCourse — 课程列表');
         console.log('─'.repeat(60));
         for (const e of entries) {
             const dir = path.join(coursesDir, e.name);
@@ -175,7 +175,7 @@ outcomes:
         const out = [
             `# ${title} — 讲师手册`,
             '',
-            '> 由 `courseflow notes` 自动生成，来源为各 slide 的演讲备注（aside.notes）。',
+            '> 由 `nextcourse notes` 自动生成，来源为各 slide 的演讲备注（aside.notes）。',
             '> 修改备注请编辑 slides/slide-XX.html 后重新生成，不要直接改本文件。',
             '',
         ];
@@ -199,25 +199,25 @@ outcomes:
 
     help() {
         console.log(`
-CourseFlow V2 — 课程开发工具
+NextCourse V2 — 课程开发工具
 
 命令:
-  courseflow list                     列出所有课程及状态
-  courseflow new    <name>            初始化新课程目录（含 course.meta.md 模板）
-  courseflow lint   <name>            校验幻灯片样式规范
-  courseflow animate <name> [--strip] 批量打入/剥离组件入场动画（不碰手写 fragment）
-  courseflow build  <name>            组装生成 deck.html
-  courseflow render <name>            lint + build 一步完成（推荐）
-  courseflow export <name> [outdir]   打包为可离线演示文件夹
-  courseflow notes  <name>            导出讲师手册 handout.md（各页演讲备注）
-  courseflow shot   <name> [--check]  溢出检测 + 逐页截图到 .review/（需本机 Chrome）
-  courseflow themes                   生成配色/字体展板 theme-gallery/index.html
+  nextcourse list                     列出所有课程及状态
+  nextcourse new    <name>            初始化新课程目录（含 course.meta.md 模板）
+  nextcourse lint   <name>            校验幻灯片样式规范
+  nextcourse animate <name> [--strip] 批量打入/剥离组件入场动画（不碰手写 fragment）
+  nextcourse build  <name>            组装生成 deck.html
+  nextcourse render <name>            lint + build 一步完成（推荐）
+  nextcourse export <name> [outdir]   打包为可离线演示文件夹
+  nextcourse notes  <name>            导出讲师手册 handout.md（各页演讲备注）
+  nextcourse shot   <name> [--check]  溢出检测 + 逐页截图到 .review/（需本机 Chrome）
+  nextcourse themes                   生成配色/字体展板 theme-gallery/index.html
 
 工作流（从零开始）:
   /course-design                ← Claude Code: 对话式设计大纲
   /slide-design <name>          ← Claude Code: 生成幻灯片
-  courseflow render <name>      ← 校验 + 构建 deck.html
-  courseflow export <name>      ← 打包，拷贝到任意电脑演示
+  nextcourse render <name>      ← 校验 + 构建 deck.html
+  nextcourse export <name>      ← 打包，拷贝到任意电脑演示
 
 文档: AGENT.md（完整说明）
 `);
@@ -233,7 +233,7 @@ if (!cmd || cmd === '--help' || cmd === '-h') {
 
 if (!commands[cmd]) {
     console.error(`未知命令: ${cmd}`);
-    console.error(`运行 courseflow --help 查看可用命令`);
+    console.error(`运行 nextcourse --help 查看可用命令`);
     process.exit(1);
 }
 

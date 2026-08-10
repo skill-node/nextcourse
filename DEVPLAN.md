@@ -1,4 +1,4 @@
-# CourseFlow v2 开发计划(合并版)
+# NextCourse v2 开发计划(合并版)
 
 > 本文件合并两份输入:
 > 1. 仓库根目录 `2.0devplan.md`(逐文件诊断 + 教学模型选型 + JSON/TS 重构方案)
@@ -11,7 +11,7 @@
 
 ## 1. 背景与目标
 
-CourseFlow 的目标:**从课程想法 → 课程大纲 → HTML slide 的完整流程。** 用 HTML(而非 PPT)呈现,因为 HTML 表达力强、可精确控制、可离线运行。
+NextCourse 的目标:**从课程想法 → 课程大纲 → HTML slide 的完整流程。** 用 HTML(而非 PPT)呈现,因为 HTML 表达力强、可精确控制、可离线运行。
 
 当前 V1 在交互、思路讨论、大纲形成、slide 生成四方面都不理想。本计划是一次以"解决项目目标"为出发点的重构,不受 V1 框架约束。
 
@@ -228,7 +228,7 @@ agent 写 slides/*.html
 - [x] 删除旧管线：`server/`（V1 SPA + Express）、`bin/`（V1 parser/renderer）已删除
 - [x] 删除 `.agent/`（V1 Skills），已从 git 移除并加入 gitignore
 - [x] 课程内容（`courses/`）移出 git 跟踪，加入 gitignore
-- [x] CLI 化：`courseflow.js` 统一入口（list / new / lint / build / render / export）
+- [x] CLI 化：`nextcourse.js` 统一入口（list / new / lint / build / render / export）
 - [x] `export.js`：离线打包（路径修正 + 拷贝 lib/ + shared_styles/）
 - [x] `AGENT.md`：全 agent 兼容的完整项目文档
 - [x] 分支整理：`v1` 保留历史，`main` = V2 主线，`v2` 分支已删除

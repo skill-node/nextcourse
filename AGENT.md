@@ -1,6 +1,6 @@
-# CourseFlow — Agent Reference
+# NextCourse — Agent Reference
 
-CourseFlow 是一个以 **AI-Native 工作流为核心的课程开发工具**。
+NextCourse 是一个以 **AI-Native 工作流为核心的课程开发工具**。
 输入：一句话主题 → 输出：可在浏览器中全屏演示的 Reveal.js HTML 幻灯片课程。
 
 整套流程完全 CLI 驱动，任何 agent（Claude Code / OpenClaw / Hermes / 命令行）均可调用。
@@ -10,14 +10,14 @@ CourseFlow 是一个以 **AI-Native 工作流为核心的课程开发工具**。
 ## 目录结构
 
 ```
-CourseFlow/
+nextcourse/
 ├── AGENT.md              ← 当前文档（agent 入口）
 ├── DESIGN-SYSTEM.md      ← 完整组件参考手册（创作幻灯片前必读）
-├── courseflow.js         ← 统一 CLI 入口
-├── build.js              ← 课程组装（courseflow build 内部调用）
-├── lint-slides.js        ← 样式校验（courseflow lint 内部调用）
-├── animate-slides.js     ← 入场动画批量打入/剥离（courseflow animate 内部调用）
-├── export.js             ← 离线打包（courseflow export 内部调用）
+├── nextcourse.js         ← 统一 CLI 入口
+├── build.js              ← 课程组装（nextcourse build 内部调用）
+├── lint-slides.js        ← 样式校验（nextcourse lint 内部调用）
+├── animate-slides.js     ← 入场动画批量打入/剥离（nextcourse animate 内部调用）
+├── export.js             ← 离线打包（nextcourse export 内部调用）
 ├── templates/
 │   └── master_template.html  ← deck.html 母版（build.js 使用）
 ├── .claude/skills/
@@ -47,18 +47,18 @@ CourseFlow/
 
 ## CLI 命令参考
 
-所有命令通过统一入口 `courseflow.js` 调用（或 `npm run <cmd>`）：
+所有命令通过统一入口 `nextcourse.js` 调用（或 `npm run <cmd>`）：
 
 ```bash
-node courseflow.js list                     # 列出所有课程及状态
-node courseflow.js new    <name>            # 初始化新课程目录
-node courseflow.js lint   <name>            # 校验幻灯片样式规范
-node courseflow.js animate <name> [--strip] # 批量打入/剥离组件入场动画（不碰手写 fragment）
-node courseflow.js build  <name>            # 组装生成 deck.html
-node courseflow.js render <name>            # lint + build 一步完成（推荐）
-node courseflow.js export <name> [outdir]   # 打包为可离线演示文件夹
-node courseflow.js notes  <name>            # 导出讲师手册 handout.md（各页演讲备注）
-node courseflow.js shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（需本机 Chrome）
+node nextcourse.js list                     # 列出所有课程及状态
+node nextcourse.js new    <name>            # 初始化新课程目录
+node nextcourse.js lint   <name>            # 校验幻灯片样式规范
+node nextcourse.js animate <name> [--strip] # 批量打入/剥离组件入场动画（不碰手写 fragment）
+node nextcourse.js build  <name>            # 组装生成 deck.html
+node nextcourse.js render <name>            # lint + build 一步完成（推荐）
+node nextcourse.js export <name> [outdir]   # 打包为可离线演示文件夹
+node nextcourse.js notes  <name>            # 导出讲师手册 handout.md（各页演讲备注）
+node nextcourse.js shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（需本机 Chrome）
 ```
 
 ### 各命令说明
@@ -138,7 +138,7 @@ theme: bold-signal
 | `notebook-tabs`    | 奶油底 + 衬线粉彩（手记/轻松） |
 | `standard-default` | 白底学术蓝（严肃/学术）        |
 
-修改后重新 `node courseflow.js render <name>` 即生效，无需改任何幻灯片文件。
+修改后重新 `node nextcourse.js render <name>` 即生效，无需改任何幻灯片文件。
 
 ---
 
@@ -269,17 +269,17 @@ Bloom 动词参考：remember / understand / apply / analyze / evaluate / create
 
 ```bash
 # 1. 初始化课程目录
-node courseflow.js new <name>
+node nextcourse.js new <name>
 
 # 2. 编辑 course.meta.md（frontmatter + 大纲）
 
 # 3. 写 slide-*.html 片段（参考 DESIGN-SYSTEM.md 组件）
 
 # 4. 校验 + 构建
-node courseflow.js render <name>
+node nextcourse.js render <name>
 
 # 5. 打包交付
-node courseflow.js export <name>
+node nextcourse.js export <name>
 ```
 
 ### Claude Code 专属
