@@ -220,4 +220,5 @@ There is no commercial plan for this tool. It is built and changed weekly inside
 delivery work, and it is open-sourced because if you also teach for a living, it should
 be useful to you. Issues and forks welcome; no roadmap promised.
 
-Built by [Kurtlee](https://skillnode.ai) — [skillnode.ai](https://skillnode.ai)
+Built by Kurtlee — an HR director of twenty years who builds AI products. More at
+[nextskill.cc](https://nextskill.cc), where this is one of four.
