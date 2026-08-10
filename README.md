@@ -221,4 +221,4 @@ delivery work, and it is open-sourced because if you also teach for a living, it
 be useful to you. Issues and forks welcome; no roadmap promised.
 
 Built by Kurtlee — an HR director of twenty years who builds AI products. More at
-[nextskill.cc](https://nextskill.cc), where this is one of four.
+[nextskill.cc](https://nextskill.cc).

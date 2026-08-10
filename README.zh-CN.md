@@ -195,4 +195,4 @@ NextCourse 为了让导出的课件能离线播放，打包了 Reveal.js、Font 
 开源是因为：如果你也靠讲课吃饭，它应该用得上。欢迎提 issue 和 fork，但不承诺 roadmap。
 
 作者 Kurtlee —— 20 年 HR 总监，亲手把 AI 写成产品。更多见
-[nextskill.cc](https://nextskill.cc)，这个项目是那里的四个之一。
+[nextskill.cc](https://nextskill.cc)。
