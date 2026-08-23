@@ -1272,6 +1272,211 @@
 }
 
 /* ============================================================
+   § 17. 活动指令卡 (.activity-card) — 练习页把话说清楚
+
+   培训课的练习页翻车通常不是任务不好, 是任务没交代清楚：
+   学员不知道做多久、几个人一组、交什么、按什么打分。
+   这张卡把「活动名 / 时间 / 分组 / 交付物 / 评分点」五件事固定成结构,
+   讲师照着念就能带起来, 内容来自 course.blueprint.md 的模块清单。
+   左侧强调色边是它与讲授页的一眼之别 —— 看到这条边就是"该动手了"。
+   ============================================================ */
+
+.activity-card {
+    width: 100%;
+    max-width: var(--content-max-width);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    padding: var(--space-8);
+    border-radius: var(--card-radius);
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-left: 6px solid var(--accent);
+    box-shadow: var(--shadow-card);
+}
+
+.activity-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+
+/* 「练习 / 实操 / 共创」标签。用 --bg-tag + --text-tag 这对令牌, 八套配色都验证过 */
+.activity-card__badge {
+    padding: 0.2rem 0.75rem;
+    border-radius: var(--radius-pill);
+    background: var(--bg-tag);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+}
+
+.reveal .activity-card__badge {
+    color: var(--text-tag);
+}
+
+/* 时间盒。放右端, 因为「还剩多久」是活动进行中唯一要反复看的信息 */
+.activity-card__timer {
+    margin-left: auto;
+    padding: 0.2rem 0.85rem;
+    border-radius: var(--radius-pill);
+    background: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.reveal .activity-card__timer {
+    color: var(--text-inverse);
+}
+
+.reveal .activity-card__title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    margin: 0;
+}
+
+.reveal .activity-card__task {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--text-body);
+    margin: 0;
+}
+
+/* 分组 / 交付物: 两个并排的事实, 不是列表 */
+.activity-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-10);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border-card);
+}
+
+.activity-card__meta-item {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    font-size: 1.05rem;
+}
+
+.reveal .activity-card__meta-item {
+    color: var(--text-body);
+}
+
+.activity-card__meta-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.reveal .activity-card__meta-label {
+    color: var(--text-muted);
+}
+
+/* 评分点 —— 这一段是活动卡真正的教学价值:
+   学员开始做之前就知道"怎样算做对了", 对应 rubric 的维度 */
+.activity-card__criteria {
+    margin: 0;
+    padding-left: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.reveal .activity-card__criteria li {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: var(--text-body);
+    margin-bottom: 0;
+}
+
+.activity-card__criteria li::marker {
+    color: var(--accent);
+}
+
+/* ============================================================
+   § 18. 考核量规表 (.rubric-table) — 结营考核说明页
+
+   与 .table-compare 的分工: table-compare 比的是「几个方案的特性」,
+   rubric-table 讲的是「同一件事做到什么程度算达标」——
+   行是评分维度, 列是等级, 达标列打底色, 因为那是学员唯一需要记住的一列。
+   数据源是 package/rubric.md, 上片时只放 3–4 个维度, 完整量规留在交付包里。
+   ============================================================ */
+
+.rubric-table {
+    width: 100%;
+    max-width: var(--content-max-width);
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+.rubric-table th,
+.rubric-table td {
+    padding: var(--table-cell-padding);
+    text-align: left;
+    border-bottom: 1px solid var(--border-card);
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.reveal .rubric-table th,
+.reveal .rubric-table td {
+    color: var(--text-body);
+}
+
+.rubric-table thead th {
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    padding: var(--table-header-padding);
+    background: var(--primary);
+}
+
+.reveal .rubric-table thead th {
+    color: var(--text-inverse);
+}
+
+.rubric-table thead th:first-child {
+    background: var(--primary-dark, var(--primary));
+    border-radius: var(--radius-sm) 0 0 0;
+}
+
+.rubric-table thead th:last-child {
+    border-radius: 0 var(--radius-sm) 0 0;
+}
+
+/* 维度列: 行标签, 收窄并加重 */
+.rubric-table__dim {
+    font-weight: 600;
+    width: 24%;
+    background: var(--bg-card);
+}
+
+.reveal .rubric-table__dim {
+    color: var(--text-heading);
+}
+
+/* 达标列。必须显式配对: 这个 class 也会盖在 thead 的主色表头那一格上,
+   不改文字色就会变成深底深字 (同 .table-compare 的 col--highlight) */
+.rubric-table__level--pass {
+    background: var(--bg-highlight);
+    border-left: 3px solid var(--accent);
+    border-right: 3px solid var(--accent);
+}
+
+.reveal .rubric-table__level--pass {
+    color: var(--text-body);
+}
+
+/* 表头那一格不跟着变底色 —— thead th 的 (0,1,1) 压过本 class 的 (0,1,0),
+   达标列在表头只靠左右两条强调色边标出来。别再给它加文字色覆盖:
+   写 --text-heading 在浅色配色下就是深蓝底上的近黑字, 直接踩穿 R4。 */
+
+/* ============================================================
    §N  相邻块组件的垂直呼吸
    ============================================================
    `.reveal .slides>section` 是 flex 列且没有 gap（见 themes/standard.css），
@@ -1306,6 +1511,8 @@
 .reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .vs-box,
 .reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .prompt-compare,
 .reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .img-equation,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .activity-card,
+.reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .rubric-table,
 .reveal .slides > section > :not(h1):not(h2):not(h3):not(.workflow) + .workflow {
     margin-top: var(--space-6);
 }

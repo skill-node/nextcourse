@@ -284,6 +284,8 @@ function loadCourse(root, name) {
             file: f,
             title: h2 ? stripTags(h2[1]) : '',
             notes: note ? stripTags(note[1]) : '',
+            html: src,
+            has: cls => new RegExp(`class\\s*=\\s*["'][^"']*\\b${cls}\\b`).test(src),
         };
     });
 

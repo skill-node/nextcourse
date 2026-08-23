@@ -27,7 +27,26 @@ description: 读取 courses/<name>/course.meta.md，按 Merrill 第一原理逐�
 
 ## Phase 4：学习体验设计 → slide-plan.md（内容审阅关卡）
 
-读 `course.meta.md` 的大纲，每个模块按此结构设计页面：
+### 先看有没有蓝图
+
+```bash
+ls courses/<课程名>/course.blueprint.md
+```
+
+**存在就必须读它**（M / L 档内训课）。蓝图第五节的模块清单表给了每个模块的
+**时长 / 教学活动 / 产出物 / 覆盖成果**，这四样直接决定 slide 怎么排：
+
+| 蓝图字段 | 落到 slide 上 |
+|---|---|
+| 教学活动 + 产出物 | 该模块必须有一张 **Activity 页**（`.activity-card`），内容与蓝图一字不差 |
+| 时长 | 决定这个模块给几页（90 min 的模块给 5 页讲授页是排不下的） |
+| 覆盖成果 | 模块小结页的落点要对得上这条 outcome 的 `do` |
+| 全课的 evidence | 结尾前加一张 **Assessment 页**（`.rubric-table`），讲清结营考核 |
+
+没有蓝图（S 档分享课）就按 `course.meta.md` 的大纲走，**不要**硬造 Activity / Assessment 页
+——30 分钟的分享课没有考核。
+
+### 页型
 
 | 页型 | 作用 | 设计要求 |
 |---|---|---|
@@ -35,11 +54,22 @@ description: 读取 courses/<name>/course.meta.md，按 Merrill 第一原理逐�
 | **Concept** | 核心概念 + 常见误解纠正 | 单页单概念；误解用 callout--warning |
 | **Demo** | 具体案例或流程演示 | 优先用 case-study / workflow / timeline |
 | **Practice** | 学员动手实操的引导 | checklist 或 pill-list；指令明确 |
+| **Activity**〔M/L〕 | 课堂活动的正式指令 | `.activity-card`：活动名 / 时间 / 分组 / 交付物 / 评分点，来自蓝图 |
+| **Assessment**〔M/L〕 | 结营考核说明 | `.rubric-table`：3–4 个维度 × 2–3 个等级，来自 `package/rubric.md` |
 | **Takeaway** | 模块最核心的一句话 | key-takeaway 组件；≤3 条要点 |
+
+**Practice 与 Activity 的分工**：Practice 是「跟着我做一遍」的引导（讲师带），
+Activity 是「现在你们分组做，20 分钟后交」的正式任务（学员做）。
+一个模块里两者可以都有，但**只有 Activity 页要写全五要素**。
+
+**Activity 页的完整口播指令写进 `aside.notes`，不上屏。** 屏幕上只留任务、时间、
+分组、交付物、评分点；「怎么开场、怎么巡场、怎么收尾」是讲师手册的内容，
+`nextcourse package` 会从蓝图另行生成。
 
 **固定页面：**
 - 第 1 页 封面：title + positioning
-- 第 2 页 课程概览：**直接由 frontmatter 的 `outcomes` 生成**——每条成果一行（do + success），让学员开课即知道"学完能做什么、怎样算学会"
+- 第 2 页 课程概览：**直接由 frontmatter 的 `outcomes` 生成**——每条成果一行（do + success）；
+  M/L 档再带上 `evidence`，让学员开课就知道「学完能做什么、**怎样算学会、拿什么判定**」
 - 倒数第 2 页 学习路径/下一步；最后 1 页 致谢结束
 
 **落盘 `courses/<课程名>/slide-plan.md`**，每页一个条目：
@@ -72,6 +102,8 @@ description: 读取 courses/<name>/course.meta.md，按 Merrill 第一原理逐�
   ├─ 多项要点 3~5条       → .pill-list  或  .check-list
   ├─ 图标分类 3~4项       → .icon-card-grid
   ├─ 多方案特性表格       → .table-compare
+  ├─ 课堂活动指令         → .activity-card          〔M/L 档，内容来自蓝图〕
+  ├─ 考核评分标准         → .rubric-table           〔M/L 档，来自 package/rubric.md〕
   ├─ 模块小结            → .key-takeaway
   ├─ 左文右图            → .layout-text-image  (右侧必须有真实图片)
   ├─ 两栏等重内容         → .grid-2
@@ -125,13 +157,16 @@ description: 读取 courses/<name>/course.meta.md，按 Merrill 第一原理逐�
 ## 工作流程
 
 ```
-1. 读 course.meta.md
+1. 读 course.meta.md（M/L 档同时读 course.blueprint.md）
 2. 按大纲确定页数和顺序 (封面 + 概览 + 模块 × 5页 + 结尾, 通常 20-30页)
+   M/L 档另加: 每模块 1 张 Activity 页 + 全课 1 张 Assessment 页
 3. [Phase 4] 写 slide-plan.md → 用户审阅内容 → 确认后继续
 4. [Phase 5] 按 plan 逐页写 slides/slide-XX.html (从 01 开始，两位数补零)
 5. 每写 5 页, 运行: node lint-slides.js <课程名>
    → 有违规立即修复, 再继续
 6. 全部写完后: node build.js <课程名>
+   M/L 档再跑一次: node check.js <课程名>
+   → 页数与大纲对不上、模块缺 Activity 页都会在这里报出来
 7. 视觉自查: node shot.js <课程名>
    → 溢出报告有问题页立即修复
    → 逐张查看 .review/slide-XX.png, 按下方 rubric 自我批判并修正, 再交用户

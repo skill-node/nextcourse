@@ -9,9 +9,10 @@
  *   1. 一致性  : blueprint 模块清单 ↔ meta 大纲 ↔ slides/ 实际页数
  *   2. 闭环    : 每条 outcome 至少被 1 个模块教到 + 有 1 条判定证据
  *   3. 深度    : Bloom 分布, 全落在 remember/understand 则警告「课程太浅」
- *   4. 时长    : 各模块时长之和 vs 声明总时长 (含休息与缓冲)
- *   5. 完整度  : M/L 档必填章节缺失提醒
- *   6. 产出    : 写出 package/alignment.md 对齐矩阵 (M/L 档)
+ *   4. 活动落地: 蓝图里有教学活动的模块, 幻灯片里必须有对应 Activity 页
+ *   5. 时长    : 各模块时长之和 vs 声明总时长 (含休息与缓冲)
+ *   6. 完整度  : M/L 档必填章节缺失提醒
+ *   7. 产出    : 写出 package/alignment.md 对齐矩阵 (M/L 档)
  *
  * 退出码: 有 error 时 1, 只有 warning 时 0
  *
@@ -22,7 +23,7 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { loadCourse, isBlank, label, parseMinutes } = require('./course-model');
+const { loadCourse, mapSlidesToModules, isBlank, label, parseMinutes } = require('./course-model');
 
 const ROOT = __dirname;
 
@@ -184,7 +185,24 @@ if (slideCount === 0) {
     warn('pages', `meta 大纲声明 ${declaredPages} 张，slides/ 实有 ${slideCount} 个`);
 }
 
-// 5) 时长核算
+// 5) 幻灯片与蓝图活动的对账（M/L 档，且页数对得上才做映射）
+const slideMap = isMPlus ? mapSlidesToModules(course) : null;
+if (slideMap) {
+    for (const m of modules) {
+        if (isBlank(m.activity)) continue;
+        const pages = slideMap[m.no] || [];
+        if (!pages.some(s => s.has('activity-card'))) {
+            warn('slides', `模块 ${m.no}「${label(m.name)}」蓝图里有活动「${m.activity}」，但这几页里没有 Activity 页（.activity-card）——学员看不到任务、时间与评分点`);
+        }
+    }
+    if (!slides.some(s => s.has('rubric-table'))) {
+        info('slides', '全 deck 没有 Assessment 页（.rubric-table）——结营要考核的话，学员应该在课上看到评分标准');
+    }
+} else if (isMPlus && slideCount && declaredPages !== slideCount) {
+    info('slides', '页数与大纲对不上，Activity 页对账跳过（先把 meta 大纲的「（N 张）」改准）');
+}
+
+// 6) 时长核算
 if (modules.length) {
     const unparsed = modules.filter(m => m.minutes === null);
     if (unparsed.length) {

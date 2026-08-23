@@ -962,6 +962,96 @@ animations.css 里专为 fragment 准备的缓动增强）。
 
 ---
 
+### § 22 活动指令卡 (.activity-card) — *components.css*
+
+练习页 / 活动页专用。把「活动名 / 时间 / 分组 / 交付物 / 评分点」五件事固定成结构——
+练习页翻车通常不是任务不好，是任务没交代清楚。
+
+```html
+<section>
+  <h2>练习：把你的提示词改成五要素版</h2>
+  <div class="activity-card">
+    <div class="activity-card__header">
+      <span class="activity-card__badge">动手练习</span>
+      <h3 class="activity-card__title">改写一条你上周真实用过的提示词</h3>
+      <span class="activity-card__timer">20 min</span>
+    </div>
+    <p class="activity-card__task">打开手机相册里上周问 AI 的那条指令，用五要素公式重写一遍，
+       再把两版结果贴在一起对比。</p>
+    <div class="activity-card__meta">
+      <div class="activity-card__meta-item">
+        <span class="activity-card__meta-label">分组</span>4 人一组，组内互读
+      </div>
+      <div class="activity-card__meta-item">
+        <span class="activity-card__meta-label">交付物</span>个人提示词模板 3 条
+      </div>
+    </div>
+    <ul class="activity-card__criteria">
+      <li>五要素齐全：角色 / 对象 / 目标 / 约束 / 格式</li>
+      <li>约束具体到可验收，不是「写好一点」</li>
+    </ul>
+  </div>
+</section>
+```
+
+✅ DO: 内容直接来自 `course.blueprint.md` 模块清单的「教学活动 / 时长 / 产出物」，
+三处保持一致（`nextcourse check` 会盯）；`__criteria` 2–3 条，对应 `package/rubric.md` 的维度；
+完整活动指令（讲师口播的五步）写进 `aside.notes`，不上屏
+❌ DON'T: 不要把整段活动流程写在 `__task` 里（那是讲师手册的活）；不要省掉 `__timer`——
+没有时间盒的活动一定超时；一页只放一张卡，两个活动拆两页
+
+> 左侧 6px 强调色边是它与讲授页的一眼之别。学员看到这条边就知道「该动手了」。
+
+---
+
+### § 23 考核量规表 (.rubric-table) — *components.css*
+
+结营考核说明页。行是评分维度，列是等级，**达标列打底色**——那是学员唯一需要记住的一列。
+
+```html
+<section>
+  <h2>结营考核怎么算过</h2>
+  <table class="rubric-table">
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th class="rubric-table__level--pass">达标</th>
+        <th>优秀</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="rubric-table__dim">提示词完整度</td>
+        <td class="rubric-table__level--pass">五要素齐全，约束可验收</td>
+        <td>能针对同一任务给出两种写法并说明取舍</td>
+      </tr>
+      <tr>
+        <td class="rubric-table__dim">成品可用性</td>
+        <td class="rubric-table__level--pass">产出回工位能直接用，无需返工</td>
+        <td>顺手做成了可复用的模板</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+```
+
+**与 `.table-compare` 的分工**（别混用）：
+
+| | `.table-compare` | `.rubric-table` |
+|---|---|---|
+| 比什么 | 几个方案 / 工具的特性 | 同一件事做到什么程度算达标 |
+| 行列语义 | 行 = 特性，列 = 方案 | 行 = 评分维度，列 = 等级 |
+| 强调列 | `.col--highlight`（推荐方案） | `.rubric-table__level--pass`（达标线） |
+| 数据源 | 讲师整理 | `package/rubric.md`（`nextcourse package` 生成） |
+
+✅ DO: 上片只放 3–4 个维度 × 2–3 个等级，完整四级量规留在交付包；
+每格写成**可观察的行为**（「五要素齐全」而不是「掌握较好」）；
+`__level--pass` 同时打在 `<th>` 和该列所有 `<td>` 上
+❌ DON'T: 不要把 `package/rubric.md` 整张表贴上片（那是给讲师打分用的，不是给学员看的）；
+不要写「较好 / 一般 / 有待提高」这类不可观察的等级描述
+
+---
+
 ## 组合示例 — 一页内的 B 档自由组合
 
 当没有现成组件时，用基础原子自由组合:
@@ -1006,11 +1096,6 @@ animations.css 里专为 fragment 准备的缓动增强）。
 > §N 那条规则是兜底，但它按类名点名，漏登记的新组件享受不到。
 
 > 第 4 步别跳过。漏了不会报错——`nextcourse animate` 有通用兜底，
-> 会给这一页的块级子元素挨个打 `fade-up`，并在输出里标 `⚙ 通用兜底`。
-> 页面不会死板，但拿不到「左右对进」「沿流向推进」这类贴合结构的节奏。
-> 看到那个标记，就是在提醒你这里缺一条规则。
-
-> 第 3 步别跳过。漏了不会报错——`nextcourse animate` 有通用兜底，
 > 会给这一页的块级子元素挨个打 `fade-up`，并在输出里标 `⚙ 通用兜底`。
 > 页面不会死板，但拿不到「左右对进」「沿流向推进」这类贴合结构的节奏。
 > 看到那个标记，就是在提醒你这里缺一条规则。

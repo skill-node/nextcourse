@@ -97,6 +97,9 @@ const CONTAINER_RULES = [
     { on: 'layout-img-top',     pick: () => true,                             mode: 'seq', anim: 'animate-fade-up' },
     { on: 'layout-top-bottom',  pick: () => true,                             mode: 'seq', anim: 'animate-fade-up' },
 
+    // ── 活动指令卡：标题 → 任务 → 分组/交付物 → 评分点, 按"交代任务"的口播顺序推进 ──
+    { on: 'activity-card',      pick: () => true,                             mode: 'seq', anim: 'animate-fade-up' },
+
     // ── 列表：逐条升起 ──
     { on: 'key-takeaway__list', pick: n => n.tag === 'li',                    mode: 'seq', anim: 'animate-fade-up' },
     { on: 'check-list',         pick: n => n.tag === 'li',                    mode: 'seq', anim: 'animate-fade-up' },
@@ -107,7 +110,7 @@ const CONTAINER_RULES = [
 // 所以这里可以放心地把容器本身也列进来当「没有可动画子元素时」的退路
 // （例如 stats-wall 里没写 stat-item，整面墙仍会升起）。
 const SOLO_BLOCKS = [
-    'concept-card', 'callout', 'highlight-box', 'table-compare', 'code-block',
+    'concept-card', 'callout', 'highlight-box', 'table-compare', 'rubric-table', 'code-block',
     'module-divider', 'key-takeaway', 'key-takeaway__next', 'case-study',
     'quote-slide', 'quadrant', 'timeline', 'stats-wall', 'icon-text',
     'card', 'card-primary', 'card-secondary', 'card-accent', 'icon-card',
