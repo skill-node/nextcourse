@@ -48,7 +48,7 @@ NextCourse — 课程列表
 ```bash
 npm run new <course-name>
 # or
-node nextcourse.js new <course-name>
+node nextcourse.js new <course-name> [--scale M|L]
 ```
 
 Creates:
@@ -57,10 +57,23 @@ Creates:
 - `courses/<course-name>/slides/` — slide fragments
 - `courses/<course-name>/assets/` — images
 
+**Scale (`--scale`)**: no flag means **S** (a 30–90 minute talk) and behaves exactly as
+it did in V2.
+
+| Scale | For | Extra output |
+|---|---|---|
+| S (default) | Public or internal talk | — |
+| M | Half-day to full-day in-house training | `course.blueprint.md` plus `scale` / `duration` / `class_size` in the frontmatter |
+| L | Bootcamp or systematic programme | Same as M; the blueprint also carries operations, TTT and roadmap sections |
+
+At M/L the `outcomes` use the block form and carry `id`, `module` (where it is taught)
+and `evidence` (what proves it). Those three fields are the fuel for `check`.
+
 **Example:**
 
 ```bash
-npm run new python-basics
+npm run new python-basics                             # S
+node nextcourse.js new leadership-workshop --scale M  # M, blueprint included
 ```
 
 ---
@@ -211,9 +224,85 @@ open courses/python-basics/deck.html
 
 ---
 
+#### `check` — teaching-design closure check
+
+```bash
+npm run check <course-name>
+# or
+node nextcourse.js check <course-name>
+```
+
+`lint` covers styling; `check` covers **teaching logic**. It reads `course.meta.md`,
+`course.blueprint.md` and `slides/`, and validates six things:
+
+| Check | What it means |
+|---|---|
+| Closure | Every outcome needs `module` (taught) and `evidence` (assessed); at M/L either one missing is an **error** |
+| Consistency | Blueprint module list ↔ outline modules ↔ actual files in `slides/` must agree |
+| Depth | A Bloom distribution stuck at remember / understand warns the course may be too shallow |
+| Activity landing | A module with a teaching activity in the blueprint must have an Activity page (`.activity-card`) in the deck |
+| Duration | Module durations vs the declared total; overrunning is an error |
+| Completeness | Missing mandatory blueprint sections at M/L |
+
+It also writes `package/alignment.md` — the alignment matrix
+(outcome × module × activity × deliverable × evidence).
+
+**Exit code**: `1` when there are errors, `0` when only warnings. S-scale courses are
+not forced into closure; they get a single informational line.
+
+---
+
 ### Delivery workflow
 
+#### `package` — build the delivery package (M/L only)
+
+```bash
+npm run package <course-name>
+# or
+node nextcourse.js package <course-name> [--render] [--force]
+```
+
+Pulls the blueprint, the outline and the slide notes together into what in-house
+delivery actually requires:
+
+| File | Read by |
+|---|---|
+| `package/facilitator-guide.md` | Facilitator — teaching points, activity scripts, matched slide notes |
+| `package/workbook.md` | Learner — tasks, write-in areas, self-check lists |
+| `package/assessment.md` | Client — L1 survey, L2 assessment, declared evaluation scope |
+| `package/rubric.md` | Facilitator — scoring rubric and tally sheet |
+| `package/facilitation.md` | Facilitator / assistant — timeline, grouping, points rules |
+| `package/content-dev.md` | Project team — SME interviews, case library, data packs, schedule |
+| `package/action-plan.md` | Learner — 30-day commitment plus 30/60/90 review |
+| `package/exercises/README.md` | Project team — data-pack rules and backlog |
+
+**Flags:**
+
+- `--render` — also render `package/*.md` into `package/html/*.html`, the
+  self-contained, printable files the **client actually receives**
+- `--force` — regenerate and overwrite existing md (**by default nothing is
+  overwritten**; your hand edits win)
+
+**Markdown is the source, HTML is the deliverable** — the same model as `deck.html`.
+Edit the md, re-render, never hand-edit the HTML.
+
+Where blueprint sections 6–8 are missing, the corresponding documents carry
+`> **待补**: …` markers — that is the backlog standing between this course and a real
+cohort. Fill the blueprint via `/course-delivery`, then run this again.
+
+> Running it on an S-scale course is refused, pointing you at `notes` instead.
+
+**Print acceptance** (walk through Chrome's print preview after `--render`):
+① backgrounds and header fills preserved ② consistent margins ③ no blank pages
+④ tables not split ⑤ no heading stranded at the foot ⑥ forced breaks honoured
+⑦ exported PDF matches the preview
+
+---
+
 #### `export` — package as an offline-playable folder
+
+> At M/L, add `--with-package` to fold `package/html/` into the offline bundle, so the
+> client receives deck and delivery documents in one folder (run `package --render` first).
 
 ```bash
 npm run export <course-name> [outdir]
@@ -348,11 +437,17 @@ Takes no course name — it describes the design system itself.
 ### Building a course from scratch
 
 ```bash
-# 1. scaffold
+# 1. scaffold (add --scale M for in-house training)
 npm run new my-course
 
 # 2. design the outline (in Claude Code)
 #    run: /course-design
+
+# 2b. M/L: evaluation plan and content development (in Claude Code)
+#    run: /course-delivery my-course
+
+# 2c. M/L: teaching-design closure check
+npm run check my-course
 
 # 3. generate slides (in Claude Code)
 #    run: /slide-design my-course
@@ -373,7 +468,10 @@ npm run shot my-course
 # 8. trainer handout
 npm run notes my-course
 
-# 9. package for delivery
+# 8b. M/L: build the delivery package
+node nextcourse.js package my-course --render
+
+# 9. package for delivery (add --with-package at M/L)
 npm run export my-course
 # or to a chosen location:
 npm run export my-course ~/Desktop/delivery

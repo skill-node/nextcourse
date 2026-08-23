@@ -35,10 +35,16 @@ PPT 生成器的前提是你已经知道这门课讲给谁、要让人学会什�
 
 课程设计的判断仍然由你来做。它负责的是把这些判断一条条问清楚、记下来，然后严格地执行。
 
-## 课程设计：三个阶段，一次问一件事
+## 课程设计：一次问一件事
 
 在 Claude Code 里运行 `/course-design`。全程对话式，最后落成一份人能读、能改、
 能进版本库的文件，而不是一个不透明的黑箱。
+
+**0 · 规格与需求诊断** —— 第一个问题是「这门课多长、什么场合」，因为它决定后面要问多少东西。
+30 分钟的公开分享和一天的企业内训，需要的设计深度差一个量级，用同一套流程伺候两者，
+不是把轻的搞重，就是把重的做浅（见下节「分档」）。
+内训档还会追问一件很多人不问的事：**本期明确不做什么**——只问「要什么」不问「不要什么」，
+课程一定会越做越胖。
 
 **1 · 定位** —— 受众是谁、在什么场景下用、为什么是这门课而不是别的。
 它先问一两个问题就停下来等你，不会一口气吐出一整份方案让你被动接受。
@@ -69,6 +75,74 @@ outcomes:
 所以大纲里会写死一条约束：**通用骨架的模块不许出现行业案例**，案例集中在一个模块里 ——
 换受众时只重写那一层。
 
+## 分档：轻的保持轻，重的才上重装备
+
+一门 60 分钟的公开分享，不需要柯氏评估、不需要考核量规、不需要学员手册。
+硬套一整套企业内训的方法论，只会把工具变成负担。所以有三档：
+
+| 档位 | 适用 | 产出 |
+|---|---|---|
+| **S · 分享课**（默认） | 30–90 分钟，公开课 / 内部分享 | `course.meta.md` + 课件 |
+| **M · 内训课** | 半天 ~ 一天，企业内训 | ＋设计蓝图 ＋交付包 |
+| **L · 培训项目** | 训练营 / 体系化项目 | ＋运营、TTT、实施路线图 |
+
+`nextcourse new <name>` 不带参数就是 S 档，**行为与升级前一字不差**——
+这是硬约束，轻量场景不该为了别人的复杂度付费。要内训档加 `--scale M`。
+
+## 企业内训：从大纲到交付包
+
+真实的内训交付，课件只是其中一件。学员手册、练习数据包、评分量规、评估问卷、
+行动承诺书——这些才是「这门课能不能落地」的分水岭。
+
+`/course-delivery <课程名>` 接着 `/course-design` 往下做：教学互动设计、
+柯氏评估方案（**默认只做 L1 + L2**，L3/L4 要先确认基线数据由谁提供）、内容开发计划。
+然后一条命令交出整包：
+
+```bash
+node nextcourse.js package <name> --render
+```
+
+```
+package/
+├── facilitator-guide.md   讲师手册（逐模块讲授要点 / 活动指令 / 幻灯片备注）
+├── workbook.md            学员手册（练习任务 / 填写区 / 自检清单）
+├── assessment.md          评估方案（L1 问卷 + L2 考核）
+├── rubric.md              考核量规（维度 × 等级，每格都是可观察行为）
+├── facilitation.md        教学设计（时间轴 / 分组 / 积分规则）
+├── content-dev.md         内容开发计划（SME 访谈 / 案例库 / 脱敏规则 / 排期）
+├── action-plan.md         学员 30 天行动承诺书
+├── alignment.md           对齐矩阵（由 check 生成）
+└── html/                  客户实际拿到的东西：双击即读，打印不掉样式
+```
+
+**md 是源，HTML 是交付物** —— 和 `deck.html` 完全一样的心智模型：改内容一律改 md，
+再重新渲染，HTML 永远不手改。渲染器是手写的受控子集（约 300 行），
+因为这个项目**零 npm 依赖**是刻意的护城河，不会为了渲染 markdown 引一个包进来。
+
+### 一个会报错的逆向设计
+
+学习成果多写两个字段之后，「教了但不测、测了但没教」这件事就能被机器抓住：
+
+```yaml
+outcomes:
+  - id: LO3
+    do:       "使用办公智能体完成一项真实工作任务"
+    bloom:    apply
+    success:  "成品无需返工可直接使用"
+    module:   3                        # 在哪个模块教
+    evidence: "结营作战包 A 项"          # 用什么证据判定达成
+```
+
+`nextcourse check <name>` 校验的不是样式，是教学逻辑：
+
+- 每条成果都有模块教到、有证据测到，缺一样就报错；
+- 蓝图的模块清单、大纲的页数、`slides/` 的实际文件数三者对不上就报警；
+- Bloom 分布全落在「记住 / 理解」——警告这门课可能太浅；
+- 各模块时长之和超过声明总时长，直接报错；
+- 蓝图里写了教学活动的模块，幻灯片里必须有对应的活动指令页。
+
+逆向设计（Backward Design）在多数课程里是句口号，因为没人查。这里它是个会报错的检查。
+
 ## 幻灯片：大纲定稿之后的事
 
 `/slide-design <课程名>`，中间有两道人审关卡 —— 因为内容问题在 plan 里改一行字，
@@ -76,7 +150,7 @@ outcomes:
 
 - **内容先过关。** 先出逐页 `slide-plan.md` 交你审，确认了才开始写标记。不在错的内容上花排版时间。
 - **页型有语义。** 每页先定它是 Hook、Concept、Demo、Practice 还是 Takeaway，
-  页型决定这页能用 22 个登记组件里的哪几个。
+  页型决定这页能用 24 个登记组件里的哪几个。
 - **机器能查的不留给眼睛。** 行内样式、写死的色值、私自引入的 `font-family`、
   没登记过的 class —— 五类违规直接让构建失败；再用无头 Chrome 逐页截图，检测内容有没有溢出屏幕。
 - **换视觉只改一行。** 配色（8 套）与字体（8 套字体集）是独立的一层，换皮肤不动任何一页幻灯片。
@@ -112,7 +186,8 @@ cd nextcourse
 然后在 Claude Code 里：
 
 ```
-/course-design                 # 对话式：定位 → 学习成果 → 知识架构
+/course-design                 # 对话式：规格 → 定位 → 学习成果 → 整体设计 → 模块架构
+/course-delivery <课程名>       # 内训档：教学互动 → 评估方案 → 内容开发计划
 /slide-design <课程名>          # 内容计划 → 人审 → 幻灯片
 ```
 
@@ -120,8 +195,10 @@ cd nextcourse
 
 ```bash
 node nextcourse.js render <name>   # lint + 构建 deck.html（推荐）
+node nextcourse.js check  <name>   # 教学设计闭环校验（成果 × 模块 × 证据）
+node nextcourse.js package <name> --render   # 生成交付包 md + 客户 HTML（M/L 档）
 node nextcourse.js shot   <name>   # 溢出检测 + 逐页截图自查
-node nextcourse.js export <name>   # 打包为可离线演示文件夹
+node nextcourse.js export <name> --with-package   # 打包为可离线演示文件夹
 node nextcourse.js animate <name>  # 批量打入入场动画（--strip 剥离）
 node nextcourse.js themes          # 生成配色 / 字体展板
 ```
@@ -130,17 +207,24 @@ node nextcourse.js themes          # 生成配色 / 字体展板
 
 ### 跑一遍自带的示例课
 
-[`examples/`](./examples) 里带了一门完整的 29 页课，就是[在线 demo](https://course.skillnode.ai/demo/)
-那一门，课件里的案例素材（单据、明细、成品长图）已全部替换为虚构示例。
-拷进工作区跑一遍：
+[`examples/`](./examples) 里带了**同一个主题的两档样例**，正好用来看分档到底差在哪：
+
+| 样例 | 档位 | 内容 |
+|---|---|---|
+| `ai-agent-insurance` | S · 分享课 | 60 分钟，16 页，就是[在线 demo](https://course.skillnode.ai/demo/) 那一门 |
+| `ai-agent-insurance-workshop` | M · 内训课 | 1 天，31 页，另有设计蓝图 + 完整交付包 |
+
+两门课的案例素材都已全部替换为虚构示例。拷进工作区跑一遍：
 
 ```bash
-cp -R examples/ai-agent-insurance courses/
-node nextcourse.js render ai-agent-insurance
-node nextcourse.js export ai-agent-insurance
+cp -R examples/ai-agent-insurance-workshop courses/
+node nextcourse.js check   ai-agent-insurance-workshop   # 教学设计闭环：0 error 0 warning
+node nextcourse.js render  ai-agent-insurance-workshop   # lint + 构建课件
+node nextcourse.js package ai-agent-insurance-workshop --render   # 交付包 HTML
 ```
 
-建议先读 `examples/ai-agent-insurance/course.meta.md` —— 这个项目真正讲的是那个文件，不是那份课件。
+建议先读 `course.blueprint.md` 和 `course.meta.md` —— 这个项目真正讲的是那两个文件，不是那份课件。
+交付包里的 `alignment.md`（对齐矩阵）值得单独看一眼：成果 × 模块 × 活动 × 证据，一张表看完这门课的闭环。
 
 ## 仓库结构
 
@@ -148,18 +232,22 @@ node nextcourse.js export ai-agent-insurance
 nextcourse/
 ├── AGENT.md                     ← 完整文档（所有 Agent 入口）
 ├── CLI_MANUAL.md                ← CLI 操作手册（完整命令参考）
-├── DESIGN-SYSTEM.md             ← 组件参考手册（22 个组件）
+├── DESIGN-SYSTEM.md             ← 组件参考手册（24 个组件）
 ├── nextcourse.js                ← 统一 CLI 入口
 ├── build.js                     ← 课程组装
+├── check.js                     ← 教学设计闭环校验
+├── package.js                   ← 交付包生成
+├── render-md.js                 ← 受控子集 md → html 渲染器（零依赖）
 ├── lint-slides.js               ← 样式闸（5 类违规检测）
 ├── animate-slides.js            ← 入场动画批量打入 / 剥离
 ├── export.js                    ← 离线打包
 ├── shot.js                      ← 溢出检测 + 逐页截图
-├── templates/                   ← deck.html 母版
+├── templates/                   ← deck.html 母版 + 设计蓝图模板（M/L 档）
 ├── shared_styles/               ← 设计系统（8 套配色 · 8 套字体集 · 组件库）
 ├── lib/                         ← Reveal.js + 网络字体（vendored，离线可用）
 ├── .claude/skills/
 │   ├── course-design/SKILL.md   ← /course-design
+│   ├── course-delivery/         ← /course-delivery（含柯氏评估等方法论参考）
 │   └── slide-design/SKILL.md    ← /slide-design
 ├── examples/                    ← 自带示例课程
 └── courses/                     ← 你的课程（gitignore）

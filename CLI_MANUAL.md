@@ -41,7 +41,7 @@ NextCourse — 课程列表
 ```bash
 npm run new <course-name>
 # 或
-nextcourse new <course-name>
+nextcourse new <course-name> [--scale M|L]
 ```
 
 创建新课程目录结构：
@@ -49,9 +49,21 @@ nextcourse new <course-name>
 - `courses/<course-name>/slides/` — 幻灯片目录
 - `courses/<course-name>/assets/` — 资源目录
 
+**档位（`--scale`）**：不带参数 = **S 档**（30–90 分钟分享课），行为与 V2 完全一致。
+
+| 档位 | 适用 | 额外产出 |
+|---|---|---|
+| S（默认） | 公开课 / 内部分享 | — |
+| M | 半天 ~ 1 天企业内训 | `course.blueprint.md` 设计蓝图 + frontmatter 追加 `scale` / `duration` / `class_size` |
+| L | 训练营 / 体系化项目 | 同 M，蓝图另含运营、TTT、路线图章节 |
+
+M / L 档的 `outcomes` 用块式写法，多带 `id` / `module`（在哪教）/ `evidence`（用什么判定），
+这三个字段是 `check` 做闭环校验的燃料。
+
 **示例：**
 ```bash
-npm run new python-basics
+npm run new python-basics                    # S 档
+nextcourse new leadership-workshop --scale M # M 档，同时生成蓝图
 ```
 
 ---
@@ -181,9 +193,93 @@ open courses/python-basics/deck.html
 
 ---
 
+#### `check` — 教学设计闭环校验
+```bash
+npm run check <course-name>
+# 或
+nextcourse check <course-name>
+```
+
+`lint` 管样式，`check` 管**教学逻辑**。它读 `course.meta.md` + `course.blueprint.md` +
+`slides/`，校验六件事：
+
+| 校验项 | 说明 |
+|---|---|
+| 闭环 | 每条 outcome 都要有 `module`（教到）和 `evidence`（测到），M/L 档缺任一即 **error** |
+| 一致性 | 蓝图模块清单 ↔ meta 大纲模块 ↔ `slides/` 实际页数，三者对不上报警 |
+| 深度 | Bloom 分布全落在 remember / understand → 警告「课程可能太浅」 |
+| 活动落地 | 蓝图里写了教学活动的模块，幻灯片里必须有 Activity 页（`.activity-card`） |
+| 时长 | 各模块时长之和 vs 声明总时长；超出即 error |
+| 完整度 | M/L 档蓝图必填章节缺失提醒 |
+
+同时生成 `package/alignment.md` 对齐矩阵（成果 × 模块 × 活动 × 产出 × 证据）。
+
+**退出码**：有 error 时 `1`，只有 warning 时 `0`。S 档不强制闭环，只提示一行。
+
+**示例输出：**
+```
+NextCourse Check — leadership-workshop
+────────────────────────────────────────────────────────
+  档位     : M · 内训课
+  蓝图     : course.blueprint.md
+  学习成果 : 5 条  understand×1 apply×2 analyze×1 evaluate×1
+  模块     : 蓝图 4 个 / meta 大纲 4 个
+  页数     : meta 声明 31 张 / slides/ 实有 31 个
+
+  ✓  对齐矩阵已生成: courses/leadership-workshop/package/alignment.md
+
+  PASS  教学设计闭环无阻断问题 — 0 error(s), 0 warning(s), 0 note(s)
+```
+
+---
+
 ### 交付工作流
 
+#### `package` — 生成交付包（M / L 档）
+```bash
+npm run package <course-name>
+# 或
+nextcourse package <course-name> [--render] [--force]
+```
+
+汇总蓝图 + 大纲 + slide 备注，生成企业内训真正要交的那一包：
+
+| 文件 | 谁看 |
+|---|---|
+| `package/facilitator-guide.md` | 讲师 —— 逐模块讲授要点、活动指令、对应幻灯片备注 |
+| `package/workbook.md` | 学员 —— 练习任务、填写区、自检清单 |
+| `package/assessment.md` | 项目方 —— L1 问卷、L2 考核、评估范围声明 |
+| `package/rubric.md` | 讲师 —— 打分量规与汇总表 |
+| `package/facilitation.md` | 讲师 / 助教 —— 时间轴、分组、积分规则 |
+| `package/content-dev.md` | 项目组 —— SME 访谈、案例库、数据包、排期 |
+| `package/action-plan.md` | 学员 —— 30 天承诺 + 30/60/90 复盘 |
+| `package/exercises/README.md` | 项目组 —— 练习数据包规则与待建清单 |
+
+**参数：**
+- `--render` — 顺带把 `package/*.md` 渲染成 `package/html/*.html`（**客户实际拿到的东西**，
+  含目录、可打印、自包含单文件）
+- `--force` — 重新生成并覆盖已存在的 md（**默认不覆盖**，你的手改优先）
+
+**md 是源，HTML 是交付物。** 和 `deck.html` 一个心智模型：改内容一律改 `package/*.md`
+再重新 `--render`，HTML 永远不手改。
+
+蓝图六~八节（教学方法 / 评估方案 / 内容开发）没写时，对应文档会留 `> **待补**：…` 标记
+——那就是这门课离「能开班」还差的东西，跑 `/course-delivery` 补齐蓝图后重跑本命令即可。
+
+> S 档课程跑这个命令会被拒绝并提示改用 `notes`——交付包是 M/L 档的东西。
+
+**打印验收**（`--render` 后在 Chrome 打印预览里逐项过）：
+① 背景色 / 表头底色保留 ② 每页边距一致 ③ 无空白页 ④ 表格不腰斩
+⑤ 标题不落页尾 ⑥ 强制分页点生效 ⑦ 导出 PDF 与预览一致
+
+---
+
+
 #### `export` — 打包为可离线演示文件夹
+
+> M / L 档加 `--with-package` 可把 `package/html/` 一起打进离线包，
+> 客户拿到的文件夹里同时有课件与交付文档（需先跑过 `package --render`）。
+
 ```bash
 npm run export <course-name> [outdir]
 ```
@@ -301,11 +397,17 @@ npm run themes
 ### 从零开始创建课程
 
 ```bash
-# 1. 创建新课程目录
+# 1. 创建新课程目录（企业内训加 --scale M）
 npm run new my-course
 
 # 2. 设计课程大纲（在 Claude Code 中）
 # 运行: /course-design
+
+# 2b. M/L 档：补评估方案与开发计划（在 Claude Code 中）
+# 运行: /course-delivery my-course
+
+# 2c. M/L 档：教学设计闭环校验
+npm run check my-course
 
 # 3. 生成幻灯片（在 Claude Code 中）
 # 运行: /slide-design my-course
@@ -326,7 +428,10 @@ npm run shot my-course
 # 8. 导出讲师手册
 npm run notes my-course
 
-# 9. 打包交付
+# 8b. M/L 档：生成交付包（讲师手册 / 学员手册 / 量规 / 评估方案）
+nextcourse package my-course --render
+
+# 9. 打包交付（M/L 档加 --with-package 带上交付文档）
 npm run export my-course
 # 或输出到自定义位置:
 npm run export my-course ~/Desktop/delivery

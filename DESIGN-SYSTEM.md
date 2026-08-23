@@ -880,11 +880,14 @@ animations.css 里专为 fragment 准备的缓动增强）。
 ```html
 <section class="ending-slide">
   <h1>谢谢</h1>
-  <div class="ending-slide__divider"></div>
   <p>问题 & 讨论</p>
   <p class="text-muted">联系方式: your@email.com</p>
 </section>
 ```
+
+> 这里**没有**分隔线元素。`.divider` 只在 `.cover-slide` 下有样式（`standard.css` §封面），
+> 结语页写 `.ending-slide__divider` 会被 lint 判 `unknown-class`——本文档此前的示例是错的，已修。
+> 需要二维码时用 `.qr-placeholder`。
 
 ---
 

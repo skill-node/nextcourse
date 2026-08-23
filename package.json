@@ -19,10 +19,12 @@
   },
   "scripts": {
     "list":   "node nextcourse.js list",
+    "check":  "node nextcourse.js check",
     "lint":   "node nextcourse.js lint",
     "animate": "node nextcourse.js animate",
     "build":  "node nextcourse.js build",
     "render": "node nextcourse.js render",
+    "package": "node nextcourse.js package",
     "export": "node nextcourse.js export",
     "notes":  "node nextcourse.js notes",
     "shot":   "node nextcourse.js shot",
