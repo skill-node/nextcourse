@@ -22,9 +22,11 @@ const path = require('path');
 const ROOT = __dirname;
 
 // ─── 参数 ────────────────────────────────────────────────────────────────────
-const [,, courseName, outputBase] = process.argv;
+const args = process.argv.slice(2);
+const WITH_PACKAGE = args.includes('--with-package');
+const [courseName, outputBase] = args.filter(a => !a.startsWith('--'));
 if (!courseName) {
-    console.error('Usage: node export.js <course-name> [output-dir]');
+    console.error('Usage: node export.js <course-name> [output-dir] [--with-package]');
     process.exit(1);
 }
 
@@ -167,6 +169,19 @@ if (fs.existsSync(assetsDir)) {
     fileCount += copyDir(assetsDir, path.join(EXPORT_DIR, 'assets'));
 }
 
+// 交付包 (M/L 档, --with-package)。只带 html/ —— 那是客户交付物;
+// md 是我们的源文件, 不进客户手里的包。
+let packagedDocs = 0;
+if (WITH_PACKAGE) {
+    const pkgHtml = path.join(COURSE_DIR, 'package', 'html');
+    if (!fs.existsSync(pkgHtml)) {
+        console.error(`ERROR: package/html/ 不存在。先运行 'node package.js ${courseName} --render'`);
+        process.exit(1);
+    }
+    packagedDocs = copyDir(pkgHtml, path.join(EXPORT_DIR, 'package'));
+    fileCount += packagedDocs;
+}
+
 // ─── 4. 结果报告 ─────────────────────────────────────────────────────────────
 const sizeMB = (dirSize(EXPORT_DIR) / 1024 / 1024).toFixed(1);
 
@@ -175,7 +190,9 @@ console.log(`${'─'.repeat(50)}`);
 console.log(`  输出目录 : ${EXPORT_DIR}`);
 console.log(`  文件总数 : ${fileCount}`);
 console.log(`  打包大小 : ${sizeMB} MB`);
+if (WITH_PACKAGE) console.log(`  交付包   : package/ ${packagedDocs} 个文档`);
 console.log(`\n  ✓  完成。`);
 console.log(`     将整个 "${path.basename(EXPORT_DIR)}" 文件夹`);
 console.log(`     拷贝到 U 盘 / 云盘 / 任意电脑`);
-console.log(`     双击 index.html 即可演示（无需联网）\n`);
+console.log(`     双击 index.html 即可演示（无需联网）`);
+if (WITH_PACKAGE) console.log(`     交付文档在 package/index.html\n`); else console.log('');

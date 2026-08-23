@@ -10,6 +10,7 @@
  *   nextcourse animate <name> [--strip] 批量打入/剥离组件入场动画
  *   nextcourse build  <name>            组装生成 deck.html
  *   nextcourse render <name>            lint + build 一步完成
+ *   nextcourse package <name> [--render] 生成交付包 package/（讲师手册 / 学员手册 / 量规…）
  *   nextcourse export <name> [outdir]   打包为可离线演示文件夹
  *   nextcourse themes                   生成配色/字体展板（theme-gallery/）
  *
@@ -196,6 +197,11 @@ outcomes:
         process.exit(run('check.js', [requireName('check')]));
     },
 
+    package() {
+        const name = requireName('package');
+        process.exit(run('package.js', [name, ...rest.slice(1)]));
+    },
+
     lint() {
         process.exit(run('lint-slides.js', [requireName('lint')]));
     },
@@ -267,7 +273,11 @@ outcomes:
         const outPath = path.join(ROOT, 'courses', name, 'handout.md');
         fs.writeFileSync(outPath, out.join('\n'), 'utf8');
         console.log(`\n  ✓  讲师手册已生成: courses/${name}/handout.md`);
-        console.log(`     共 ${files.length} 页, 其中 ${noteCount} 页有演讲备注\n`);
+        console.log(`     共 ${files.length} 页, 其中 ${noteCount} 页有演讲备注`);
+        if (fs.existsSync(path.join(ROOT, 'courses', name, 'course.blueprint.md'))) {
+            console.log(`     （M/L 档: nextcourse package ${name} 出的讲师手册按模块组织, 还带活动指令与评分点）`);
+        }
+        console.log('');
     },
 
     help() {
@@ -283,17 +293,22 @@ NextCourse V2 — 课程开发工具
   nextcourse animate <name> [--strip] 批量打入/剥离组件入场动画（不碰手写 fragment）
   nextcourse build  <name>            组装生成 deck.html
   nextcourse render <name>            lint + build 一步完成（推荐）
-  nextcourse export <name> [outdir]   打包为可离线演示文件夹
+  nextcourse package <name> [--render] [--force]
+                                      生成交付包 package/*.md（--render 另出客户看的 HTML）
+  nextcourse export <name> [outdir] [--with-package]
+                                      打包为可离线演示文件夹
   nextcourse notes  <name>            导出讲师手册 handout.md（各页演讲备注）
   nextcourse shot   <name> [--check]  溢出检测 + 逐页截图到 .review/（需本机 Chrome）
   nextcourse themes                   生成配色/字体展板 theme-gallery/index.html
 
 工作流（从零开始）:
   /course-design                ← Claude Code: 对话式设计大纲（S 档止于此）
+  /course-delivery <name>       ← Claude Code: M/L 档补评估方案与开发计划
   nextcourse check <name>       ← M/L 档: 校验教学设计闭环
   /slide-design <name>          ← Claude Code: 生成幻灯片
   nextcourse render <name>      ← 校验 + 构建 deck.html
-  nextcourse export <name>      ← 打包，拷贝到任意电脑演示
+  nextcourse package <name> --render   ← M/L 档: 交出讲师手册/学员手册/量规
+  nextcourse export <name> --with-package  ← 打包，拷贝到任意电脑演示
 
 档位（--scale，只影响设计层，不影响构建）:
   S 分享课   30–90 min，只有 course.meta.md + deck（默认，与 V2 完全一致）

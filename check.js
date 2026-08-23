@@ -2,10 +2,8 @@
 /**
  * check.js — NextCourse V3 教学设计闭环校验
  *
- * lint 管样式, check 管教学逻辑。读取:
- *   courses/<name>/course.meta.md        构建契约 (frontmatter + 页面级大纲)
- *   courses/<name>/course.blueprint.md   设计层真相 (M / L 档)
- *   courses/<name>/slides/*.html         实际页数
+ * lint 管样式, check 管教学逻辑。输入见 course-model.js:
+ *   course.meta.md / course.blueprint.md / slides/*.html
  *
  * 校验项:
  *   1. 一致性  : blueprint 模块清单 ↔ meta 大纲 ↔ slides/ 实际页数
@@ -24,6 +22,7 @@
 
 const fs   = require('fs');
 const path = require('path');
+const { loadCourse, isBlank, label, parseMinutes } = require('./course-model');
 
 const ROOT = __dirname;
 
@@ -34,231 +33,26 @@ if (!courseName) {
     process.exit(1);
 }
 
-const COURSE_DIR = path.join(ROOT, 'courses', courseName);
-const META_PATH  = path.join(COURSE_DIR, 'course.meta.md');
-if (!fs.existsSync(META_PATH)) {
-    console.error(`ERROR: course.meta.md not found at ${META_PATH}`);
+const course = loadCourse(ROOT, courseName);
+if (!course) {
+    console.error(`ERROR: course.meta.md not found at ${path.join(ROOT, 'courses', courseName, 'course.meta.md')}`);
     process.exit(1);
 }
 
-// ─── 通用解析工具 ────────────────────────────────────────────────────────────
+const {
+    meta, scale, isMPlus, outcomes, headings,
+    blueprintName, hasBlueprint, sections, modules, blueprintOutcomeIds,
+    slides, declaredPages,
+} = course;
 
-// 「中文书名号占位」= 模板没填, 一律当空处理
-const PLACEHOLDER = /^[「『][\s\S]*[」』]$/;
-
-function isBlank(v) {
-    return !v || !String(v).trim() || PLACEHOLDER.test(String(v).trim());
-}
-
-// 报告里显示名称: 占位符统一显示成「未填」, 免得出现「「模块名」」这种套娃
-function label(v) {
-    return isBlank(v) ? '未填' : String(v).replace(/^[「『]|[」』]$/g, '');
-}
-
-function unquote(v) {
-    const s = String(v).trim();
-    if (/^".*"$/.test(s) || /^'.*'$/.test(s)) return s.slice(1, -1);
-    return s;
-}
-
-// 逗号分隔但要跳过引号内的逗号: {do: "a, b", bloom: apply}
-function splitTopLevel(s, sep = ',') {
-    const out = [];
-    let cur = '', quote = null;
-    for (const ch of s) {
-        if (quote) {
-            if (ch === quote) quote = null;
-            cur += ch;
-        } else if (ch === '"' || ch === "'") {
-            quote = ch; cur += ch;
-        } else if (ch === sep) {
-            out.push(cur); cur = '';
-        } else {
-            cur += ch;
-        }
-    }
-    if (cur.trim()) out.push(cur);
-    return out;
-}
-
-function splitKV(line) {
-    const i = line.indexOf(':');
-    if (i < 1) return null;
-    return [line.slice(0, i).trim(), unquote(line.slice(i + 1))];
-}
-
-/**
- * frontmatter 解析: 标量 + outcomes 列表。
- * outcomes 两种写法都支持——
- *   - { do: "...", bloom: apply, success: "..." }          流式 (S 档模板)
- *   - id: LO1                                              块式 (M/L 档模板)
- *     do: "..."
- */
-function parseFrontmatter(src) {
-    const m = src.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-    const result = { scalars: {}, outcomes: [] };
-    if (!m) return result;
-
-    const lines = m[1].split(/\r?\n/);
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        if (!line.trim() || /^\s*#/.test(line)) continue;
-        if (/^\S/.test(line)) {
-            const kv = splitKV(line);
-            if (!kv) continue;
-            const [key, val] = kv;
-            if (key === 'outcomes' && !val) {
-                let item = null;
-                while (i + 1 < lines.length && (!lines[i + 1].trim() || /^\s/.test(lines[i + 1]))) {
-                    const sub = lines[++i];
-                    if (!sub.trim()) continue;
-                    const dash = sub.match(/^\s*-\s*(.*)$/);
-                    if (dash) {
-                        item = {};
-                        result.outcomes.push(item);
-                        const body = dash[1].trim();
-                        if (body.startsWith('{')) {
-                            for (const part of splitTopLevel(body.replace(/^\{|\}\s*$/g, ''))) {
-                                const p = splitKV(part);
-                                if (p) item[p[0]] = p[1];
-                            }
-                        } else {
-                            const p = splitKV(body);
-                            if (p) item[p[0]] = p[1];
-                        }
-                    } else if (item) {
-                        const p = splitKV(sub);
-                        if (p) item[p[0]] = p[1];
-                    }
-                }
-            } else {
-                result.scalars[key] = val;
-            }
-        }
-    }
-    return result;
-}
-
-// markdown 表格 → 对象数组 (以表头单元格为 key)
-function parseTables(lines) {
-    const tables = [];
-    for (let i = 0; i < lines.length; i++) {
-        if (!/^\s*\|/.test(lines[i])) continue;
-        if (!/^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1] || '')) continue;
-        const cells = row => row.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
-        const header = cells(lines[i]);
-        const rows = [];
-        let j = i + 2;
-        for (; j < lines.length && /^\s*\|/.test(lines[j]); j++) {
-            const vals = cells(lines[j]);
-            const obj = {};
-            header.forEach((h, k) => { obj[h] = vals[k] === undefined ? '' : vals[k]; });
-            rows.push(obj);
-        }
-        tables.push({ header, rows });
-        i = j;
-    }
-    return tables;
-}
-
-// "1 天（有效 6.5h）" → 390 ; "90 分钟" → 90 ; "半天" → null
-function parseMinutes(s) {
-    if (!s) return null;
-    const h = String(s).match(/(\d+(?:\.\d+)?)\s*(?:h\b|hr|hours?|小时)/i);
-    if (h) return Math.round(parseFloat(h[1]) * 60);
-    const m = String(s).match(/(\d+(?:\.\d+)?)\s*(?:min\b|minutes?|分钟|分\b)/i);
-    if (m) return Math.round(parseFloat(m[1]));
-    return null;
-}
-
-const CN_NUM = { 一:1, 二:2, 三:3, 四:4, 五:5, 六:6, 七:7, 八:8, 九:9, 十:10 };
-
-function moduleNo(text) {
-    const m = String(text).match(/模块\s*([一二三四五六七八九十]|\d+)/);
-    if (!m) return null;
-    return CN_NUM[m[1]] || parseInt(m[1], 10);
-}
-
-function outcomeIds(text) {
-    return String(text).match(/\bLO\d+/gi) || [];
-}
-
-// ─── 读取三份输入 ────────────────────────────────────────────────────────────
-
-const metaSrc = fs.readFileSync(META_PATH, 'utf8');
-const { scalars: meta, outcomes: rawOutcomes } = parseFrontmatter(metaSrc);
-
-const scale = (meta.scale || 'S').toUpperCase();
 const SCALE_LABEL = { S: 'S · 分享课', M: 'M · 内训课', L: 'L · 培训项目' };
-const isMPlus = scale === 'M' || scale === 'L';
-
-// 没写 id 的按顺序补 LO1..LOn, 后面的矩阵才有得引用
-const outcomes = rawOutcomes.map((o, i) => ({
-    id: o.id || `LO${i + 1}`,
-    do: o.do || '',
-    bloom: (o.bloom || '').toLowerCase(),
-    success: o.success || '',
-    module: o.module || '',
-    evidence: o.evidence || '',
-    hasId: !!o.id,
-}));
-
-// meta 正文: ### 标题（N 张）
-const metaHeadings = [];
-for (const line of metaSrc.split(/\r?\n/)) {
-    const h = line.match(/^###\s+(.*?)\s*$/);
-    if (!h) continue;
-    const text = h[1];
-    const pages = text.match(/[（(]\s*(\d+)\s*张/);
-    metaHeadings.push({
-        text,
-        no: moduleNo(text),
-        pages: pages ? parseInt(pages[1], 10) : null,
-        name: text.replace(/^模块\s*[一二三四五六七八九十\d]+\s*[:：]?\s*/, '')
-                  .replace(/[（(][^）)]*[）)]\s*$/, '').trim(),
-    });
-}
-
-// blueprint
-const blueprintName = meta.blueprint || 'course.blueprint.md';
-const BP_PATH = path.join(COURSE_DIR, blueprintName);
-const hasBlueprint = fs.existsSync(BP_PATH);
-// 注释掉的章节不算数 (模板里 六~十一 节就是注释掉的)
-const bpSrc   = hasBlueprint ? fs.readFileSync(BP_PATH, 'utf8').replace(/<!--[\s\S]*?-->/g, '') : '';
-const bpLines = bpSrc.split(/\r?\n/);
-const bpHeads = bpLines.filter(l => /^##\s/.test(l)).map(l => l.replace(/^##\s+/, '').trim());
-const bpTables = parseTables(bpLines);
-
-function findTable(...keywords) {
-    return bpTables.find(t => keywords.every(k => t.header.some(h => h.includes(k))));
-}
-
-const modTable = findTable('模块', '时长');
-const bpModules = modTable ? modTable.rows.map(r => {
-    const col = n => r[Object.keys(r).find(k => k.includes(n))] || '';
-    return {
-        no: parseInt(r['#'] || col('#') || '', 10),
-        name: col('模块'),
-        duration: col('时长'),
-        activity: col('活动'),
-        deliverable: col('产出'),
-        outcomes: outcomeIds(col('覆盖') || col('成果')),
-    };
-}).filter(m => !isNaN(m.no)) : [];
-
-const loTable = findTable('id', 'Bloom') || findTable('id', 'bloom');
-const bpOutcomeIds = loTable ? loTable.rows.map(r => (r['id'] || r['ID'] || '').trim()).filter(Boolean) : [];
-
-// slides
-const SLIDES_DIR = path.join(COURSE_DIR, 'slides');
-const slideCount = fs.existsSync(SLIDES_DIR)
-    ? fs.readdirSync(SLIDES_DIR).filter(f => f.endsWith('.html')).length
-    : 0;
+const bpHeads = sections.map(s => s.title);
+const slideCount = slides.length;
 
 // ─── 校验 ────────────────────────────────────────────────────────────────────
 
 const issues = [];
-const add = (level, code, msg) => issues.push({ level, code, msg });
+const add  = (level, code, msg) => issues.push({ level, code, msg });
 const err  = (code, msg) => add('error', code, msg);
 const warn = (code, msg) => add('warn', code, msg);
 const info = (code, msg) => add('info', code, msg);
@@ -290,21 +84,20 @@ if (!isMPlus && hasBlueprint) {
 }
 
 // 2) 学习成果本身
+const BLOOM = ['remember', 'understand', 'apply', 'analyze', 'evaluate', 'create'];
 if (outcomes.length === 0) {
     err('outcome', 'frontmatter 里没有 outcomes');
 } else {
     if (outcomes.length < 3) warn('outcome', `只有 ${outcomes.length} 条学习成果（建议 3–5 条）`);
     if (outcomes.length > 5) warn('outcome', `有 ${outcomes.length} 条学习成果（建议不超过 5 条，宁缺毋滥）`);
 
-    const BLOOM = ['remember', 'understand', 'apply', 'analyze', 'evaluate', 'create'];
     for (const o of outcomes) {
         if (!o.bloom) warn('outcome', `${o.id} 没写 bloom`);
         else if (!BLOOM.includes(o.bloom)) warn('outcome', `${o.id} 的 bloom "${o.bloom}" 不是 Bloom 六层之一`);
         if (isBlank(o.do)) err('outcome', `${o.id} 的 do 为空`);
         if (isBlank(o.success)) warn('outcome', `${o.id} 没写 success（成功标准）`);
     }
-    const deep = outcomes.filter(o => BLOOM.indexOf(o.bloom) >= 2);
-    if (deep.length === 0) {
+    if (!outcomes.some(o => BLOOM.indexOf(o.bloom) >= 2)) {
         warn('depth', '全部成果停留在 remember / understand 层——课程可能太浅，至少 1 条应达到 apply 及以上');
     }
 }
@@ -313,15 +106,14 @@ if (outcomes.length === 0) {
 // S 档不强制闭环（30 分钟的分享课没有考核），只在末尾提示一句，不逐条刷屏
 const openLoop = { module: [], evidence: [] };
 const closure = isMPlus
-    ? err
+    ? (code, msg) => err(code, msg)
     : (code, msg, id, kind) => openLoop[kind].push(id);
 for (const o of outcomes) {
     if (isBlank(o.module)) {
         closure('closure', `${o.id} 没指定 module（在哪个模块教）`, o.id, 'module');
-    } else if (bpModules.length) {
-        const nos = String(o.module).split(/[、,，\s/]+/).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
-        for (const n of nos) {
-            const mod = bpModules.find(m => m.no === n);
+    } else if (modules.length) {
+        for (const n of o.modules) {
+            const mod = modules.find(m => m.no === n);
             if (!mod) {
                 err('closure', `${o.id} 指向模块 ${n}，但蓝图模块清单里没有这个编号`);
             } else if (mod.outcomes.length && !mod.outcomes.some(x => x.toUpperCase() === o.id.toUpperCase())) {
@@ -339,7 +131,7 @@ if (openLoop.module.length || openLoop.evidence.length) {
     if (openLoop.evidence.length) parts.push(`${openLoop.evidence.join(' ')} 没写 evidence`);
     info('closure', `S 档不强制闭环（${parts.join('；')}）——要做「教到 × 测到」的强校验，把 scale 改成 M`);
 }
-for (const m of bpModules) {
+for (const m of modules) {
     for (const id of m.outcomes) {
         if (!outcomes.some(o => o.id.toUpperCase() === id.toUpperCase())) {
             err('closure', `模块 ${m.no} 覆盖成果写了 ${id}，但 outcomes 里没有这条`);
@@ -348,31 +140,31 @@ for (const m of bpModules) {
     if (!m.outcomes.length) warn('closure', `模块 ${m.no}「${label(m.name)}」没写覆盖成果（它在教哪条 outcome？）`);
     if (isBlank(m.deliverable)) warn('closure', `模块 ${m.no}「${label(m.name)}」没有产出物——学员从这个模块带走什么？`);
 }
-if (bpOutcomeIds.length) {
+if (blueprintOutcomeIds.length) {
     const metaIds = outcomes.map(o => o.id.toUpperCase());
-    for (const id of bpOutcomeIds) {
+    for (const id of blueprintOutcomeIds) {
         if (!metaIds.includes(id.toUpperCase())) {
             warn('drift', `蓝图目标体系里的 ${id} 在 course.meta.md 的 outcomes 里不存在`);
         }
     }
     for (const id of metaIds) {
-        if (!bpOutcomeIds.some(x => x.toUpperCase() === id)) {
+        if (!blueprintOutcomeIds.some(x => x.toUpperCase() === id)) {
             warn('drift', `outcomes 里的 ${id} 没写进蓝图的目标体系表`);
         }
     }
 }
 
 // 4) 一致性: blueprint ↔ meta ↔ slides
-const metaModules = metaHeadings.filter(h => h.no !== null);
-if (bpModules.length) {
-    bpModules.forEach((m, i) => {
+const metaModules = headings.filter(h => h.no !== null);
+if (modules.length) {
+    modules.forEach((m, i) => {
         if (m.no !== i + 1) warn('drift', `蓝图模块编号不连续: 第 ${i + 1} 行写的是 ${m.no}`);
     });
-    if (metaModules.length && metaModules.length !== bpModules.length) {
-        err('drift', `蓝图有 ${bpModules.length} 个模块，course.meta.md 大纲里有 ${metaModules.length} 个`);
+    if (metaModules.length && metaModules.length !== modules.length) {
+        err('drift', `蓝图有 ${modules.length} 个模块，course.meta.md 大纲里有 ${metaModules.length} 个`);
     }
     for (const mm of metaModules) {
-        const bm = bpModules.find(m => m.no === mm.no);
+        const bm = modules.find(m => m.no === mm.no);
         if (!bm) { err('drift', `meta 大纲的模块 ${mm.no}「${label(mm.name)}」不在蓝图模块清单里`); continue; }
         // 两边都还是模板占位时不比名字, 那只是「都没填」, 不是漂移
         const named = !isBlank(bm.name) && !isBlank(mm.name) && !/^（.*）$/.test(mm.name);
@@ -384,7 +176,6 @@ if (bpModules.length) {
     err('drift', '蓝图第五节没解析到模块清单表（需要含「模块」「时长」两列的表格，列名别改）');
 }
 
-const declaredPages = metaHeadings.reduce((n, h) => n + (h.pages || 0), 0);
 if (slideCount === 0) {
     info('pages', 'slides/ 还没有页面——运行 /slide-design 生成');
 } else if (declaredPages === 0) {
@@ -394,13 +185,12 @@ if (slideCount === 0) {
 }
 
 // 5) 时长核算
-if (bpModules.length) {
-    const mins = bpModules.map(m => parseMinutes(m.duration));
-    const unparsed = bpModules.filter((m, i) => mins[i] === null);
+if (modules.length) {
+    const unparsed = modules.filter(m => m.minutes === null);
     if (unparsed.length) {
         warn('duration', `模块时长无法解析: ${unparsed.map(m => `模块 ${m.no}「${m.duration}」`).join(', ')}（写成 60 min 或 1.5h）`);
     }
-    const sum = mins.reduce((a, b) => a + (b || 0), 0);
+    const sum = modules.reduce((a, m) => a + (m.minutes || 0), 0);
     const total = parseMinutes(meta.duration);
     if (total && sum) {
         const gap = total - sum;
@@ -419,21 +209,19 @@ if (bpModules.length) {
 
 let alignmentPath = null;
 if (isMPlus && hasBlueprint && outcomes.length) {
-    const pkgDir = path.join(COURSE_DIR, 'package');
+    const pkgDir = path.join(course.dir, 'package');
     fs.mkdirSync(pkgDir, { recursive: true });
     const cell = v => (isBlank(v) ? '—' : String(v).replace(/\|/g, '\\|'));
     const rows = outcomes.map(o => {
-        const nos = String(o.module).split(/[、,，\s/]+/).map(n => parseInt(n, 10)).filter(n => !isNaN(n));
-        const mods = nos.map(n => bpModules.find(m => m.no === n)).filter(Boolean);
+        const mods = o.modules.map(n => modules.find(m => m.no === n)).filter(Boolean);
         return `| ${o.id} | ${cell(o.do)} | ${o.bloom || '—'} | ${
             mods.length ? mods.map(m => `${m.no} ${label(m.name)}`).join('<br>') : cell(o.module)} | ${
-            cell(mods.map(m => m.activity).filter(Boolean).join('；'))} | ${
-            cell(mods.map(m => m.deliverable).filter(Boolean).join('；'))} | ${cell(o.evidence)} |`;
+            cell(mods.map(m => m.activity).filter(v => !isBlank(v)).join('；'))} | ${
+            cell(mods.map(m => m.deliverable).filter(v => !isBlank(v)).join('；'))} | ${cell(o.evidence)} |`;
     });
-    const orphan = bpModules.filter(m => !outcomes.some(o =>
-        String(o.module).split(/[、,，\s/]+/).map(n => parseInt(n, 10)).includes(m.no)));
+    const orphan = modules.filter(m => !outcomes.some(o => o.modules.includes(m.no)));
     const md = [
-        `# ${unquote(meta.title || courseName)} — 对齐矩阵`,
+        `# ${course.title} — 对齐矩阵`,
         '',
         '> 由 `nextcourse check` 自动生成，勿手改。',
         `> 数据源：\`${blueprintName}\` 模块清单 + \`course.meta.md\` outcomes。`,
@@ -444,7 +232,7 @@ if (isMPlus && hasBlueprint && outcomes.length) {
         ...rows,
         '',
         orphan.length
-            ? `**没有挂上任何学习成果的模块**：${orphan.map(m => `${m.no}「${m.name}」`).join('、')}——要么补 outcome，要么砍掉。`
+            ? `**没有挂上任何学习成果的模块**：${orphan.map(m => `${m.no}「${label(m.name)}」`).join('、')}——要么补 outcome，要么砍掉。`
             : '**每个模块都挂到了学习成果。**',
         '',
     ].join('\n');
@@ -470,7 +258,7 @@ console.log(`  档位     : ${SCALE_LABEL[scale] || scale}${meta.scale ? '' : ' 
 console.log(`  蓝图     : ${hasBlueprint ? blueprintName : '(无)'}`);
 console.log(`  学习成果 : ${outcomes.length} 条  ${
     Object.entries(bloomTally).map(([k, v]) => `${k}×${v}`).join(' ') || ''}`);
-console.log(`  模块     : 蓝图 ${bpModules.length} 个 / meta 大纲 ${metaModules.length} 个`);
+console.log(`  模块     : 蓝图 ${modules.length} 个 / meta 大纲 ${metaModules.length} 个`);
 console.log(`  页数     : meta 声明 ${declaredPages || '—'} 张 / slides/ 实有 ${slideCount} 个`);
 
 const ICON = { error: '✗', warn: '⚠', info: '·' };
