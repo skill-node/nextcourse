@@ -4,7 +4,8 @@
  *
  * 命令:
  *   nextcourse list                     列出所有课程及状态
- *   nextcourse new    <name>            初始化新课程目录
+ *   nextcourse new    <name> [--scale]  初始化新课程目录
+ *   nextcourse check  <name>            校验教学设计闭环（成果 × 模块 × 证据）
  *   nextcourse lint   <name>            校验幻灯片样式规范
  *   nextcourse animate <name> [--strip] 批量打入/剥离组件入场动画
  *   nextcourse build  <name>            组装生成 deck.html
@@ -93,10 +94,67 @@ const commands = {
         const dir  = path.join(ROOT, 'courses', name);
         if (fs.existsSync(dir)) die(`课程 "${name}" 已存在: ${dir}`);
 
+        // 档位: 不带 --scale = S 档（轻量分享课），与 V2 行为完全一致
+        const scaleArg = rest.slice(1).find(a => a.startsWith('--scale'));
+        let scale = 'S';
+        if (scaleArg) {
+            scale = (scaleArg.includes('=')
+                ? scaleArg.split('=')[1]
+                : rest[rest.indexOf(scaleArg) + 1] || '').toUpperCase();
+            if (!['S', 'M', 'L'].includes(scale)) {
+                die('--scale 只能是 S / M / L（S 分享课 · M 内训课 · L 培训项目）');
+            }
+        }
+        const isMPlus = scale === 'M' || scale === 'L';
+
         fs.mkdirSync(path.join(dir, 'slides'), { recursive: true });
         fs.mkdirSync(path.join(dir, 'assets'), { recursive: true });
 
-        const meta = `---
+        // S 档 frontmatter 保持 V2 原样；M/L 才追加设计层字段（build.js 一律不依赖）
+        const meta = isMPlus ? `---
+title: "${name}"
+template: standard
+theme: bold-signal
+scale: ${scale}
+duration: "1 天（有效 6.5h）"
+class_size: "20–30 人，4–5 人一组"
+blueprint: course.blueprint.md
+audience: "目标受众"
+positioning: "核心价值主张（1句话）"
+outcomes:
+  - id: LO1
+    do: "动词开头的行为"
+    bloom: apply
+    success: "成功标准"
+    module: 1
+    evidence: "用什么证据判定达成"
+  - id: LO2
+    do: "动词开头的行为"
+    bloom: analyze
+    success: "成功标准"
+    module: 2
+    evidence: "用什么证据判定达成"
+  - id: LO3
+    do: "动词开头的行为"
+    bloom: create
+    success: "成功标准"
+    module: 3
+    evidence: "用什么证据判定达成"
+---
+
+## 课程大纲
+
+<!-- 模块的编号与名称以 course.blueprint.md 第五节为准，这里按同样编号展开到页 -->
+
+### 模块一：（标题）（6 张）
+- ...
+
+### 模块二：（标题）（6 张）
+- ...
+
+### 模块三：（标题）（6 张）
+- ...
+` : `---
 title: "${name}"
 template: standard
 theme: bold-signal
@@ -118,9 +176,24 @@ outcomes:
 `;
         fs.writeFileSync(path.join(dir, 'course.meta.md'), meta, 'utf8');
 
-        console.log(`\n  ✓  课程目录已创建: courses/${name}/`);
-        console.log(`     编辑 course.meta.md 填写大纲`);
+        if (isMPlus) {
+            const tmpl = path.join(ROOT, 'templates', 'course.blueprint.md');
+            if (!fs.existsSync(tmpl)) die(`蓝图模板缺失: ${tmpl}`);
+            fs.copyFileSync(tmpl, path.join(dir, 'course.blueprint.md'));
+        }
+
+        console.log(`\n  ✓  课程目录已创建: courses/${name}/  (${scale} 档)`);
+        if (isMPlus) {
+            console.log(`     course.blueprint.md  设计层真相（模块清单以它为准）`);
+            console.log(`     course.meta.md       构建契约（页面级大纲）`);
+        } else {
+            console.log(`     编辑 course.meta.md 填写大纲`);
+        }
         console.log(`     或在 Claude Code 中运行 /course-design 进行对话式设计\n`);
+    },
+
+    check() {
+        process.exit(run('check.js', [requireName('check')]));
     },
 
     lint() {
@@ -203,7 +276,9 @@ NextCourse V2 — 课程开发工具
 
 命令:
   nextcourse list                     列出所有课程及状态
-  nextcourse new    <name>            初始化新课程目录（含 course.meta.md 模板）
+  nextcourse new    <name> [--scale M|L]
+                                      初始化新课程目录（不带 --scale = S 档轻量分享课）
+  nextcourse check  <name>            校验教学设计闭环：成果 × 模块 × 证据 + 时长 + 页数
   nextcourse lint   <name>            校验幻灯片样式规范
   nextcourse animate <name> [--strip] 批量打入/剥离组件入场动画（不碰手写 fragment）
   nextcourse build  <name>            组装生成 deck.html
@@ -214,10 +289,16 @@ NextCourse V2 — 课程开发工具
   nextcourse themes                   生成配色/字体展板 theme-gallery/index.html
 
 工作流（从零开始）:
-  /course-design                ← Claude Code: 对话式设计大纲
+  /course-design                ← Claude Code: 对话式设计大纲（S 档止于此）
+  nextcourse check <name>       ← M/L 档: 校验教学设计闭环
   /slide-design <name>          ← Claude Code: 生成幻灯片
   nextcourse render <name>      ← 校验 + 构建 deck.html
   nextcourse export <name>      ← 打包，拷贝到任意电脑演示
+
+档位（--scale，只影响设计层，不影响构建）:
+  S 分享课   30–90 min，只有 course.meta.md + deck（默认，与 V2 完全一致）
+  M 内训课   半天~1 天，追加 course.blueprint.md 设计蓝图
+  L 培训项目 训练营 / 体系化项目，蓝图追加运营与路线图章节
 
 文档: AGENT.md（完整说明）
 `);
