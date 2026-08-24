@@ -7,7 +7,7 @@
 [![Dependencies: zero](https://img.shields.io/badge/npm%20dependencies-0-success.svg)](./package.json)
 [![Reveal.js](https://img.shields.io/badge/output-Reveal.js%20HTML-orange.svg)](https://revealjs.com)
 
-[中文说明 →](./README.zh-CN.md) · [Live demo: a complete 29-slide course ↗](https://course.skillnode.ai/demo/) · [Theme gallery ↗](https://course.skillnode.ai/gallery/)
+[中文说明 →](./README.zh-CN.md) · [Live demo: a complete 29-slide course ↗](https://course.skillnode.ai/demo/) · [Live demo: a nine-document delivery pack ↗](https://course.skillnode.ai/package/) · [Theme gallery ↗](https://course.skillnode.ai/gallery/)
 
 ---
 
@@ -240,8 +240,8 @@ clearest way to see what the scale actually changes:
 
 | Example | Scale | Contents |
 |---|---|---|
-| `ai-agent-insurance` | S · Talk | 60 min, 16 slides — the one on the [live demo](https://course.skillnode.ai/demo/) |
-| `ai-agent-insurance-workshop` | M · Workshop | Full day, 31 slides, plus design blueprint and full delivery package |
+| `ai-agent-insurance` | S · Talk | 60 min, 29 slides — the one on the [live demo](https://course.skillnode.ai/demo/) |
+| `ai-agent-insurance-workshop` | M · Workshop | Full day, 31 slides, plus design blueprint and full delivery package — the pack on the [live demo](https://course.skillnode.ai/package/) |
 
 All case materials in both are replaced by fabricated samples. Copy one in and build it:
 

@@ -50,7 +50,7 @@ nextcourse/
 │   ├── color-schemes/    ← 8 套配色方案（颜色 + 排版特化）
 │   └── font-sets/        ← 8 套字体集（与配色正交，course.meta.md 的 fontset: 指定）
 ├── examples/             ← 随仓库分发的示例课程（脱敏版，入库；只放源，不放构建产物）
-│   ├── ai-agent-insurance/           ← S 档样例：60 min / 16 页
+│   ├── ai-agent-insurance/           ← S 档样例：60 min / 29 页
 │   └── ai-agent-insurance-workshop/  ← M 档样例：1 天 / 31 页 + 蓝图 + 交付包
 └── courses/              ← 用户自己的课程（整个目录 gitignore，不入库）
     └── <course-name>/

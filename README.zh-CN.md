@@ -7,7 +7,7 @@
 [![Dependencies: zero](https://img.shields.io/badge/npm%20dependencies-0-success.svg)](./package.json)
 [![Reveal.js](https://img.shields.io/badge/output-Reveal.js%20HTML-orange.svg)](https://revealjs.com)
 
-[English →](./README.md) · [在线看一门完整的 29 页课 ↗](https://course.skillnode.ai/demo/) · [主题展板 ↗](https://course.skillnode.ai/gallery/)
+[English →](./README.md) · [在线看一门完整的 29 页课 ↗](https://course.skillnode.ai/demo/) · [在线看一套 9 份的交付包 ↗](https://course.skillnode.ai/package/) · [主题展板 ↗](https://course.skillnode.ai/gallery/)
 
 ---
 
@@ -211,8 +211,8 @@ node nextcourse.js themes          # 生成配色 / 字体展板
 
 | 样例 | 档位 | 内容 |
 |---|---|---|
-| `ai-agent-insurance` | S · 分享课 | 60 分钟，16 页，就是[在线 demo](https://course.skillnode.ai/demo/) 那一门 |
-| `ai-agent-insurance-workshop` | M · 内训课 | 1 天，31 页，另有设计蓝图 + 完整交付包 |
+| `ai-agent-insurance` | S · 分享课 | 60 分钟，29 页，就是[在线 demo](https://course.skillnode.ai/demo/) 那一门 |
+| `ai-agent-insurance-workshop` | M · 内训课 | 1 天，31 页，另有设计蓝图 + 完整交付包，就是[在线 demo](https://course.skillnode.ai/package/) 那一套 |
 
 两门课的案例素材都已全部替换为虚构示例。拷进工作区跑一遍：
 

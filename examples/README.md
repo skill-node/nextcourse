@@ -9,8 +9,8 @@ real client engagement.
 
 | Example | Scale · 档位 | Contents · 内容 |
 |---|---|---|
-| [`ai-agent-insurance`](./ai-agent-insurance) | **S · Talk / 分享课** | 60 min, 16 slides. Outline + deck only. The course on the [live demo](https://course.skillnode.ai/demo/). |
-| [`ai-agent-insurance-workshop`](./ai-agent-insurance-workshop) | **M · Workshop / 内训课** | Full day, 31 slides, plus a design blueprint and the full delivery package. |
+| [`ai-agent-insurance`](./ai-agent-insurance) | **S · Talk / 分享课** | 60 min, 29 slides. Outline + deck only. The course on the [live demo](https://course.skillnode.ai/demo/). |
+| [`ai-agent-insurance-workshop`](./ai-agent-insurance-workshop) | **M · Workshop / 内训课** | Full day, 31 slides, plus a design blueprint and the full delivery package. The pack on the [live demo](https://course.skillnode.ai/package/). |
 
 ## Run them · 跑一遍
 
