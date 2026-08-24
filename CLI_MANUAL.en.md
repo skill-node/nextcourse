@@ -244,7 +244,7 @@ node nextcourse.js check <course-name>
 | Duration | Module durations vs the declared total; overrunning is an error |
 | Completeness | Missing mandatory blueprint sections at M/L |
 
-It also writes `package/alignment.md` — the alignment matrix
+It also writes `package/7_alignment.md` — the alignment matrix
 (outcome × module × activity × deliverable × evidence).
 
 **Exit code**: `1` when there are errors, `0` when only warnings. S-scale courses are
@@ -267,14 +267,23 @@ delivery actually requires:
 
 | File | Read by |
 |---|---|
-| `package/facilitator-guide.md` | Facilitator — teaching points, activity scripts, matched slide notes |
-| `package/workbook.md` | Learner — tasks, write-in areas, self-check lists |
-| `package/assessment.md` | Client — L1 survey, L2 assessment, declared evaluation scope |
-| `package/rubric.md` | Facilitator — scoring rubric and tally sheet |
-| `package/facilitation.md` | Facilitator / assistant — timeline, grouping, points rules |
-| `package/content-dev.md` | Project team — SME interviews, case library, data packs, schedule |
-| `package/action-plan.md` | Learner — 30-day commitment plus 30/60/90 review |
+| `package/1_facilitator-guide.md` | Facilitator — teaching points, activity scripts, matched slide notes |
+| `package/2_workbook.md` | Learner — tasks, write-in areas, self-check lists |
+| `package/3_rubric.md` | Facilitator — scoring rubric and tally sheet |
+| `package/4_action-plan.md` | Learner — 30-day commitment plus 30/60/90 review |
+| `package/5_assessment.md` | Client — L1 survey, L2 assessment, declared evaluation scope |
+| `package/6_facilitation.md` | Facilitator / assistant — timeline, grouping, points rules |
+| `package/7_alignment.md` | Internal — alignment matrix (written by `check`, untouched here) |
+| `package/8_content-dev.md` | Project team — SME interviews, case library, data packs, schedule |
 | `package/exercises/README.md` | Project team — data-pack rules and backlog |
+
+**The number prefix is the delivery order.** The client receives a folder, and a file
+manager sorts by name — so the sort order *is* their reading order: 1–4 are what has to
+be on the table the day the course runs, 5–8 are the design and project-level evidence.
+The cover renders as `html/0_index.html` and therefore always sorts first, and its
+document list carries the same numbers. The order lives in `DOCS` in `package.js` (a
+`no` per entry). Older courses whose package files have no prefix are **renamed in
+place** on the next run; hand-edited content is preserved.
 
 **Flags:**
 

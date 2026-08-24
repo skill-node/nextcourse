@@ -55,7 +55,7 @@ ls courses/<课程名>/course.blueprint.md
 | **Demo** | 具体案例或流程演示 | 优先用 case-study / workflow / timeline |
 | **Practice** | 学员动手实操的引导 | checklist 或 pill-list；指令明确 |
 | **Activity**〔M/L〕 | 课堂活动的正式指令 | `.activity-card`：活动名 / 时间 / 分组 / 交付物 / 评分点，来自蓝图 |
-| **Assessment**〔M/L〕 | 结营考核说明 | `.rubric-table`：3–4 个维度 × 2–3 个等级，来自 `package/rubric.md` |
+| **Assessment**〔M/L〕 | 结营考核说明 | `.rubric-table`：3–4 个维度 × 2–3 个等级，来自 `package/3_rubric.md` |
 | **Takeaway** | 模块最核心的一句话 | key-takeaway 组件；≤3 条要点 |
 
 **Practice 与 Activity 的分工**：Practice 是「跟着我做一遍」的引导（讲师带），
@@ -103,7 +103,7 @@ Activity 是「现在你们分组做，20 分钟后交」的正式任务（学�
   ├─ 图标分类 3~4项       → .icon-card-grid
   ├─ 多方案特性表格       → .table-compare
   ├─ 课堂活动指令         → .activity-card          〔M/L 档，内容来自蓝图〕
-  ├─ 考核评分标准         → .rubric-table           〔M/L 档，来自 package/rubric.md〕
+  ├─ 考核评分标准         → .rubric-table           〔M/L 档，来自 package/3_rubric.md〕
   ├─ 模块小结            → .key-takeaway
   ├─ 左文右图            → .layout-text-image  (右侧必须有真实图片)
   ├─ 两栏等重内容         → .grid-2

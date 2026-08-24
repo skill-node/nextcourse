@@ -104,15 +104,15 @@ node nextcourse.js package <name> --render
 
 ```
 package/
-├── facilitator-guide.md   讲师手册（逐模块讲授要点 / 活动指令 / 幻灯片备注）
-├── workbook.md            学员手册（练习任务 / 填写区 / 自检清单）
-├── assessment.md          评估方案（L1 问卷 + L2 考核）
-├── rubric.md              考核量规（维度 × 等级，每格都是可观察行为）
-├── facilitation.md        教学设计（时间轴 / 分组 / 积分规则）
-├── content-dev.md         内容开发计划（SME 访谈 / 案例库 / 脱敏规则 / 排期）
-├── action-plan.md         学员 30 天行动承诺书
-├── alignment.md           对齐矩阵（由 check 生成）
-└── html/                  客户实际拿到的东西：双击即读，打印不掉样式
+├── 1_facilitator-guide.md  讲师手册（逐模块讲授要点 / 活动指令 / 幻灯片备注）
+├── 2_workbook.md           学员手册（练习任务 / 填写区 / 自检清单）
+├── 3_rubric.md             考核量规（维度 × 等级，每格都是可观察行为）
+├── 4_action-plan.md        学员 30 天行动承诺书
+├── 5_assessment.md         评估方案（L1 问卷 + L2 考核）
+├── 6_facilitation.md       教学设计（时间轴 / 分组 / 积分规则）
+├── 7_alignment.md          对齐矩阵（由 check 生成）
+├── 8_content-dev.md        内容开发计划（SME 访谈 / 案例库 / 脱敏规则 / 排期）
+└── html/                   客户实际拿到的东西：双击即读，打印不掉样式，封面是 0_index.html
 ```
 
 **md 是源，HTML 是交付物** —— 和 `deck.html` 完全一样的心智模型：改内容一律改 md，
@@ -224,7 +224,7 @@ node nextcourse.js package ai-agent-insurance-workshop --render   # 交付包 HT
 ```
 
 建议先读 `course.blueprint.md` 和 `course.meta.md` —— 这个项目真正讲的是那两个文件，不是那份课件。
-交付包里的 `alignment.md`（对齐矩阵）值得单独看一眼：成果 × 模块 × 活动 × 证据，一张表看完这门课的闭环。
+交付包里的 `7_alignment.md`（对齐矩阵）值得单独看一眼：成果 × 模块 × 活动 × 证据，一张表看完这门课的闭环。
 
 ## 仓库结构
 

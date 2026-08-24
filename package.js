@@ -3,15 +3,19 @@
  * package.js — NextCourse V3 交付包生成
  *
  * 读 course.blueprint.md + course.meta.md + slides/，汇总出企业内训真正要交的东西：
- *   package/facilitator-guide.md   讲师手册
- *   package/workbook.md            学员手册
- *   package/assessment.md          评估方案 (柯氏 L1 问卷 / L2 考核)
- *   package/rubric.md              考核量规
- *   package/facilitation.md        教学设计 (时间轴 / 分组 / 积分)
- *   package/content-dev.md         内容开发计划
- *   package/action-plan.md         学员行动承诺书
+ *   package/1_facilitator-guide.md 讲师手册
+ *   package/2_workbook.md          学员手册
+ *   package/3_rubric.md            考核量规
+ *   package/4_action-plan.md       学员行动承诺书
+ *   package/5_assessment.md        评估方案 (柯氏 L1 问卷 / L2 考核)
+ *   package/6_facilitation.md      教学设计 (时间轴 / 分组 / 积分)
+ *   package/7_alignment.md         对齐矩阵 —— 由 nextcourse check 生成, 本命令不碰
+ *   package/8_content-dev.md       内容开发计划
  *   package/exercises/README.md    练习数据包说明
- *   package/alignment.md           对齐矩阵 —— 由 nextcourse check 生成, 本命令不碰
+ *
+ * **文件名前缀是交付顺序，不是装饰。** 客户拿到的是一个文件夹，文件管理器按名字排序，
+ * 于是排序就是他们的阅读顺序：1–4 是开班当天桌上要有的，5–8 是设计与项目层的证据。
+ * 封面渲染成 0_index.html，永远排第一。序号由 DOCS 的 no 决定，改序号就改那里。
  *
  * **md 是源，HTML 是交付物。** --render 把 md 渲染成 package/html/*.html，
  * 那才是客户实际拿到的东西；HTML 永远不手改，改 md 再重新渲染（和 deck.html 一个心智模型）。
@@ -28,7 +32,7 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { loadCourse, mapSlidesToModules, isBlank, label } = require('./course-model');
+const { loadCourse, mapSlidesToModules, isBlank, label, ALIGNMENT_FILE } = require('./course-model');
 const { wrapDocument, accentFromTheme } = require('./render-md');
 
 const ROOT = __dirname;
@@ -120,7 +124,7 @@ function facilitatorGuide() {
         '- [ ] 设备：投影 / 音响 / 白板 / 便利贴 / 计时器',
         '- [ ] 学员材料：学员手册（workbook）人手一份，练习数据包已分发',
         '- [ ] 讲师材料：deck.html 离线包已拷到授课机并试放一遍',
-        '- [ ] 评估：L1 问卷与 L2 考核表已准备（见 assessment.md / rubric.md）',
+        '- [ ] 评估：L1 问卷与 L2 考核表已准备（见 5_assessment.md / 3_rubric.md）',
         '');
 
     const timeline = course.findTable('时间', '环节') || course.findTable('时间', '时长');
@@ -156,7 +160,7 @@ function facilitatorGuide() {
         out.push(`1. **交代任务**：${v(m.activity, '（活动形式待定）')}——${v(m.deliverable, '产出物待定')}`);
         out.push('2. **交代时间**：___ 分钟，计时器可见');
         out.push(`3. **交代分组**：${v(meta.class_size, '分组方式待定')}`);
-        out.push('4. **交代交付物与评分点**：见 rubric.md 对应维度');
+        out.push('4. **交代交付物与评分点**：见 3_rubric.md 对应维度');
         out.push('5. **收尾**：抽 2–3 组分享，讲师只点评「符合评分点的地方」和「一个可改进点」');
         out.push('');
 
@@ -269,7 +273,7 @@ function assessment() {
     out.push('');
 
     out.push('<!-- pagebreak -->', '', '## L2 · 实操考核', '');
-    out.push('考核任务直接取自各条学习成果的判定证据（evidence），评分见 `rubric.md`。', '');
+    out.push('考核任务直接取自各条学习成果的判定证据（evidence），评分见 `3_rubric.md`。', '');
     out.push('| 成果 | 考核任务 | 判定证据 | 达标线 |');
     out.push('|---|---|---|---|');
     for (const o of outcomes) {
@@ -475,18 +479,44 @@ function exercisesReadme() {
 
 // ─── 写入 ────────────────────────────────────────────────────────────────────
 
+// no = 交付顺序, 直接写进文件名。1–4 开班当天要用, 5–8 设计与项目层证据。
+// 对齐矩阵占 7 号但由 check.js 生成 (见 ALIGNMENT_FILE), 这里不建、只渲染。
 const DOCS = [
-    { file: 'facilitator-guide.md', kind: '讲师手册',   build: facilitatorGuide },
-    { file: 'workbook.md',          kind: '学员手册',   build: workbook },
-    { file: 'assessment.md',        kind: '评估方案',   build: assessment },
-    { file: 'rubric.md',            kind: '考核量规',   build: rubric },
-    { file: 'facilitation.md',      kind: '教学设计',   build: facilitation },
-    { file: 'content-dev.md',       kind: '内容开发计划', build: contentDev },
-    { file: 'action-plan.md',       kind: '行动承诺书', build: actionPlan },
-    { file: path.join('exercises', 'README.md'), kind: '练习数据包', build: exercisesReadme },
+    { no: 1, stem: 'facilitator-guide', kind: '讲师手册',     build: facilitatorGuide },
+    { no: 2, stem: 'workbook',          kind: '学员手册',     build: workbook },
+    { no: 3, stem: 'rubric',            kind: '考核量规',     build: rubric },
+    { no: 4, stem: 'action-plan',       kind: '行动承诺书',   build: actionPlan },
+    { no: 5, stem: 'assessment',        kind: '评估方案',     build: assessment },
+    { no: 6, stem: 'facilitation',      kind: '教学设计',     build: facilitation },
+    { no: 8, stem: 'content-dev',       kind: '内容开发计划', build: contentDev },
 ];
+for (const d of DOCS) d.file = `${d.no}_${d.stem}.md`;
+DOCS.push({ file: path.join('exercises', 'README.md'), kind: '练习数据包', build: exercisesReadme });
+
+// 交付顺序是 V3 之后才有的。老课程的 package/ 里是没有序号的旧名字，
+// 直接生成会变成新旧两份并存 —— 认出旧名字就地改名, 手改过的内容一个字不丢。
+function migrateLegacyNames() {
+    const renamed = [];
+    for (const doc of DOCS) {
+        if (!doc.no) continue;
+        const legacy = path.join(PKG_DIR, `${doc.stem}.md`);
+        const dest   = path.join(PKG_DIR, doc.file);
+        if (fs.existsSync(legacy) && !fs.existsSync(dest)) {
+            fs.renameSync(legacy, dest);
+            renamed.push(`${doc.stem}.md → ${doc.file}`);
+        }
+    }
+    const legacyAlign = path.join(PKG_DIR, 'alignment.md');
+    const destAlign   = path.join(PKG_DIR, ALIGNMENT_FILE);
+    if (fs.existsSync(legacyAlign) && !fs.existsSync(destAlign)) {
+        fs.renameSync(legacyAlign, destAlign);
+        renamed.push(`alignment.md → ${ALIGNMENT_FILE}`);
+    }
+    return renamed;
+}
 
 fs.mkdirSync(path.join(PKG_DIR, 'exercises'), { recursive: true });
+const migrated = migrateLegacyNames();
 
 const written = [];
 const skipped = [];
@@ -511,8 +541,18 @@ if (RENDER) {
     const htmlDir = path.join(PKG_DIR, 'html');
     fs.mkdirSync(htmlDir, { recursive: true });
 
-    // alignment.md 由 check 生成, 这里只负责渲染它
+    // 序号已经写进文件名, sort() 出来就是交付顺序 (0_index 由下面单独写)
+    // 对齐矩阵由 check 生成, 这里只负责渲染它
     const mdFiles = fs.readdirSync(PKG_DIR).filter(f => f.endsWith('.md')).sort();
+
+    // 旧名字渲染出来的 html 是残留物, 留着会和新序号文件并排出现在客户那边。
+    // 只删我们自己旧版生成过的那几个名字, 不扫荡整个目录 —— 别人放进来的东西不归我们管。
+    const stale = [...DOCS.filter(d => d.no).map(d => `${d.stem}.html`), 'alignment.html', 'index.html'];
+    for (const f of stale) {
+        const p = path.join(htmlDir, f);
+        if (fs.existsSync(p)) fs.unlinkSync(p);
+    }
+
     for (const f of mdFiles) {
         const md = fs.readFileSync(path.join(PKG_DIR, f), 'utf8');
         const docTitle = (md.match(/^#\s+(.*)$/m) || [, f.replace(/\.md$/, '')])[1];
@@ -532,10 +572,13 @@ if (RENDER) {
         '',
         '## 文档',
         '',
+        // 链接文字带上文件名里的序号, 客户在目录里和在本页看到的是同一个顺序
         ...mdFiles.map(f => {
             const known = DOCS.find(d => path.basename(d.file) === f);
-            const kind = known ? known.kind : (f === 'alignment.md' ? '对齐矩阵' : f.replace(/\.md$/, ''));
-            return `- [${kind}](./${f.replace(/\.md$/, '.html')})`;
+            const kind = known ? known.kind
+                : (f === ALIGNMENT_FILE ? '对齐矩阵' : f.replace(/^\d+_/, '').replace(/\.md$/, ''));
+            const no = (f.match(/^(\d+)_/) || [, ''])[1];
+            return `- [${no ? `${no} · ` : ''}${kind}](./${f.replace(/\.md$/, '.html')})`;
         }),
         '',
         '## 课程模块',
@@ -550,12 +593,13 @@ if (RENDER) {
         '`nextcourse package <课程名> --render`。',
         '',
     ].join('\n');
+    // 0_ 前缀让封面在文件管理器里永远排第一 —— 客户拿到的是文件夹, 排序就是动线
     fs.writeFileSync(
-        path.join(htmlDir, 'index.html'),
+        path.join(htmlDir, '0_index.html'),
         wrapDocument({ title: '交付包', subtitle: title, md: indexMd, css, accent, toc: false }),
         'utf8'
     );
-    rendered.push('index.html');
+    rendered.push('0_index.html');
 }
 
 // ─── 报告 ────────────────────────────────────────────────────────────────────
@@ -565,8 +609,10 @@ console.log('─'.repeat(56));
 console.log(`  档位     : ${course.scale}　模块 ${modules.length} 个　成果 ${outcomes.length} 条`);
 console.log(`  幻灯片   : ${course.slides.length} 页${slideMap ? '（已按模块映射进讲师手册）' : '（页数与大纲对不上，讲师手册不做映射）'}`);
 console.log('');
-for (const d of written) console.log(`  ✓  生成  ${d.file.padEnd(22)} ${d.kind}`);
-for (const d of skipped) console.log(`  ·  跳过  ${d.file.padEnd(22)} ${d.kind}（已存在，--force 覆盖）`);
+for (const r of migrated) console.log(`  ↻  改名  ${r}（旧名字没有交付序号）`);
+if (migrated.length) console.log('');
+for (const d of written) console.log(`  ✓  生成  ${d.file.padEnd(24)} ${d.kind}`);
+for (const d of skipped) console.log(`  ·  跳过  ${d.file.padEnd(24)} ${d.kind}（已存在，--force 覆盖）`);
 if (RENDER) {
     console.log('');
     console.log(`  ✓  渲染  package/html/  ${rendered.length} 个文件（客户交付物）`);
@@ -574,10 +620,10 @@ if (RENDER) {
 
 console.log(`\n${'─'.repeat(56)}`);
 console.log('  md 是源，HTML 是交付物：改内容一律改 package/*.md，再重新 --render。');
-if (!fs.existsSync(path.join(PKG_DIR, 'alignment.md'))) {
+if (!fs.existsSync(path.join(PKG_DIR, ALIGNMENT_FILE))) {
     console.log(`  对齐矩阵还没有——跑一次 nextcourse check ${courseName}。`);
 }
 if (RENDER) {
-    console.log(`  打印验收：Chrome 打开 package/html/index.html → 打印预览，逐项过 7 条清单。`);
+    console.log(`  打印验收：Chrome 打开 package/html/0_index.html → 打印预览，逐项过 7 条清单。`);
 }
 console.log('');

@@ -195,4 +195,4 @@ console.log(`\n  ✓  完成。`);
 console.log(`     将整个 "${path.basename(EXPORT_DIR)}" 文件夹`);
 console.log(`     拷贝到 U 盘 / 云盘 / 任意电脑`);
 console.log(`     双击 index.html 即可演示（无需联网）`);
-if (WITH_PACKAGE) console.log(`     交付文档在 package/index.html\n`); else console.log('');
+if (WITH_PACKAGE) console.log(`     交付文档在 package/0_index.html\n`); else console.log('');

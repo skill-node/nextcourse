@@ -12,7 +12,7 @@
  *   4. 活动落地: 蓝图里有教学活动的模块, 幻灯片里必须有对应 Activity 页
  *   5. 时长    : 各模块时长之和 vs 声明总时长 (含休息与缓冲)
  *   6. 完整度  : M/L 档必填章节缺失提醒
- *   7. 产出    : 写出 package/alignment.md 对齐矩阵 (M/L 档)
+ *   7. 产出    : 写出 package/7_alignment.md 对齐矩阵 (M/L 档)
  *
  * 退出码: 有 error 时 1, 只有 warning 时 0
  *
@@ -23,7 +23,7 @@
 
 const fs   = require('fs');
 const path = require('path');
-const { loadCourse, mapSlidesToModules, isBlank, label, parseMinutes } = require('./course-model');
+const { loadCourse, mapSlidesToModules, isBlank, label, parseMinutes, ALIGNMENT_FILE } = require('./course-model');
 
 const ROOT = __dirname;
 
@@ -255,7 +255,10 @@ if (isMPlus && hasBlueprint && outcomes.length) {
             : '**每个模块都挂到了学习成果。**',
         '',
     ].join('\n');
-    alignmentPath = path.join(pkgDir, 'alignment.md');
+    // 老课程里可能还躺着没有交付序号的 alignment.md, 就地改名, 别留两份
+    const legacy = path.join(pkgDir, 'alignment.md');
+    alignmentPath = path.join(pkgDir, ALIGNMENT_FILE);
+    if (fs.existsSync(legacy) && !fs.existsSync(alignmentPath)) fs.renameSync(legacy, alignmentPath);
     fs.writeFileSync(alignmentPath, md, 'utf8');
 }
 

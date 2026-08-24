@@ -14,6 +14,10 @@
 const fs   = require('fs');
 const path = require('path');
 
+// 对齐矩阵由 check.js 写、package.js 渲染, 文件名带交付序号 (见 package.js 抬头),
+// 两边必须一致 —— 所以名字放在这里, 别在任何一边写字面量。
+const ALIGNMENT_FILE = '7_alignment.md';
+
 // ─── 小工具 ──────────────────────────────────────────────────────────────────
 
 // 「中文书名号占位」= 模板没填, 一律当空处理
@@ -319,6 +323,7 @@ function mapSlidesToModules(course) {
 }
 
 module.exports = {
+    ALIGNMENT_FILE,
     isBlank, label, unquote, splitTopLevel, splitKV,
     parseMinutes, moduleNo, outcomeIds, moduleRefs,
     parseFrontmatter, parseTables,

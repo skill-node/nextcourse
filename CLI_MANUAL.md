@@ -212,7 +212,7 @@ nextcourse check <course-name>
 | 时长 | 各模块时长之和 vs 声明总时长；超出即 error |
 | 完整度 | M/L 档蓝图必填章节缺失提醒 |
 
-同时生成 `package/alignment.md` 对齐矩阵（成果 × 模块 × 活动 × 产出 × 证据）。
+同时生成 `package/7_alignment.md` 对齐矩阵（成果 × 模块 × 活动 × 产出 × 证据）。
 
 **退出码**：有 error 时 `1`，只有 warning 时 `0`。S 档不强制闭环，只提示一行。
 
@@ -226,7 +226,7 @@ NextCourse Check — leadership-workshop
   模块     : 蓝图 4 个 / meta 大纲 4 个
   页数     : meta 声明 31 张 / slides/ 实有 31 个
 
-  ✓  对齐矩阵已生成: courses/leadership-workshop/package/alignment.md
+  ✓  对齐矩阵已生成: courses/leadership-workshop/package/7_alignment.md
 
   PASS  教学设计闭环无阻断问题 — 0 error(s), 0 warning(s), 0 note(s)
 ```
@@ -246,14 +246,21 @@ nextcourse package <course-name> [--render] [--force]
 
 | 文件 | 谁看 |
 |---|---|
-| `package/facilitator-guide.md` | 讲师 —— 逐模块讲授要点、活动指令、对应幻灯片备注 |
-| `package/workbook.md` | 学员 —— 练习任务、填写区、自检清单 |
-| `package/assessment.md` | 项目方 —— L1 问卷、L2 考核、评估范围声明 |
-| `package/rubric.md` | 讲师 —— 打分量规与汇总表 |
-| `package/facilitation.md` | 讲师 / 助教 —— 时间轴、分组、积分规则 |
-| `package/content-dev.md` | 项目组 —— SME 访谈、案例库、数据包、排期 |
-| `package/action-plan.md` | 学员 —— 30 天承诺 + 30/60/90 复盘 |
+| `package/1_facilitator-guide.md` | 讲师 —— 逐模块讲授要点、活动指令、对应幻灯片备注 |
+| `package/2_workbook.md` | 学员 —— 练习任务、填写区、自检清单 |
+| `package/3_rubric.md` | 讲师 —— 打分量规与汇总表 |
+| `package/4_action-plan.md` | 学员 —— 30 天承诺 + 30/60/90 复盘 |
+| `package/5_assessment.md` | 项目方 —— L1 问卷、L2 考核、评估范围声明 |
+| `package/6_facilitation.md` | 讲师 / 助教 —— 时间轴、分组、积分规则 |
+| `package/7_alignment.md` | 内部 —— 对齐矩阵（由 `check` 生成，本命令不碰） |
+| `package/8_content-dev.md` | 项目组 —— SME 访谈、案例库、数据包、排期 |
 | `package/exercises/README.md` | 项目组 —— 练习数据包规则与待建清单 |
+
+**文件名前缀就是交付顺序。** 客户拿到的是一个文件夹，文件管理器按名字排序，
+所以排序即动线：1–4 是开班当天桌上要有的，5–8 是设计与项目层的证据，
+封面渲染成 `html/0_index.html` 永远排第一，封面里的文档列表也带同一套序号。
+序号定义在 `package.js` 的 `DOCS`（每项一个 `no`），要调整顺序就改那里，
+老课程里没有序号的旧文件会在下次运行时**自动改名**，手改过的内容不会丢。
 
 **参数：**
 - `--render` — 顺带把 `package/*.md` 渲染成 `package/html/*.html`（**客户实际拿到的东西**，

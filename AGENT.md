@@ -92,12 +92,12 @@ node nextcourse.js shot   <name> [--check]  # 溢出检测 + 逐页截图到 .re
 |------|------|
 | `list` | 显示 courses/ 下所有课程，标注 meta/slides/deck/export 完成状态 |
 | `new <name>` | 创建 courses/\<name\>/ 目录结构 + course.meta.md 模板；`--scale M\|L` 另生成 course.blueprint.md 并在 frontmatter 补 scale/duration/class_size |
-| `check <name>` | 教学逻辑校验：闭环（每条 outcome 有 module 教到 + evidence 测到）、蓝图↔大纲↔slides 一致性、Bloom 深度、活动落地（有活动的模块必须有 Activity 页）、时长核算、M/L 章节完整度；并生成 package/alignment.md 对齐矩阵。有 error 时 exit 1 |
+| `check <name>` | 教学逻辑校验：闭环（每条 outcome 有 module 教到 + evidence 测到）、蓝图↔大纲↔slides 一致性、Bloom 深度、活动落地（有活动的模块必须有 Activity 页）、时长核算、M/L 章节完整度；并生成 package/7_alignment.md 对齐矩阵。有 error 时 exit 1 |
 | `lint <name>` | 扫描 slide-*.html，检查 5 类违规（内联 style / 硬编码色 / 硬编码 RGB / 新字体 / 未注册 class） |
 | `animate <name>` | 按组件结构批量给 slides 打入场动画 class；`--strip` 一键剥离，`--dry` 只报告。幂等，且绝不改动手写的 `fragment`（详见 CLI_MANUAL.md） |
 | `build <name>` | 读 course.meta.md frontmatter + 拼接 slides/ → 生成 deck.html |
 | `render <name>` | lint 通过后再 build，是日常最常用的命令 |
-| `package <name>` | 汇总蓝图 + 大纲 + slide 备注，生成 package/ 交付包（讲师手册 / 学员手册 / 评估方案 / 量规 / 教学设计 / 内容开发 / 行动承诺 / 数据包说明）。`--render` 另出 package/html/（客户交付物），`--force` 覆盖已有 md（默认不覆盖）。S 档会被拒绝 |
+| `package <name>` | 汇总蓝图 + 大纲 + slide 备注，生成 package/ 交付包（讲师手册 / 学员手册 / 评估方案 / 量规 / 教学设计 / 内容开发 / 行动承诺 / 数据包说明）。`--render` 另出 package/html/（客户交付物，封面 0_index.html），`--force` 覆盖已有 md（默认不覆盖）。文件名带交付序号 `1_`…`8_`（排序即客户的阅读动线，序号定义在 package.js 的 DOCS），每份文档 h1 与 &lt;title&gt; 只写功能名、课程名走小字副标题。S 档会被拒绝 |
 | `export <name>` | 生成 courses/\<name\>/export/，只含演示必需文件，双击 index.html 即可离线演示；`--with-package` 把 package/html/ 一起打进去 |
 | `notes <name>` | 抽取各页 h2 + aside.notes，生成讲师手册 courses/\<name\>/handout.md |
 | `shot <name>` | 用本机 Chrome headless 做溢出检测并逐页截图到 .review/，供视觉自查（`--check` 只检测不截图） |
@@ -365,7 +365,7 @@ node nextcourse.js export <name> [--with-package]
 
 `/course-delivery` 的方法论参考放在 `references/`（渐进加载，用到才读）：
 `kirkpatrick.md`（柯氏指标写法与题库）、`facilitation.md`（互动手法库）、
-`content-dev.md`（SME 访谈、案例卡、脱敏规则）。
+`8_content-dev.md`（SME 访谈、案例卡、脱敏规则）。
 
 ---
 

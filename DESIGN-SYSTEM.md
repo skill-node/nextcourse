@@ -998,7 +998,7 @@ animations.css 里专为 fragment 准备的缓动增强）。
 ```
 
 ✅ DO: 内容直接来自 `course.blueprint.md` 模块清单的「教学活动 / 时长 / 产出物」，
-三处保持一致（`nextcourse check` 会盯）；`__criteria` 2–3 条，对应 `package/rubric.md` 的维度；
+三处保持一致（`nextcourse check` 会盯）；`__criteria` 2–3 条，对应 `package/3_rubric.md` 的维度；
 完整活动指令（讲师口播的五步）写进 `aside.notes`，不上屏
 ❌ DON'T: 不要把整段活动流程写在 `__task` 里（那是讲师手册的活）；不要省掉 `__timer`——
 没有时间盒的活动一定超时；一页只放一张卡，两个活动拆两页
@@ -1045,12 +1045,12 @@ animations.css 里专为 fragment 准备的缓动增强）。
 | 比什么 | 几个方案 / 工具的特性 | 同一件事做到什么程度算达标 |
 | 行列语义 | 行 = 特性，列 = 方案 | 行 = 评分维度，列 = 等级 |
 | 强调列 | `.col--highlight`（推荐方案） | `.rubric-table__level--pass`（达标线） |
-| 数据源 | 讲师整理 | `package/rubric.md`（`nextcourse package` 生成） |
+| 数据源 | 讲师整理 | `package/3_rubric.md`（`nextcourse package` 生成） |
 
 ✅ DO: 上片只放 3–4 个维度 × 2–3 个等级，完整四级量规留在交付包；
 每格写成**可观察的行为**（「五要素齐全」而不是「掌握较好」）；
 `__level--pass` 同时打在 `<th>` 和该列所有 `<td>` 上
-❌ DON'T: 不要把 `package/rubric.md` 整张表贴上片（那是给讲师打分用的，不是给学员看的）；
+❌ DON'T: 不要把 `package/3_rubric.md` 整张表贴上片（那是给讲师打分用的，不是给学员看的）；
 不要写「较好 / 一般 / 有待提高」这类不可观察的等级描述
 
 ---

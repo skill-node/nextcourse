@@ -177,15 +177,22 @@ nextcourse package <name> --render   # 生成 package/*.md 并渲染 package/htm
 
 | 文件 | 谁看 |
 |---|---|
-| `package/facilitator-guide.md` | 讲师 —— 逐模块讲授要点、活动指令、幻灯片备注 |
-| `package/workbook.md` | 学员 —— 练习、填写区、自检清单 |
-| `package/assessment.md` | 项目方 —— L1 问卷、L2 考核、评估范围声明 |
-| `package/rubric.md` | 讲师 —— 打分量规与汇总表 |
-| `package/facilitation.md` | 讲师 / 助教 —— 时间轴、分组、积分规则 |
-| `package/content-dev.md` | 项目组 —— SME 访谈、案例库、数据包、排期 |
-| `package/action-plan.md` | 学员 —— 30 天承诺 + 30/60/90 复盘 |
-| `package/alignment.md` | 内部 —— 对齐矩阵（由 `check` 生成） |
-| `package/html/` | **客户** —— 上面这些的 HTML 版，双击即读、可打印 |
+| `package/1_facilitator-guide.md` | 讲师 —— 逐模块讲授要点、活动指令、幻灯片备注 |
+| `package/2_workbook.md` | 学员 —— 练习、填写区、自检清单 |
+| `package/3_rubric.md` | 讲师 —— 打分量规与汇总表 |
+| `package/4_action-plan.md` | 学员 —— 30 天承诺 + 30/60/90 复盘 |
+| `package/5_assessment.md` | 项目方 —— L1 问卷、L2 考核、评估范围声明 |
+| `package/6_facilitation.md` | 讲师 / 助教 —— 时间轴、分组、积分规则 |
+| `package/7_alignment.md` | 内部 —— 对齐矩阵（由 `check` 生成） |
+| `package/8_content-dev.md` | 项目组 —— SME 访谈、案例库、数据包、排期 |
+| `package/html/` | **客户** —— 上面这些的 HTML 版，双击即读、可打印，封面 `0_index.html` |
+
+**文件名的数字前缀是交付顺序，不要手动去掉。** 客户拿到的是文件夹，按名字排序就是
+阅读动线：1–4 开班当天要用，5–8 是设计与项目层证据，封面 `0_index.html` 永远第一。
+序号定义在 `package.js` 的 `DOCS`，命令会把老课程里没序号的旧文件自动改名。
+
+**每份文档的 h1 只写功能名**（「讲师手册」「考核量规」），课程名由渲染器放到下一行小字，
+`<title>` 同样只写功能名。手写或手改 md 时照这个来，别把课程名写回 h1。
 
 ### md 是源，HTML 是交付物
 
@@ -210,7 +217,7 @@ nextcourse package <name> --render   # 生成 package/*.md 并渲染 package/htm
 交付层已完成：
   设计蓝图   courses/<name>/course.blueprint.md   （六~十一节已补）
   交付包 md  courses/<name>/package/*.md          （源文件，改这里）
-  客户交付物 courses/<name>/package/html/         （双击 index.html）
+  客户交付物 courses/<name>/package/html/         （双击 0_index.html）
 
 下一步：
   /slide-design <name>                     还没做幻灯片的话

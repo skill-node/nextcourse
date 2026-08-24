@@ -387,7 +387,7 @@ S 档：
 M / L 档：
 设计蓝图  courses/<name>/course.blueprint.md   （一~五节已完成）
 构建契约  courses/<name>/course.meta.md
-对齐矩阵  courses/<name>/package/alignment.md   （check 自动生成）
+对齐矩阵  courses/<name>/package/7_alignment.md （check 自动生成）
 
 下一步二选一：
   /slide-design <name>      直接开始做幻灯片
