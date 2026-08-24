@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>让 AI 替你动手：保险团队的办公智能体实战工作坊 — 对齐矩阵</title>
+<title>对齐矩阵</title>
 <style>
-:root { --doc-accent: #c7441b; }
 /* ===================================
    NextCourse — 交付包文档样式 (package-doc.css)
 
@@ -60,13 +59,23 @@ html, body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 8px 24px rgba(0, 0, 0, .06);
 }
 
-.doc-kicker {
-    font-size: .8rem;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--doc-accent);
-    font-weight: 700;
-    margin-bottom: .5rem;
+/* ===== 文档头 =====
+   h1 是**功能名**（讲师手册 / 考核量规 / 教学设计…），课程名在下一行小字。
+   客户一次开好几份，大标题必须一眼区分出「这是哪一份」；课程名每份都一样，
+   放大只是重复信息。分隔线画在 .doc-head 上而不是 h1 上 —— 两行是一个整体。 */
+
+.doc-head {
+    margin: 0 0 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--doc-accent);
+}
+
+.doc-course {
+    margin-top: .45rem;
+    font-size: .95rem;
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--doc-ink-soft);
 }
 
 /* ===== 标题 ===== */
@@ -75,9 +84,7 @@ html, body {
     font-size: 2rem;
     line-height: 1.3;
     font-weight: 800;
-    margin: 0 0 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 3px solid var(--doc-accent);
+    margin: 0;
     letter-spacing: -.01em;
 }
 
@@ -268,13 +275,13 @@ html, body {
     /* 3. 分页只发生在逻辑边界。
           break-* 是标准属性，page-break-* 是老引擎（含部分打印驱动、
           wkhtmltopdf 一类工具）唯一认的写法 —— 两套都写，成本只是多一行。 */
-    h1, h2, h3, h4 {
+    h1, h2, h3, h4, .doc-head {
         break-after: avoid;
         page-break-after: avoid;
     }
     h2 { margin-top: 1.6rem; }
 
-    table, tr, thead, blockquote, pre,
+    table, tr, thead, blockquote, pre, .doc-head,
     .activity-block, .rubric-row, .case-card, .fill-lines {
         break-inside: avoid;
         page-break-inside: avoid;
@@ -307,13 +314,16 @@ html, body {
     .fill-lines .rule { height: 2.4rem; }
 }
 
+/* 课程强调色注入必须放在样式表**之后**: package-doc.css 里有一条同名兜底
+   (--doc-accent: #2563eb)，同为 :root 同特异性，谁在后面谁生效 ——
+   放前面会被兜底的蓝色盖掉，所有课程的交付包都会变成一个色。 */
+:root { --doc-accent: #c7441b; }
 </style>
 </head>
 <body>
 <article class="doc">
-<div class="doc-kicker">让 AI 替你动手：保险团队的办公智能体实战工作坊</div>
-<h1 id="让-ai-替你动手保险团队的办公智能体实战工作坊--对齐矩阵">让 AI 替你动手：保险团队的办公智能体实战工作坊 — 对齐矩阵</h1>
-<blockquote>由 <code>nextcourse check</code> 自动生成，勿手改。 数据源：<code>course.blueprint.md</code> 模块清单 + <code>course.meta.md</code> outcomes。 生成时间：2026-08-23</blockquote>
+<header class="doc-head"><h1 id="对齐矩阵">对齐矩阵</h1><div class="doc-course">让 AI 替你动手：保险团队的办公智能体实战工作坊</div></header>
+<blockquote>由 <code>nextcourse check</code> 自动生成，勿手改。 数据源：<code>course.blueprint.md</code> 模块清单 + <code>course.meta.md</code> outcomes。 生成时间：2026-08-24</blockquote>
 <div class="table-wrap"><table><thead><tr><th>成果</th><th>学完能做到</th><th>Bloom</th><th>在哪教</th><th>教学活动</th><th>学员产出</th><th>判定证据</th></tr></thead><tbody><tr><td>LO1</td><td>区分聊天 AI 与办公智能体的能力边界</td><td>understand</td><td>1 认清你在用的是什么</td><td>讲授 + 两两互讲</td><td>「能不能交给智能体」判断卡</td><td>模块 1 两两互讲，讲错由同伴当场纠正</td></tr><tr><td>LO2</td><td>用五要素公式改写一条自己的提示词</td><td>apply</td><td>2 把话说对：提示词五要素</td><td>示范 + 动手改写 + 同伴互评</td><td>个人提示词卡 3 条</td><td>个人提示词卡 3 条，按量规「提示词完整度」维度逐条打分</td></tr><tr><td>LO3</td><td>使用办公智能体完成一项真实工作任务</td><td>apply</td><td>3 五个实战场景与动手实操</td><td>现场演示 + 分组实操 + 组间互评</td><td>个人作战包（成品 + 提示词原文）</td><td>结营作战包 A 项：成品文件 + 用的提示词原文</td></tr><tr><td>LO4</td><td>判断一项日常工作是否值得交给智能体</td><td>analyze</td><td>3 五个实战场景与动手实操</td><td>现场演示 + 分组实操 + 组间互评</td><td>个人作战包（成品 + 提示词原文）</td><td>结营作战包 B 项：3 个场景的判断卡</td></tr><tr><td>LO5</td><td>识别客户信息与销售宣传的红线并处理材料</td><td>evaluate</td><td>4 人机分工与销售合规</td><td>判断题擂台 + 红线复盘</td><td>材料脱敏检查清单</td><td>结营作战包 C 项：脱敏后的材料 + 文案修订说明</td></tr></tbody></table></div>
 <p><strong>每个模块都挂到了学习成果。</strong></p>
 </article>

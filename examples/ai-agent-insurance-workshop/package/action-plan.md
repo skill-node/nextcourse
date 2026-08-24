@@ -1,4 +1,4 @@
-# 让 AI 替你动手：保险团队的办公智能体实战工作坊 — 行动承诺书
+# 行动承诺书
 
 <!-- 由 `nextcourse package ai-agent-insurance-workshop` 生成，数据源：course.blueprint.md + course.meta.md + slides/。
      md 是源，package/html/ 是交付物：改这里，然后重新 --render，不要手改 HTML。 -->

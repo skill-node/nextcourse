@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>让 AI 替你动手：保险团队的办公智能体实战工作坊 — 教学设计</title>
+<title>教学设计</title>
 <style>
-:root { --doc-accent: #c7441b; }
 /* ===================================
    NextCourse — 交付包文档样式 (package-doc.css)
 
@@ -60,13 +59,23 @@ html, body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 8px 24px rgba(0, 0, 0, .06);
 }
 
-.doc-kicker {
-    font-size: .8rem;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--doc-accent);
-    font-weight: 700;
-    margin-bottom: .5rem;
+/* ===== 文档头 =====
+   h1 是**功能名**（讲师手册 / 考核量规 / 教学设计…），课程名在下一行小字。
+   客户一次开好几份，大标题必须一眼区分出「这是哪一份」；课程名每份都一样，
+   放大只是重复信息。分隔线画在 .doc-head 上而不是 h1 上 —— 两行是一个整体。 */
+
+.doc-head {
+    margin: 0 0 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--doc-accent);
+}
+
+.doc-course {
+    margin-top: .45rem;
+    font-size: .95rem;
+    line-height: 1.5;
+    font-weight: 500;
+    color: var(--doc-ink-soft);
 }
 
 /* ===== 标题 ===== */
@@ -75,9 +84,7 @@ html, body {
     font-size: 2rem;
     line-height: 1.3;
     font-weight: 800;
-    margin: 0 0 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 3px solid var(--doc-accent);
+    margin: 0;
     letter-spacing: -.01em;
 }
 
@@ -268,13 +275,13 @@ html, body {
     /* 3. 分页只发生在逻辑边界。
           break-* 是标准属性，page-break-* 是老引擎（含部分打印驱动、
           wkhtmltopdf 一类工具）唯一认的写法 —— 两套都写，成本只是多一行。 */
-    h1, h2, h3, h4 {
+    h1, h2, h3, h4, .doc-head {
         break-after: avoid;
         page-break-after: avoid;
     }
     h2 { margin-top: 1.6rem; }
 
-    table, tr, thead, blockquote, pre,
+    table, tr, thead, blockquote, pre, .doc-head,
     .activity-block, .rubric-row, .case-card, .fill-lines {
         break-inside: avoid;
         page-break-inside: avoid;
@@ -307,12 +314,15 @@ html, body {
     .fill-lines .rule { height: 2.4rem; }
 }
 
+/* 课程强调色注入必须放在样式表**之后**: package-doc.css 里有一条同名兜底
+   (--doc-accent: #2563eb)，同为 :root 同特异性，谁在后面谁生效 ——
+   放前面会被兜底的蓝色盖掉，所有课程的交付包都会变成一个色。 */
+:root { --doc-accent: #c7441b; }
 </style>
 </head>
 <body>
 <article class="doc">
-<div class="doc-kicker">让 AI 替你动手：保险团队的办公智能体实战工作坊</div>
-<h1 id="让-ai-替你动手保险团队的办公智能体实战工作坊--教学设计">让 AI 替你动手：保险团队的办公智能体实战工作坊 — 教学设计</h1>
+<header class="doc-head"><h1 id="教学设计">教学设计</h1><div class="doc-course">让 AI 替你动手：保险团队的办公智能体实战工作坊</div></header>
 <nav class="toc"><div class="toc-title">目录</div><ul><li class="lv2"><a href="#整体设计来自蓝图">整体设计（来自蓝图）</a></li><li class="lv2"><a href="#教学方法与互动设计来自蓝图">教学方法与互动设计（来自蓝图）</a></li><li class="lv2"><a href="#分组方案">分组方案</a></li><li class="lv2"><a href="#模块节奏表">模块节奏表</a></li><li class="lv2"><a href="#游戏化与积分可选">游戏化与积分（可选）</a></li></ul></nav>
 <blockquote>时间轴、分组、互动手法与积分规则。讲师手册讲「讲什么」，这份讲「怎么组织」。</blockquote>
 <p><strong>课程规格</strong>：1 天（有效 6.5h） · 24 人，4 人一组，共 6 组 · 4 个模块 · 5 条学习成果</p>

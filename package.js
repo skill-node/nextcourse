@@ -94,9 +94,10 @@ function sectionBody(...keywords) {
     return s.body.replace(/^###/gm, '####').trim();
 }
 
+// h1 只写功能名: 课程名由渲染器放到下一行小字 (见 render-md.js wrapDocument)。
 // 生成溯源写成 md 注释: 改 md 的人看得到, 客户拿到的 HTML 里不会出现内部课程名
 const HEADER = (kind, note) => [
-    `# ${title} — ${kind}`,
+    `# ${kind}`,
     '',
     `<!-- 由 \`nextcourse package ${courseName}\` 生成，数据源：${course.blueprintName} + course.meta.md${
         slideMap ? ' + slides/' : ''}。`,
@@ -455,7 +456,7 @@ function actionPlan() {
 
 function exercisesReadme() {
     return [
-        `# ${title} — 练习数据包`,
+        `# 练习数据包`,
         '',
         '课堂练习用的案例卡、样例数据与话术卡放在本目录。',
         '',
@@ -525,7 +526,7 @@ if (RENDER) {
 
     // 客户打开的第一扇门
     const indexMd = [
-        `# ${title} — 交付包`,
+        `# 交付包`,
         '',
         `> ${v(meta.duration, '')}${meta.class_size ? ` · ${v(meta.class_size)}` : ''} · ${modules.length} 个模块 · ${outcomes.length} 条学习成果`,
         '',
@@ -551,7 +552,7 @@ if (RENDER) {
     ].join('\n');
     fs.writeFileSync(
         path.join(htmlDir, 'index.html'),
-        wrapDocument({ title: `${title} — 交付包`, md: indexMd, css, accent, toc: false }),
+        wrapDocument({ title: '交付包', subtitle: title, md: indexMd, css, accent, toc: false }),
         'utf8'
     );
     rendered.push('index.html');

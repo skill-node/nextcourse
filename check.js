@@ -239,7 +239,8 @@ if (isMPlus && hasBlueprint && outcomes.length) {
     });
     const orphan = modules.filter(m => !outcomes.some(o => o.modules.includes(m.no)));
     const md = [
-        `# ${course.title} — 对齐矩阵`,
+        // h1 只写功能名, 课程名由 render-md 放到下一行小字 —— 与 package.js 同一口径
+        `# 对齐矩阵`,
         '',
         '> 由 `nextcourse check` 自动生成，勿手改。',
         `> 数据源：\`${blueprintName}\` 模块清单 + \`course.meta.md\` outcomes。`,

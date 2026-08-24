@@ -249,6 +249,11 @@ function accentFromTheme(root, theme) {
 
 /**
  * 包成一份自包含 HTML：CSS 内联，不引外部字体与脚本，双击即读、随手可打印。
+ *
+ * 文档头的信息层级是刻意的：**h1 放功能名**（讲师手册 / 考核量规 / 教学设计…），
+ * 课程名压到下一行小字。客户会一次开好几份，如果每份的大标题都以课程名开头，
+ * 满屏重复信息，最该一眼认出的「这是哪一份」反而排在最后。
+ * <title> 同理只写功能名 —— 标签页宽度只够显示前几个字。
  */
 function wrapDocument({ title, subtitle, md, css, accent = '#2563eb', toc = true }) {
     const { html, toc: heads } = render(md);
@@ -257,10 +262,16 @@ function wrapDocument({ title, subtitle, md, css, accent = '#2563eb', toc = true
             heads.map(h => `<li class="lv${h.level}"><a href="#${h.id}">${h.text}</a></li>`).join('')
         }</ul></nav>`
         : '';
-    // 目录挂在 h1 之后 —— 先看见这是什么文档, 再看见它有几节
-    const body = nav
-        ? (/<\/h1>/.test(html) ? html.replace('</h1>', `</h1>\n${nav}`) : nav + '\n' + html)
-        : html;
+    const courseLine = subtitle ? `<div class="doc-course">${esc(subtitle)}</div>` : '';
+    // h1 与课程名合成一个文档头, 分隔线画在头上而不是 h1 上, 两行才是一个整体
+    let body = html.replace(
+        /<h1([^>]*)>([\s\S]*?)<\/h1>/,
+        (_, attrs, inner) => `<header class="doc-head"><h1${attrs}>${inner}</h1>${courseLine}</header>`
+    );
+    // md 没有 h1 的兜底: 课程名单独成头, 没有课程名就什么都不加
+    if (!/<\/header>/.test(body) && courseLine) body = `<header class="doc-head">${courseLine}</header>\n${body}`;
+    // 目录挂在文档头之后 —— 先看见这是什么文档, 再看见它有几节
+    if (nav) body = body.replace('</header>', `</header>\n${nav}`);
     return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -268,13 +279,15 @@ function wrapDocument({ title, subtitle, md, css, accent = '#2563eb', toc = true
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${esc(title)}</title>
 <style>
-:root { --doc-accent: ${accent}; }
 ${css}
+/* 课程强调色注入必须放在样式表**之后**: package-doc.css 里有一条同名兜底
+   (--doc-accent: #2563eb)，同为 :root 同特异性，谁在后面谁生效 ——
+   放前面会被兜底的蓝色盖掉，所有课程的交付包都会变成一个色。 */
+:root { --doc-accent: ${accent}; }
 </style>
 </head>
 <body>
 <article class="doc">
-${subtitle ? `<div class="doc-kicker">${esc(subtitle)}</div>` : ''}
 ${body}
 </article>
 </body>

@@ -286,6 +286,17 @@ delivery actually requires:
 **Markdown is the source, HTML is the deliverable** — the same model as `deck.html`.
 Edit the md, re-render, never hand-edit the HTML.
 
+**The heading and the tab say what the document *is*.** Each document's h1 is its
+function — Facilitator Guide, Rubric, Assessment Plan — with the course title on a
+smaller second line, and `<title>` carries the function alone. Clients open several of
+these at once; leading every one with the same course title buries the only thing that
+tells them apart, and makes every browser tab identical. Write the function as the h1 in
+the md; the renderer adds the course title.
+
+**One stylesheet for every course**: `shared_styles/package-doc.css` (light, printable).
+The only thing that follows the course `theme` is the accent colour — the palette's
+`--primary`, darkened to 4.5:1 on white. Change that file and every course changes.
+
 Where blueprint sections 6–8 are missing, the corresponding documents carry
 `> **待补**: …` markers — that is the backlog standing between this course and a real
 cohort. Fill the blueprint via `/course-delivery`, then run this again.
