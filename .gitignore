@@ -12,7 +12,9 @@ node_modules/
 # 一个独立的备份 git 仓库, 外层仓库只能把它记成 gitlink, 收不进文件。
 courses/
 
-# 示例课程的产物不入库 (render / export 生成, 跑一次就有)
+# 示例课程的产物不入库 (render / export 生成, 跑一次就有)。
+# 例外: examples/*/package/html/ **刻意入库** —— 那是客户实际拿到的交付物,
+# clone 下来双击就该看见成品与打印分页, 不该先装环境跑命令。别往这里加它。
 examples/*/deck.html
 examples/*/export/
 examples/*/.review/

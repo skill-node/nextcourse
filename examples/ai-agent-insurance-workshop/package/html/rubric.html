@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>让 AI 替你动手：保险团队的办公智能体实战工作坊 — 考核量规</title>
+<style>
+:root { --doc-accent: #c7441b; }
+/* ===================================
+   NextCourse — 交付包文档样式 (package-doc.css)
+
+   用于 package/html/*.html：讲师手册、学员手册、量规、评估方案。
+   这是**拿来读和打印的文档**，不是第二套幻灯片：
+   刻意不引 components.css，只借配色里的强调色（由 render-md.js 注入 --doc-accent）。
+
+   交付文档一律浅色。深色配色（dark-ocean / dark-botanical / bold-signal 等）
+   只继承强调色的色相，压到对白底 4.5:1 —— 满页黑底打印既费墨又难读。
+
+   打印是硬性验收项，不是锦上添花，见文末 @media print。
+   =================================== */
+
+:root {
+    --doc-bg:        #f4f4f5;   /* 页面底 (屏幕上纸张之外的部分) */
+    --doc-paper:     #ffffff;   /* 纸张 */
+    --doc-ink:       #1f2328;   /* 正文 */
+    --doc-ink-soft:  #57606a;   /* 次要文字、注释 */
+    --doc-line:      #d8dade;   /* 分隔线、表格线 */
+    --doc-tint:      #f6f7f9;   /* 表头、代码块、填写区底色 */
+    --doc-tint-warm: #fbf7ee;   /* 引用块底色 */
+    /* --doc-accent 由 render-md.js 按课程 theme 注入, 这里给个兜底 */
+    --doc-accent:    #2563eb;
+
+    --doc-font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                "Hiragino Sans GB", "Microsoft YaHei", "Source Han Sans SC",
+                "Noto Sans CJK SC", sans-serif;
+    --doc-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--doc-bg);
+    color: var(--doc-ink);
+    font-family: var(--doc-font);
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* ===== 纸张容器 ===== */
+
+.doc {
+    max-width: 52rem;
+    margin: 2.5rem auto;
+    padding: 3.5rem 3.5rem 4rem;
+    background: var(--doc-paper);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .08), 0 8px 24px rgba(0, 0, 0, .06);
+}
+
+.doc-kicker {
+    font-size: .8rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--doc-accent);
+    font-weight: 700;
+    margin-bottom: .5rem;
+}
+
+/* ===== 标题 ===== */
+
+.doc h1 {
+    font-size: 2rem;
+    line-height: 1.3;
+    font-weight: 800;
+    margin: 0 0 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--doc-accent);
+    letter-spacing: -.01em;
+}
+
+.doc h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 2.75rem 0 1rem;
+    padding-left: .75rem;
+    border-left: 4px solid var(--doc-accent);
+    letter-spacing: -.005em;
+}
+
+.doc h3 {
+    font-size: 1.08rem;
+    font-weight: 700;
+    margin: 2rem 0 .75rem;
+    color: var(--doc-accent);
+}
+
+.doc h4 {
+    font-size: .95rem;
+    font-weight: 700;
+    margin: 1.5rem 0 .5rem;
+    color: var(--doc-ink-soft);
+    letter-spacing: .02em;
+}
+
+/* ===== 正文块 ===== */
+
+.doc p { margin: 0 0 1rem; }
+
+.doc ul, .doc ol { margin: 0 0 1rem; padding-left: 1.5rem; }
+.doc li { margin: .35rem 0; }
+.doc li > ul, .doc li > ol { margin: .35rem 0 .35rem; }
+
+.doc li.task { list-style: none; margin-left: -1.25rem; }
+.doc li.task .box {
+    display: inline-block;
+    width: 1.1em;
+    color: var(--doc-accent);
+    font-size: 1.05em;
+}
+
+.doc a {
+    color: var(--doc-accent);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0, 0, 0, .15);
+}
+
+.doc strong { font-weight: 700; }
+/* 中文里斜体不好看, 交付文档的 em 用「弱化」而不是「倾斜」来表达次要 */
+.doc em { font-style: normal; color: var(--doc-ink-soft); font-size: .94em; }
+
+.doc hr {
+    border: 0;
+    border-top: 1px solid var(--doc-line);
+    margin: 2.5rem 0;
+}
+
+.doc blockquote {
+    margin: 1.25rem 0;
+    padding: .85rem 1.15rem;
+    background: var(--doc-tint-warm);
+    border-left: 3px solid var(--doc-accent);
+    border-radius: 0 4px 4px 0;
+    color: var(--doc-ink-soft);
+}
+.doc blockquote p:last-child { margin-bottom: 0; }
+
+.doc code {
+    font-family: var(--doc-mono);
+    font-size: .875em;
+    background: var(--doc-tint);
+    border: 1px solid var(--doc-line);
+    border-radius: 3px;
+    padding: .1em .35em;
+}
+
+.doc pre {
+    margin: 1.25rem 0;
+    padding: 1rem 1.15rem;
+    background: var(--doc-tint);
+    border: 1px solid var(--doc-line);
+    border-radius: 5px;
+    overflow-x: auto;
+    line-height: 1.6;
+}
+.doc pre code { background: none; border: 0; padding: 0; font-size: .85rem; }
+
+/* ===== 表格 (交付包大量使用) ===== */
+
+.doc .table-wrap { overflow-x: auto; margin: 1.25rem 0; }
+
+.doc table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .92rem;
+}
+
+.doc th, .doc td {
+    border: 1px solid var(--doc-line);
+    padding: .55rem .75rem;
+    text-align: left;
+    vertical-align: top;
+}
+
+.doc thead th {
+    background: var(--doc-tint);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.doc tbody tr:nth-child(even) { background: rgba(0, 0, 0, .015); }
+
+/* ===== 目录 ===== */
+
+.doc .toc {
+    margin: 0 0 2.5rem;
+    /* 目录紧跟在 h1 之后, 上方要留出与标题的呼吸 */
+    margin-top: -.5rem;
+    padding: 1.1rem 1.35rem;
+    background: var(--doc-tint);
+    border: 1px solid var(--doc-line);
+    border-radius: 5px;
+}
+.doc .toc-title {
+    font-size: .75rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--doc-ink-soft);
+    font-weight: 700;
+    margin-bottom: .5rem;
+}
+.doc .toc ul { list-style: none; margin: 0; padding: 0; }
+.doc .toc li { margin: .15rem 0; font-size: .92rem; }
+.doc .toc li.lv3 { padding-left: 1.25rem; font-size: .86rem; }
+.doc .toc a { border-bottom: 0; color: var(--doc-ink); }
+.doc .toc a:hover { color: var(--doc-accent); }
+
+/* ===== 填写区 (学员手册) =====
+   <!-- fill:3 --> 渲染成 3 条手写横线。纸上要能写字，屏幕上也别太丑。 */
+
+.doc .fill-lines { margin: .75rem 0 1.5rem; }
+.doc .fill-lines .rule {
+    display: block;
+    height: 2.1rem;
+    border-bottom: 1px solid var(--doc-line);
+}
+
+/* ===== 打印 =====
+   打印丢样式是这类交付物最容易翻车的地方：客户导出 PDF 发现背景全白、
+   表格被腰斩、标题孤零零挂在页尾，整个交付包的专业感就没了。
+   下面每一条都是踩过的坑，别删。 */
+
+@page {
+    /* 页边距统一由 @page 管。若把边距留在容器 padding 上，
+       只有第一页有内边距，后续页贴边，而且 padding 会撑高内容产生空白页。
+       注意 @page 里写 background 各浏览器支持不可靠，背景靠 html/body。 */
+    margin: 15mm 16mm 12mm 16mm;
+}
+
+@media print {
+
+    /* 1. 强制保留背景与配色 —— 最关键的一条。
+          不加这句 Chrome / Safari 默认丢弃所有背景，表头底色、引用底色全变白。
+          必须带 !important，且必须作用在 * 上。 */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    html, body {
+        background: var(--doc-paper);
+        font-size: 10.5pt;
+        line-height: 1.6;
+    }
+
+    /* 2. 容器归零，边距全交给 @page */
+    .doc {
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: var(--doc-paper);
+    }
+
+    /* 3. 分页只发生在逻辑边界。
+          break-* 是标准属性，page-break-* 是老引擎（含部分打印驱动、
+          wkhtmltopdf 一类工具）唯一认的写法 —— 两套都写，成本只是多一行。 */
+    h1, h2, h3, h4 {
+        break-after: avoid;
+        page-break-after: avoid;
+    }
+    h2 { margin-top: 1.6rem; }
+
+    table, tr, thead, blockquote, pre,
+    .activity-block, .rubric-row, .case-card, .fill-lines {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* 表格跨页时表头每页重复 */
+    thead { display: table-header-group; }
+
+    p, li { orphans: 3; widows: 3; }
+
+    /* 作者可控的强制分页: md 里写 <!-- pagebreak --> */
+    .page-break-before {
+        break-before: page;
+        page-break-before: always;
+    }
+
+    /* 4. 清理屏幕态。
+          目录不强制分页 —— 三页的量规硬占一整页目录很浪费，
+          需要分页的地方作者在 md 里写 <!-- pagebreak -->，那才是可控的。 */
+    .toc { border-radius: 0; }
+    a { color: var(--doc-ink); border-bottom: 0; }
+    /* 纸上点不了链接，把真实地址展开 */
+    .doc a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: .85em;
+        color: var(--doc-ink-soft);
+        word-break: break-all;
+    }
+    code, pre { border-radius: 0; }
+    .fill-lines .rule { height: 2.4rem; }
+}
+
+</style>
+</head>
+<body>
+<article class="doc">
+<div class="doc-kicker">让 AI 替你动手：保险团队的办公智能体实战工作坊</div>
+<h1 id="让-ai-替你动手保险团队的办公智能体实战工作坊--考核量规">让 AI 替你动手：保险团队的办公智能体实战工作坊 — 考核量规</h1>
+<nav class="toc"><div class="toc-title">目录</div><ul><li class="lv2"><a href="#使用说明">使用说明</a></li><li class="lv2"><a href="#lo1--区分聊天-ai-与办公智能体的能力边界">LO1 · 区分聊天 AI 与办公智能体的能力边界</a></li><li class="lv2"><a href="#lo2--用五要素公式改写一条自己的提示词">LO2 · 用五要素公式改写一条自己的提示词</a></li><li class="lv2"><a href="#lo3--使用办公智能体完成一项真实工作任务">LO3 · 使用办公智能体完成一项真实工作任务</a></li><li class="lv2"><a href="#lo4--判断一项日常工作是否值得交给智能体">LO4 · 判断一项日常工作是否值得交给智能体</a></li><li class="lv2"><a href="#lo5--识别客户信息与销售宣传的红线并处理材料">LO5 · 识别客户信息与销售宣传的红线并处理材料</a></li><li class="lv2"><a href="#汇总表讲师填">汇总表（讲师填）</a></li></ul></nav>
+<blockquote>L2 实操考核的评分表。维度来自学习成果，等级描述必须写成可观察的行为，不能写「较好」「一般」。</blockquote>
+<p><strong>课程规格</strong>：1 天（有效 6.5h） · 24 人，4 人一组，共 6 组 · 4 个模块 · 5 条学习成果</p>
+<h2 id="使用说明">使用说明</h2>
+<ul>
+<li>每个维度独立打分，不做加权平均掩盖短板；</li>
+<li><strong>达标</strong>是及格线，不是理想态；「优秀」留给确实超出预期的产出；</li>
+<li>评分时只看<strong>交上来的产出物</strong>，不看课堂表现印象。</li>
+</ul>
+<h2 id="lo1--区分聊天-ai-与办公智能体的能力边界">LO1 · 区分聊天 AI 与办公智能体的能力边界</h2>
+<p><strong>判定证据</strong>：模块 1 两两互讲，讲错由同伴当场纠正　｜　<strong>达标线</strong>：能举出 1 件聊天框做不到、而智能体能做的事，并说清为什么</p>
+<div class="table-wrap"><table><thead><tr><th>等级</th><th>行为描述</th><th>分值</th></tr></thead><tbody><tr><td>优秀</td><td><strong>待补</strong>：比达标线多做到什么（写成可观察的行为，不写「更好」）</td><td>4</td></tr><tr><td>达标</td><td>能举出 1 件聊天框做不到、而智能体能做的事，并说清为什么</td><td>3</td></tr><tr><td>待改进</td><td><strong>待补</strong>：产出物完成但关键要素缺失（列出是哪个要素）</td><td>2</td></tr><tr><td>未达标</td><td><strong>待补</strong>：未提交，或与任务要求不符</td><td>1</td></tr></tbody></table></div>
+<h2 id="lo2--用五要素公式改写一条自己的提示词">LO2 · 用五要素公式改写一条自己的提示词</h2>
+<p><strong>判定证据</strong>：个人提示词卡 3 条，按量规「提示词完整度」维度逐条打分　｜　<strong>达标线</strong>：把一条含糊指令改写为含角色/对象/目标/约束/格式的完整提示词，两版输出质量肉眼可见差异</p>
+<div class="table-wrap"><table><thead><tr><th>等级</th><th>行为描述</th><th>分值</th></tr></thead><tbody><tr><td>优秀</td><td><strong>待补</strong>：比达标线多做到什么（写成可观察的行为，不写「更好」）</td><td>4</td></tr><tr><td>达标</td><td>把一条含糊指令改写为含角色/对象/目标/约束/格式的完整提示词，两版输出质量肉眼可见差异</td><td>3</td></tr><tr><td>待改进</td><td><strong>待补</strong>：产出物完成但关键要素缺失（列出是哪个要素）</td><td>2</td></tr><tr><td>未达标</td><td><strong>待补</strong>：未提交，或与任务要求不符</td><td>1</td></tr></tbody></table></div>
+<h2 id="lo3--使用办公智能体完成一项真实工作任务">LO3 · 使用办公智能体完成一项真实工作任务</h2>
+<p><strong>判定证据</strong>：结营作战包 A 项：成品文件 + 用的提示词原文　｜　<strong>达标线</strong>：独立产出「发票明细表」或「宣传图文」其中一件，成品无需返工可直接使用</p>
+<div class="table-wrap"><table><thead><tr><th>等级</th><th>行为描述</th><th>分值</th></tr></thead><tbody><tr><td>优秀</td><td><strong>待补</strong>：比达标线多做到什么（写成可观察的行为，不写「更好」）</td><td>4</td></tr><tr><td>达标</td><td>独立产出「发票明细表」或「宣传图文」其中一件，成品无需返工可直接使用</td><td>3</td></tr><tr><td>待改进</td><td><strong>待补</strong>：产出物完成但关键要素缺失（列出是哪个要素）</td><td>2</td></tr><tr><td>未达标</td><td><strong>待补</strong>：未提交，或与任务要求不符</td><td>1</td></tr></tbody></table></div>
+<h2 id="lo4--判断一项日常工作是否值得交给智能体">LO4 · 判断一项日常工作是否值得交给智能体</h2>
+<p><strong>判定证据</strong>：结营作战包 B 项：3 个场景的判断卡　｜　<strong>达标线</strong>：对 3 个给定工作场景说出该用聊天框、该用智能体、还是不该用 AI，并讲出判断依据</p>
+<div class="table-wrap"><table><thead><tr><th>等级</th><th>行为描述</th><th>分值</th></tr></thead><tbody><tr><td>优秀</td><td><strong>待补</strong>：比达标线多做到什么（写成可观察的行为，不写「更好」）</td><td>4</td></tr><tr><td>达标</td><td>对 3 个给定工作场景说出该用聊天框、该用智能体、还是不该用 AI，并讲出判断依据</td><td>3</td></tr><tr><td>待改进</td><td><strong>待补</strong>：产出物完成但关键要素缺失（列出是哪个要素）</td><td>2</td></tr><tr><td>未达标</td><td><strong>待补</strong>：未提交，或与任务要求不符</td><td>1</td></tr></tbody></table></div>
+<h2 id="lo5--识别客户信息与销售宣传的红线并处理材料">LO5 · 识别客户信息与销售宣传的红线并处理材料</h2>
+<p><strong>判定证据</strong>：结营作战包 C 项：脱敏后的材料 + 文案修订说明　｜　<strong>达标线</strong>：对一份含敏感信息的材料指出必须遮挡的字段；对一段 AI 生成文案指出违规表述</p>
+<div class="table-wrap"><table><thead><tr><th>等级</th><th>行为描述</th><th>分值</th></tr></thead><tbody><tr><td>优秀</td><td><strong>待补</strong>：比达标线多做到什么（写成可观察的行为，不写「更好」）</td><td>4</td></tr><tr><td>达标</td><td>对一份含敏感信息的材料指出必须遮挡的字段；对一段 AI 生成文案指出违规表述</td><td>3</td></tr><tr><td>待改进</td><td><strong>待补</strong>：产出物完成但关键要素缺失（列出是哪个要素）</td><td>2</td></tr><tr><td>未达标</td><td><strong>待补</strong>：未提交，或与任务要求不符</td><td>1</td></tr></tbody></table></div>
+<div class="page-break-before"></div>
+<h2 id="汇总表讲师填">汇总表（讲师填）</h2>
+<div class="table-wrap"><table><thead><tr><th>学员</th><th>LO1</th><th>LO2</th><th>LO3</th><th>LO4</th><th>LO5</th><th>合计</th><th>是否达标</th></tr></thead><tbody><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table></div>
+</article>
+</body>
+</html>
