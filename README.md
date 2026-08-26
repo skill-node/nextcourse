@@ -327,6 +327,7 @@ outcome x module x activity x evidence, the whole loop in one table.
 
 ```
 nextcourse/
+├── AGENTS.md                    ← signpost for agents: install, then where to read
 ├── AGENT.md                     ← full documentation (entry point for any agent)
 ├── CLI_MANUAL.md                ← complete CLI reference
 ├── DESIGN-SYSTEM.md             ← component reference (24 components)

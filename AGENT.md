@@ -24,6 +24,7 @@ NextCourse 是一个以 **AI-Native 工作流为核心的课程开发工具**。
 
 ```
 nextcourse/
+├── AGENTS.md             ← 约定俗成的 agent 路牌（英文，薄壳），指向本文档
 ├── AGENT.md              ← 当前文档（agent 入口）
 ├── DESIGN-SYSTEM.md      ← 完整组件参考手册（创作幻灯片前必读）
 ├── nextcourse.js         ← 统一 CLI 入口

@@ -290,6 +290,7 @@ nextcourse package ai-agent-insurance-workshop --render   # 交付包 HTML
 
 ```
 nextcourse/
+├── AGENTS.md                    ← agent 路牌：怎么装、然后该读哪一份
 ├── AGENT.md                     ← 完整文档（所有 Agent 入口）
 ├── CLI_MANUAL.md                ← CLI 操作手册（完整命令参考）
 ├── DESIGN-SYSTEM.md             ← 组件参考手册（24 个组件）
