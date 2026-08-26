@@ -3,7 +3,8 @@
 **An agent that designs the course — then builds the deck and everything else you hand the client.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-[![Node](https://img.shields.io/badge/node-20.x-informational.svg)](https://nodejs.org)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-informational.svg)](https://nodejs.org)
+[![npm](https://img.shields.io/npm/v/nextcourse.svg)](https://www.npmjs.com/package/nextcourse)
 [![Dependencies: zero](https://img.shields.io/badge/npm%20dependencies-0-success.svg)](./package.json)
 [![Output](https://img.shields.io/badge/output-Reveal.js%20deck%20%2B%20delivery%20pack-orange.svg)](https://course.skillnode.ai/package/)
 
@@ -42,7 +43,7 @@ judgements one at a time, writing them down, and then executing them strictly.
 
 ## Course design: one question at a time
 
-Run `/course-design` in Claude Code. Entirely conversational, landing in a file a
+Ask your agent to design a course; `nextcourse-design` takes over. Entirely conversational, landing in a file a
 human can read, edit and put under version control — not an opaque black box.
 
 **0 · Spec and needs diagnosis** — The first question is *how long, what setting*,
@@ -108,12 +109,12 @@ In real in-house delivery the deck is one item among many. The learner workbook,
 exercise data pack, the scoring rubric, the evaluation survey, the action-commitment
 sheet — those decide whether the course actually lands.
 
-`/course-delivery <name>` picks up where `/course-design` stops: facilitation design,
+`nextcourse-delivery <name>` picks up where `nextcourse-design` stops: facilitation design,
 Kirkpatrick evaluation (**L1 + L2 by default**; L3/L4 only once you have named who
 supplies the baseline data), content development plan. Then one command ships the lot:
 
 ```bash
-node nextcourse.js package <name> --render
+nextcourse package <name> --render
 ```
 
 ```
@@ -163,7 +164,7 @@ that fails.
 
 ## Slides: what happens after the outline is settled
 
-`/slide-design <name>` — with two human review gates, because content problems are one
+`nextcourse-slides <name>` — with two human review gates, because content problems are one
 line to fix in a plan and a re-layout to fix in HTML.
 
 - **Content clears first.** A page-by-page `slide-plan.md` goes to you before any
@@ -202,36 +203,74 @@ actually reason about.
 
 ## Quick start
 
-Requires **Node 20.x** and, for the screenshot pass, a local **Chrome / Chromium /
-Edge**. There is nothing to `npm install` — the CLI runs on Node built-ins alone.
+Requires **Node 20 or newer** and, for the screenshot pass, a local **Chrome /
+Chromium / Edge**. NextCourse itself has **zero runtime dependencies** — the CLI
+runs on Node built-ins alone.
+
+**Install the skills** (works in Claude Code, Codex, Cursor, OpenCode, WorkBuddy and
+70-odd other runtimes — they all read the same [Agent Skills](https://code.claude.com/docs/en/skills)
+format):
+
+```bash
+npx skills add skill-node/nextcourse
+```
+
+**Install the engine:**
+
+```bash
+npm i -g nextcourse
+```
+
+Then just talk to your agent — *"help me design a half-day workshop on X"*. Four
+skills are now available and the agent picks the right one:
+
+| Skill | What it does |
+|---|---|
+| `nextcourse` | Control desk — works out which stage you're stuck at and routes |
+| `nextcourse-design` | Spec → positioning → outcomes → design → modules |
+| `nextcourse-delivery` | In-house scales: facilitation → evaluation → content plan → delivery pack |
+| `nextcourse-slides` | Plan → review → slides → deck |
+
+**Your courses land in the directory you're working in** — `./courses/<name>/`. So
+`cd` to wherever you keep them before you start. Set `NEXTCOURSE_HOME` to pin them to
+one fixed workspace instead.
+
+The CLI is also yours to drive directly:
+
+```bash
+nextcourse doctor                 # self-check: Node, engine assets, Chrome, working dir
+nextcourse render <name>          # lint + build deck.html  (recommended)
+nextcourse check  <name>          # teaching-design closure check (outcome x module x evidence)
+nextcourse package <name> --render        # delivery package: md source + client HTML (M/L)
+nextcourse shot   <name>          # overflow check + per-page screenshots
+nextcourse export <name> --with-package   # package as an offline-playable folder
+nextcourse docs   design-system   # print the bundled component reference
+```
+
+`nextcourse` with no arguments lists every command; see
+[CLI_MANUAL.md](./CLI_MANUAL.md) for the full reference.
+
+<details>
+<summary><b>Prefer not to install globally?</b></summary>
+
+`npx -y nextcourse <command>` works the same way — the skills fall back to it
+automatically when `nextcourse` isn't on `PATH`.
+
+</details>
+
+<details>
+<summary><b>Working on NextCourse itself?</b></summary>
 
 ```bash
 git clone https://github.com/skill-node/nextcourse.git
 cd nextcourse
+node nextcourse.js render <name>
 ```
 
-Then, in Claude Code:
+Run from the repo root and the working directory *is* the repo root, so courses live
+in `nextcourse/courses/` exactly as they did before v4.
 
-```
-/course-design                 # conversational: spec → positioning → outcomes → design → modules
-/course-delivery <course-name> # in-house scales: facilitation → evaluation → content plan
-/slide-design <course-name>    # plan → review → slides
-```
-
-And from the shell:
-
-```bash
-node nextcourse.js render <name>   # lint + build deck.html  (recommended)
-node nextcourse.js check  <name>   # teaching-design closure check (outcome x module x evidence)
-node nextcourse.js package <name> --render   # delivery package: md source + client HTML (M/L)
-node nextcourse.js shot   <name>   # overflow check + per-page screenshots
-node nextcourse.js export <name> --with-package   # package as an offline-playable folder
-node nextcourse.js animate <name>  # batch entrance animations (--strip to remove)
-node nextcourse.js themes          # build the palette / typeface gallery
-```
-
-`node nextcourse.js` with no arguments lists every command; see
-[CLI_MANUAL.md](./CLI_MANUAL.md) for the full reference.
+</details>
 
 ### Run the bundled examples
 
@@ -246,10 +285,10 @@ clearest way to see what the scale actually changes:
 All case materials in both are replaced by fabricated samples. Copy one in and build it:
 
 ```bash
-cp -R examples/ai-agent-insurance-workshop courses/
-node nextcourse.js check   ai-agent-insurance-workshop   # closure check: 0 errors, 0 warnings
-node nextcourse.js render  ai-agent-insurance-workshop   # lint + build the deck
-node nextcourse.js package ai-agent-insurance-workshop --render   # delivery package HTML
+mkdir -p courses && cp -R "$(npm root -g)/nextcourse/examples/ai-agent-insurance-workshop" courses/
+nextcourse check   ai-agent-insurance-workshop   # closure check: 0 errors, 0 warnings
+nextcourse render  ai-agent-insurance-workshop   # lint + build the deck
+nextcourse package ai-agent-insurance-workshop --render   # delivery package HTML
 ```
 
 Read `course.blueprint.md` and `course.meta.md` first — those files, not the deck, are
@@ -272,13 +311,15 @@ nextcourse/
 ├── animate-slides.js            ← batch entrance animations
 ├── export.js                    ← offline packaging
 ├── shot.js                      ← overflow detection + screenshots
+├── paths.js                     ← the two roots: engine assets vs. your courses
 ├── templates/                   ← deck.html master template + design blueprint (M/L)
 ├── shared_styles/               ← design system (8 palettes · 8 font sets · components)
 ├── lib/                         ← Reveal.js + webfonts (vendored, offline-capable)
-├── .claude/skills/
-│   ├── course-design/SKILL.md   ← /course-design
-│   ├── course-delivery/         ← /course-delivery (Kirkpatrick and other references)
-│   └── slide-design/SKILL.md    ← /slide-design
+├── .claude/skills/              ← the four skills, installed by `npx skills add`
+│   ├── nextcourse/              ← control desk: triage and routing
+│   ├── nextcourse-design/       ← + references/ (Bloom, Kirkpatrick, templates)
+│   ├── nextcourse-delivery/     ← + references/ (Kirkpatrick, facilitation, content dev)
+│   └── nextcourse-slides/       ← + references/ (component picker)
 ├── examples/                    ← bundled example course
 └── courses/                     ← your courses (gitignored)
 ```

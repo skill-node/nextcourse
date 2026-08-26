@@ -3,7 +3,8 @@
 **一个先陪你设计课程，再把课件和整套交付包一起做出来的智能体。**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-[![Node](https://img.shields.io/badge/node-20.x-informational.svg)](https://nodejs.org)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-informational.svg)](https://nodejs.org)
+[![npm](https://img.shields.io/npm/v/nextcourse.svg)](https://www.npmjs.com/package/nextcourse)
 [![Dependencies: zero](https://img.shields.io/badge/npm%20dependencies-0-success.svg)](./package.json)
 [![Output](https://img.shields.io/badge/output-Reveal.js%20deck%20%2B%20delivery%20pack-orange.svg)](https://course.skillnode.ai/package/)
 
@@ -37,7 +38,7 @@ PPT 生成器的前提是你已经知道这门课讲给谁、要让人学会什�
 
 ## 课程设计：一次问一件事
 
-在 Claude Code 里运行 `/course-design`。全程对话式，最后落成一份人能读、能改、
+让 agent 帮你设计课程，`nextcourse-design` 就会接手。全程对话式，最后落成一份人能读、能改、
 能进版本库的文件，而不是一个不透明的黑箱。
 
 **0 · 规格与需求诊断** —— 第一个问题是「这门课多长、什么场合」，因为它决定后面要问多少东西。
@@ -94,12 +95,12 @@ outcomes:
 真实的内训交付，课件只是其中一件。学员手册、练习数据包、评分量规、评估问卷、
 行动承诺书——这些才是「这门课能不能落地」的分水岭。
 
-`/course-delivery <课程名>` 接着 `/course-design` 往下做：教学互动设计、
+`nextcourse-delivery <课程名>` 接着 `nextcourse-design` 往下做：教学互动设计、
 柯氏评估方案（**默认只做 L1 + L2**，L3/L4 要先确认基线数据由谁提供）、内容开发计划。
 然后一条命令交出整包：
 
 ```bash
-node nextcourse.js package <name> --render
+nextcourse package <name> --render
 ```
 
 ```
@@ -145,7 +146,7 @@ outcomes:
 
 ## 幻灯片：大纲定稿之后的事
 
-`/slide-design <课程名>`，中间有两道人审关卡 —— 因为内容问题在 plan 里改一行字，
+`nextcourse-slides <课程名>`，中间有两道人审关卡 —— 因为内容问题在 plan 里改一行字，
 在 HTML 里改要重排版。
 
 - **内容先过关。** 先出逐页 `slide-plan.md` 交你审，确认了才开始写标记。不在错的内容上花排版时间。
@@ -175,35 +176,69 @@ PPT 是个二进制包，模型只能隔着一层去猜，猜出来的既不够�
 
 ## 快速开始
 
-需要 **Node 20.x**；截图自查那一步还需要本机装有 **Chrome / Chromium / Edge**。
-**没有任何 npm 依赖要装** —— 整套 CLI 只用 Node 内置模块。
+需要 **Node 20 或更高**；截图自查那一步还需要本机装有 **Chrome / Chromium / Edge**。
+NextCourse 自身**零运行时依赖** —— 整套 CLI 只用 Node 内置模块。
+
+**装技能**（Claude Code、Codex、Cursor、OpenCode、WorkBuddy 等七十多个 runtime 都吃同一份
+[Agent Skills](https://code.claude.com/docs/en/skills) 格式）：
+
+```bash
+npx skills add skill-node/nextcourse
+```
+
+**装引擎：**
+
+```bash
+npm i -g nextcourse
+```
+
+然后直接跟你的 agent 说话就行 —— 「帮我设计一门半天的 X 工作坊」。装好的四个技能，
+agent 会自己挑：
+
+| 技能 | 干什么 |
+|---|---|
+| `nextcourse` | 总控台 —— 判断你卡在哪一环，路由到下面三个 |
+| `nextcourse-design` | 规格 → 定位 → 学习成果 → 整体设计 → 模块架构 |
+| `nextcourse-delivery` | 内训档：教学互动 → 评估方案 → 内容开发计划 → 交付包 |
+| `nextcourse-slides` | 内容计划 → 人审 → 幻灯片 → deck |
+
+**课程落在你当前所在的目录**下 —— `./courses/<课程名>/`。所以开工前先 `cd` 到你想放
+课程的地方。想固定到一处就设 `NEXTCOURSE_HOME`。
+
+CLI 你也可以直接用：
+
+```bash
+nextcourse doctor                 # 自检：Node / 引擎资产 / Chrome / 工作目录
+nextcourse render <name>          # lint + 构建 deck.html（推荐）
+nextcourse check  <name>          # 教学设计闭环校验（成果 × 模块 × 证据）
+nextcourse package <name> --render        # 生成交付包 md + 客户 HTML（M/L 档）
+nextcourse shot   <name>          # 溢出检测 + 逐页截图自查
+nextcourse export <name> --with-package   # 打包为可离线演示文件夹
+nextcourse docs   design-system   # 打印内置的组件参考
+```
+
+`nextcourse` 不带参数会列出全部命令，完整参考见 [CLI_MANUAL.md](./CLI_MANUAL.md)。
+
+<details>
+<summary><b>不想全局装？</b></summary>
+
+`npx -y nextcourse <命令>` 效果一样 —— `nextcourse` 不在 `PATH` 上时，技能会自动退到这条路。
+
+</details>
+
+<details>
+<summary><b>要改 NextCourse 本身？</b></summary>
 
 ```bash
 git clone https://github.com/skill-node/nextcourse.git
 cd nextcourse
+node nextcourse.js render <name>
 ```
 
-然后在 Claude Code 里：
+在仓库根目录里跑，工作目录**就是**仓库根，课程照样待在 `nextcourse/courses/`，
+跟 v4 之前一模一样。
 
-```
-/course-design                 # 对话式：规格 → 定位 → 学习成果 → 整体设计 → 模块架构
-/course-delivery <课程名>       # 内训档：教学互动 → 评估方案 → 内容开发计划
-/slide-design <课程名>          # 内容计划 → 人审 → 幻灯片
-```
-
-以及在命令行里：
-
-```bash
-node nextcourse.js render <name>   # lint + 构建 deck.html（推荐）
-node nextcourse.js check  <name>   # 教学设计闭环校验（成果 × 模块 × 证据）
-node nextcourse.js package <name> --render   # 生成交付包 md + 客户 HTML（M/L 档）
-node nextcourse.js shot   <name>   # 溢出检测 + 逐页截图自查
-node nextcourse.js export <name> --with-package   # 打包为可离线演示文件夹
-node nextcourse.js animate <name>  # 批量打入入场动画（--strip 剥离）
-node nextcourse.js themes          # 生成配色 / 字体展板
-```
-
-`node nextcourse.js` 不带参数会列出全部命令，完整参考见 [CLI_MANUAL.md](./CLI_MANUAL.md)。
+</details>
 
 ### 跑一遍自带的示例课
 
@@ -217,10 +252,10 @@ node nextcourse.js themes          # 生成配色 / 字体展板
 两门课的案例素材都已全部替换为虚构示例。拷进工作区跑一遍：
 
 ```bash
-cp -R examples/ai-agent-insurance-workshop courses/
-node nextcourse.js check   ai-agent-insurance-workshop   # 教学设计闭环：0 error 0 warning
-node nextcourse.js render  ai-agent-insurance-workshop   # lint + 构建课件
-node nextcourse.js package ai-agent-insurance-workshop --render   # 交付包 HTML
+mkdir -p courses && cp -R "$(npm root -g)/nextcourse/examples/ai-agent-insurance-workshop" courses/
+nextcourse check   ai-agent-insurance-workshop   # 教学设计闭环：0 error 0 warning
+nextcourse render  ai-agent-insurance-workshop   # lint + 构建课件
+nextcourse package ai-agent-insurance-workshop --render   # 交付包 HTML
 ```
 
 建议先读 `course.blueprint.md` 和 `course.meta.md` —— 这个项目真正讲的是那两个文件，不是那份课件。
@@ -246,9 +281,10 @@ nextcourse/
 ├── shared_styles/               ← 设计系统（8 套配色 · 8 套字体集 · 组件库）
 ├── lib/                         ← Reveal.js + 网络字体（vendored，离线可用）
 ├── .claude/skills/
-│   ├── course-design/SKILL.md   ← /course-design
-│   ├── course-delivery/         ← /course-delivery（含柯氏评估等方法论参考）
-│   └── slide-design/SKILL.md    ← /slide-design
+│   ├── nextcourse/              ← 总控台：分诊与路由
+│   ├── nextcourse-design/       ← + references/（Bloom、柯氏、输出模板）
+│   ├── nextcourse-delivery/     ← + references/（柯氏、教学手法、内容开发）
+│   └── nextcourse-slides/       ← + references/（组件选型）
 ├── examples/                    ← 自带示例课程
 └── courses/                     ← 你的课程（gitignore）
 ```

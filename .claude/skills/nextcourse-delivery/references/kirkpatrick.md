@@ -1,6 +1,6 @@
 # 柯氏四级评估 — 指标写法与题库
 
-> `/course-delivery` Phase 6 的参考。**默认只设计 L1 + L2**，L3/L4 问过用户再展开。
+> `nextcourse-delivery` Phase 6 的参考。**默认只设计 L1 + L2**，L3/L4 问过用户再展开。
 
 ## 一句话区分四级
 

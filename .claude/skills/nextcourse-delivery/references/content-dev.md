@@ -1,6 +1,6 @@
 # 内容开发 — 访谈、案例、数据包与排期
 
-> `/course-delivery` Phase 7 的参考。课程落不了地，缺的从来不是 PPT，
+> `nextcourse-delivery` Phase 7 的参考。课程落不了地，缺的从来不是 PPT，
 > 是**案例、数据包和讲师**。
 
 ## SME 访谈提纲

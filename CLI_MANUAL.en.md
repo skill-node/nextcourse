@@ -10,7 +10,7 @@
 ```bash
 npm run render <course-name>
 # or
-node nextcourse.js render <course-name>
+nextcourse render <course-name>
 ```
 
 ---
@@ -48,7 +48,7 @@ NextCourse — 课程列表
 ```bash
 npm run new <course-name>
 # or
-node nextcourse.js new <course-name> [--scale M|L]
+nextcourse new <course-name> [--scale M|L]
 ```
 
 Creates:
@@ -73,7 +73,7 @@ and `evidence` (what proves it). Those three fields are the fuel for `check`.
 
 ```bash
 npm run new python-basics                             # S
-node nextcourse.js new leadership-workshop --scale M  # M, blueprint included
+nextcourse new leadership-workshop --scale M  # M, blueprint included
 ```
 
 ---
@@ -229,7 +229,7 @@ open courses/python-basics/deck.html
 ```bash
 npm run check <course-name>
 # or
-node nextcourse.js check <course-name>
+nextcourse check <course-name>
 ```
 
 `lint` covers styling; `check` covers **teaching logic**. It reads `course.meta.md`,
@@ -259,7 +259,7 @@ not forced into closure; they get a single informational line.
 ```bash
 npm run package <course-name>
 # or
-node nextcourse.js package <course-name> [--render] [--force]
+nextcourse package <course-name> [--render] [--force]
 ```
 
 Pulls the blueprint, the outline and the slide notes together into what in-house
@@ -308,7 +308,7 @@ The only thing that follows the course `theme` is the accent colour — the pale
 
 Where blueprint sections 6–8 are missing, the corresponding documents carry
 `> **待补**: …` markers — that is the backlog standing between this course and a real
-cohort. Fill the blueprint via `/course-delivery`, then run this again.
+cohort. Fill the blueprint via `nextcourse-delivery`, then run this again.
 
 > Running it on an S-scale course is refused, pointing you at `notes` instead.
 
@@ -431,7 +431,7 @@ npm run shot python-basics
 # detect only (through npm, a leading-dash argument needs -- to be forwarded)
 npm run shot python-basics -- --check
 # or straight to the CLI, where -- is unnecessary
-node nextcourse.js shot python-basics --check
+nextcourse shot python-basics --check
 ```
 
 ---
@@ -461,16 +461,16 @@ Takes no course name — it describes the design system itself.
 npm run new my-course
 
 # 2. design the outline (in Claude Code)
-#    run: /course-design
+#    run: nextcourse-design
 
 # 2b. M/L: evaluation plan and content development (in Claude Code)
-#    run: /course-delivery my-course
+#    run: nextcourse-delivery my-course
 
 # 2c. M/L: teaching-design closure check
 npm run check my-course
 
 # 3. generate slides (in Claude Code)
-#    run: /slide-design my-course
+#    run: nextcourse-slides my-course
 
 # 4. lint + build
 npm run render my-course
@@ -489,7 +489,7 @@ npm run shot my-course
 npm run notes my-course
 
 # 8b. M/L: build the delivery package
-node nextcourse.js package my-course --render
+nextcourse package my-course --render
 
 # 9. package for delivery (add --with-package at M/L)
 npm run export my-course
@@ -593,14 +593,74 @@ npm run render my-course && npm run shot my-course && npm run export my-course
 
 ---
 
+## Where your courses live
+
+Courses land under **the directory you run the command from**: `./courses/<name>/`.
+So `cd` to wherever you keep them before you start.
+
+| Variable | Effect |
+|---|---|
+| `NEXTCOURSE_HOME` | Pin the working directory. Courses always go to `$NEXTCOURSE_HOME/courses/`, wherever you invoke from |
+| `CHROME_PATH` | Browser used by `shot` (Chrome / Chromium is auto-detected otherwise) |
+
+The engine's own `lib/`, `shared_styles/` and `templates/` are always read from where
+the package is installed, independent of your working directory. `nextcourse doctor`
+prints both roots — **"where did my course go" is almost always the wrong directory**.
+
+Run from inside a clone of the repo and the working directory *is* the repo root, so
+`courses/<name>/` resolves exactly as it did before v4.
+
+```bash
+nextcourse doctor
+# NextCourse doctor — v4.0.0
+# ✓  Node 20.11.0
+# ✓  引擎位置   /usr/local/lib/node_modules/nextcourse    ← engine
+# ✓  工作目录   /Users/you/my-courses  (当前目录)          ← working directory
+# ✓  课程目录   /Users/you/my-courses/courses             ← courses
+# ✓  Chrome     /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+# ✓  引擎资产   完整                                       ← engine assets OK
+```
+
+> The CLI's own output is Chinese — it has not been internationalised. The two lines
+> that matter are 引擎位置 (where the engine is) and 工作目录 (where your courses go).
+
+---
+
+## `nextcourse docs <name>` — print the bundled documentation
+
+This is how the skills read the design system without copying tens of thousands of
+words into a prompt.
+
+| Name | Contents |
+|---|---|
+| `design-system` | Full reference for all 24 components — required reading before writing slides |
+| `agent` | Directory layout, workflows, hard rules |
+| `cli` | This manual |
+| `domains` | Subject-domain fit: which activities and components suit which topic |
+
+```bash
+nextcourse docs                    # list what's available
+nextcourse docs design-system      # print to stdout
+nextcourse docs domains | head -40
+```
+
+---
+
 ## Requirements
 
-- **Node.js** 20.x
+- **Node.js** 20 or newer
 - **Zero npm dependencies** — the CLI uses only Node built-ins (`fs`, `path`,
-  `child_process`, `https`), so a fresh clone runs without `npm install`. The
-  `npm run *` scripts are just shortcuts for `node nextcourse.js *`; npm is optional.
+  `child_process`, `https`), so there is nothing else to install. The `npm run *`
+  scripts are just shortcuts for `nextcourse *` when working from a clone.
 - **Chrome / Chromium / Edge** — only for `shot`. Point `CHROME_PATH` at a custom
   binary if it is not in a standard location.
+
+Install:
+
+```bash
+npm i -g nextcourse                    # or use npx -y nextcourse <command>
+npx skills add skill-node/nextcourse   # the four Agent Skills
+```
 
 ---
 

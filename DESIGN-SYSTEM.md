@@ -1,6 +1,6 @@
 # NextCourse V3 — 设计系统参考
 
-> **唯一真相源。** `/slide-design` Skill 只读此文件。  
+> **唯一真相源。** `nextcourse-slides` 技能只读此文件（也可 `nextcourse docs design-system` 打印）。  
 > 铁律: 只用登记的 class + `var(--*)` 令牌。禁止内联 `style=` / 写死十六进制颜色 / 声明新 `font-family`。  
 > 违规由 `lint-slides.js` 自动拦截。
 
@@ -97,7 +97,7 @@ max-width: var(--content-max-width);   /* tokens.css，默认 80rem */
 ## 配色红线 (R1–R4)
 
 > 面向 **改 `color-schemes/*.css` 的人**，不是写 slide 的人。
-> 四条都由展板自动体检：`node nextcourse.js themes` → 打开 `theme-gallery/<主题>.html`
+> 四条都由展板自动体检：`nextcourse themes` → 打开 `theme-gallery/<主题>.html`
 > → 「体检」区必须归零。
 
 **配色文件的头注释是展板的数据源**，新增配色时这几行不是装饰：
@@ -147,7 +147,7 @@ max-width: var(--content-max-width);   /* tokens.css，默认 80rem */
 
 **必备令牌**
 `themes/` 和 `components/` 里凡是裸用 `var(--x)`（不写兜底值）的令牌，配色必须全部定义。
-少一个不会报错，只会让那条规则**静默失效**。`node nextcourse.js themes` 会在结尾审计并退出码报错。
+少一个不会报错，只会让那条规则**静默失效**。`nextcourse themes` 会在结尾审计并退出码报错。
 
 ---
 

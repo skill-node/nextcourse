@@ -280,7 +280,7 @@ md 里的 h1 就写功能名即可，课程名由渲染器补。
 压到对白底 4.5:1。想改交付包长相就改这个文件，改一处全部课程生效。
 
 蓝图六~八节（教学方法 / 评估方案 / 内容开发）没写时，对应文档会留 `> **待补**：…` 标记
-——那就是这门课离「能开班」还差的东西，跑 `/course-delivery` 补齐蓝图后重跑本命令即可。
+——那就是这门课离「能开班」还差的东西，跑 `nextcourse-delivery` 补齐蓝图后重跑本命令即可。
 
 > S 档课程跑这个命令会被拒绝并提示改用 `notes`——交付包是 M/L 档的东西。
 
@@ -390,7 +390,7 @@ npm run shot python-basics
 # 仅运行检测，不生成截图（走 npm 时以 - 开头的参数要用 -- 转交）
 npm run shot python-basics -- --check
 # 或直接走 CLI，不用 --
-node nextcourse.js shot python-basics --check
+nextcourse shot python-basics --check
 ```
 
 ---
@@ -417,16 +417,16 @@ npm run themes
 npm run new my-course
 
 # 2. 设计课程大纲（在 Claude Code 中）
-# 运行: /course-design
+# 运行: nextcourse-design
 
 # 2b. M/L 档：补评估方案与开发计划（在 Claude Code 中）
-# 运行: /course-delivery my-course
+# 运行: nextcourse-delivery my-course
 
 # 2c. M/L 档：教学设计闭环校验
 npm run check my-course
 
 # 3. 生成幻灯片（在 Claude Code 中）
-# 运行: /slide-design my-course
+# 运行: nextcourse-slides my-course
 
 # 4. 校验并构建（编辑完成后）
 npm run render my-course
@@ -549,13 +549,67 @@ npm run render my-course && npm run shot my-course && npm run export my-course
 
 ---
 
+## 课程放在哪
+
+课程落在**调用命令时所在的目录**下：`./courses/<课程名>/`。所以开工前先 `cd` 到你想放
+课程的地方。
+
+| 环境变量 | 作用 |
+|---|---|
+| `NEXTCOURSE_HOME` | 把工作目录钉到一个固定路径，不管在哪调用，课程都进 `$NEXTCOURSE_HOME/courses/` |
+| `CHROME_PATH` | `shot` 命令用的浏览器路径（默认自动找 Chrome / Chromium） |
+
+引擎自带的 `lib/` `shared_styles/` `templates/` 永远从包的安装位置读，跟你在哪调用无关。
+两个根都会被 `nextcourse doctor` 报出来 —— **「课程怎么不见了」几乎都是站错了目录**。
+
+在 clone 下来的仓库根目录里跑时，工作目录就是仓库根，`courses/<name>/` 与 v4 之前是
+同一个路径，老用法一字未变。
+
+```bash
+nextcourse doctor
+# NextCourse doctor — v4.0.0
+# ✓  Node 20.11.0
+# ✓  引擎位置   /usr/local/lib/node_modules/nextcourse
+# ✓  工作目录   /Users/you/my-courses  (当前目录)
+# ✓  课程目录   /Users/you/my-courses/courses
+# ✓  Chrome     /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+# ✓  引擎资产   完整
+```
+
+---
+
+## `nextcourse docs <name>` —— 打印内置文档
+
+技能靠这个读设计系统，不必把几万字复制进提示词。
+
+| 名称 | 内容 |
+|---|---|
+| `design-system` | 24 个组件的完整参考 —— 写幻灯片前必读 |
+| `agent` | 目录结构 / 工作流 / 硬规则总览 |
+| `cli` | 本手册 |
+| `domains` | 题材域适配表：不同题材该用什么活动与组件 |
+
+```bash
+nextcourse docs                    # 列出可用的文档
+nextcourse docs design-system      # 打印到 stdout
+nextcourse docs domains | head -40
+```
+
+---
+
 ## 环境要求
 
-- **Node.js** 20.x
+- **Node.js** 20 或更高
 - **零 npm 依赖** —— 整套 CLI 只用 Node 内置模块（`fs` / `path` / `child_process` / `https`），
-  clone 下来不用 `npm install` 就能跑。`npm run *` 只是 `node nextcourse.js *` 的快捷方式，
-  不用 npm 也可以。
+  装完不用再装别的。`npm run *` 只是 `nextcourse *` 的快捷方式（clone 用法），不用 npm 也可以。
 - **Chrome / Chromium / Edge**（仅 `shot` 命令需要；自定义路径用环境变量 `CHROME_PATH`）
+
+安装：
+
+```bash
+npm i -g nextcourse              # 或每次用 npx -y nextcourse <命令>
+npx skills add skill-node/nextcourse   # 四个 Agent Skill
+```
 
 ---
 

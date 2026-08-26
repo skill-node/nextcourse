@@ -38,10 +38,14 @@ nextcourse/
 ├── templates/
 │   ├── master_template.html  ← deck.html 母版（build.js 使用）
 │   └── course.blueprint.md   ← 设计蓝图模板（M/L 档，new --scale 复制）
+├── paths.js              ← 两个根：PKG_ROOT（引擎资产）/ WORK_ROOT（用户课程）
+├── docs/domains.md       ← 题材域适配表（nextcourse docs domains）
 ├── .claude/skills/
-│   ├── course-design/SKILL.md    ← /course-design Skill（Phase 0–4 大纲设计）
-│   ├── course-delivery/          ← /course-delivery Skill（Phase 5–8 交付层，含 references/）
-│   └── slide-design/SKILL.md     ← /slide-design Skill（幻灯片渲染）
+│   ├── README.md                 ← 四个技能的安装说明（含各 runtime 目录对照）
+│   ├── nextcourse/               ← 总控技能：分诊 + 路由
+│   ├── nextcourse-design/        ← Phase 0–4 大纲设计（含 references/）
+│   ├── nextcourse-delivery/      ← Phase 5–8 交付层（含 references/）
+│   └── nextcourse-slides/        ← 幻灯片渲染（含 references/）
 ├── shared_styles/        ← 全局设计系统 CSS（所有课程共用）
 │   ├── base_layout.css
 │   ├── tokens.css
@@ -74,17 +78,17 @@ nextcourse/
 所有命令通过统一入口 `nextcourse.js` 调用（或 `npm run <cmd>`）：
 
 ```bash
-node nextcourse.js list                     # 列出所有课程及状态
-node nextcourse.js new    <name> [--scale M|L]  # 初始化新课程目录（不带 --scale = S 档）
-node nextcourse.js check  <name>            # 教学设计闭环校验（成果 × 模块 × 证据）
-node nextcourse.js lint   <name>            # 校验幻灯片样式规范
-node nextcourse.js animate <name> [--strip] # 批量打入/剥离组件入场动画（不碰手写 fragment）
-node nextcourse.js build  <name>            # 组装生成 deck.html
-node nextcourse.js render <name>            # lint + build 一步完成（推荐）
-node nextcourse.js package <name> [--render] [--force]   # 生成交付包（M/L 档）
-node nextcourse.js export <name> [outdir] [--with-package]  # 打包为可离线演示文件夹
-node nextcourse.js notes  <name>            # 导出讲师手册 handout.md（各页演讲备注）
-node nextcourse.js shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（需本机 Chrome）
+nextcourse list                     # 列出所有课程及状态
+nextcourse new    <name> [--scale M|L]  # 初始化新课程目录（不带 --scale = S 档）
+nextcourse check  <name>            # 教学设计闭环校验（成果 × 模块 × 证据）
+nextcourse lint   <name>            # 校验幻灯片样式规范
+nextcourse animate <name> [--strip] # 批量打入/剥离组件入场动画（不碰手写 fragment）
+nextcourse build  <name>            # 组装生成 deck.html
+nextcourse render <name>            # lint + build 一步完成（推荐）
+nextcourse package <name> [--render] [--force]   # 生成交付包（M/L 档）
+nextcourse export <name> [outdir] [--with-package]  # 打包为可离线演示文件夹
+nextcourse notes  <name>            # 导出讲师手册 handout.md（各页演讲备注）
+nextcourse shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（需本机 Chrome）
 ```
 
 ### 各命令说明
@@ -114,7 +118,7 @@ node nextcourse.js shot   <name> [--check]  # 溢出检测 + 逐页截图到 .re
 **Step 1 — 大纲设计（对话式）**
 
 ```
-/course-design
+nextcourse-design
 ```
 
 通过对话完成五个阶段，最终生成 `course.meta.md`（M/L 档另出 `course.blueprint.md`）：
@@ -128,12 +132,12 @@ node nextcourse.js shot   <name> [--check]  # 溢出检测 + 逐页截图到 .re
 ```
 
 **档位决定后面走多远。** S 档（默认，30–90 分钟分享）在阶段 0 只问一个问题就进阶段 1，
-跳过阶段 3，行为与 V2 完全一致；M/L 档才走全套。
+跳过阶段 3，行为与升级前完全一致；M/L 档才走全套。
 
 **Step 1b — 交付层设计（仅 M/L 档，对话式）**
 
 ```
-/course-delivery <course-name>
+nextcourse-delivery <course-name>
 ```
 
 先读现状（meta + blueprint + `nextcourse check`），**只补缺的阶段**，不重问已经定过的事：
@@ -150,7 +154,7 @@ node nextcourse.js shot   <name> [--check]  # 溢出检测 + 逐页截图到 .re
 **Step 1c — 闭环校验（M/L 档）**
 
 ```
-node nextcourse.js check <course-name>
+nextcourse check <course-name>
 ```
 
 error 必须清零再进入幻灯片阶段——大纲阶段改一行字，slide 阶段要重排版。
@@ -158,7 +162,7 @@ error 必须清零再进入幻灯片阶段——大纲阶段改一行字，slide
 **Step 2 — 幻灯片渲染**
 
 ```
-/slide-design <course-name>
+nextcourse-slides <course-name>
 ```
 
 读取 `course.meta.md`（M/L 档同时读 `course.blueprint.md`），按 Merrill 第一原理逐页生成
@@ -197,7 +201,7 @@ theme: bold-signal
 | `notebook-tabs`    | 奶油底 + 衬线粉彩（手记/轻松） |
 | `standard-default` | 白底学术蓝（严肃/学术）        |
 
-修改后重新 `node nextcourse.js render <name>` 即生效，无需改任何幻灯片文件。
+修改后重新 `nextcourse render <name>` 即生效，无需改任何幻灯片文件。
 
 ---
 
@@ -315,58 +319,88 @@ Bloom 动词参考：remember / understand / apply / analyze / evaluate / create
 
 ---
 
+## 两个根：引擎在哪，课程在哪
+
+从 V4 起 NextCourse 可以装成 npm 包，在用户自己的任意目录里用。所以「引擎自带的东西」
+和「用户的课程」是两个不同的根，定义在 `paths.js`：
+
+| 根 | 是什么 | 谁读它 |
+|---|---|---|
+| `PKG_ROOT` | 引擎安装位置：`lib/` `shared_styles/` `templates/` `docs/` 内置文档 | build / lint / package / export / theme-gallery |
+| `WORK_ROOT` | 用户课程：`courses/<name>/`。默认取**调用时的 cwd** | 所有读写课程的地方 |
+
+`NEXTCOURSE_HOME` 可以把 `WORK_ROOT` 钉到一个固定工作区。跑 `nextcourse doctor`
+会把两个根都报出来 —— 「课程怎么不见了」几乎都是站错目录。
+
+在仓库根目录里跑时 `WORK_ROOT` 就是仓库根，`courses/<name>/` 与 V3 是同一个路径，
+所以 clone 用法一字未变。
+
+`deck.html` 里指向引擎资产的前缀由 `build.js` 按 `{{ASSET_BASE}}` 现算：课程在仓库里
+算出来是 `../..`，隔得远就退成绝对路径。`export` 会把这个前缀统一抹成 `./`。
+
+---
+
 ## 给其他 Agent 的使用说明
 
-### OpenClaw / Hermes / 其他 CLI Agent
+### 支持 Agent Skills 的 runtime
 
-这些 agent 没有 Claude Code 的 `/skill` 机制，但可以：
+Claude Code / Codex / Cursor / OpenCode / WorkBuddy 等都读标准 `SKILL.md`。四个技能：
 
-1. **读取本文档（AGENT.md）**获取项目全貌
-2. **读取 `DESIGN-SYSTEM.md`** 获取完整组件规范
-3. **读取 `.claude/skills/slide-design/SKILL.md`** 获取幻灯片创作完整工作流
-4. **直接调用 CLI 脚本**完成构建、校验、导出
+| 技能 | 定义文件 | 职责 |
+|---|---|---|
+| `nextcourse` | `.claude/skills/nextcourse/SKILL.md` | 总控台：分诊用户卡在哪一环，路由到下面三个，串多步骤工作流 |
+| `nextcourse-design` | `.claude/skills/nextcourse-design/SKILL.md` | 对话式引导：规格诊断 → 定位 → 目标体系 → 整体设计 → 模块架构 → 写 course.meta.md（+ 蓝图一~五节） |
+| `nextcourse-delivery` | `.claude/skills/nextcourse-delivery/SKILL.md` | **M/L 档**：教学互动 → 评估方案 → 内容开发 → 补蓝图六~十一节 → 生成 package/ |
+| `nextcourse-slides` | `.claude/skills/nextcourse-slides/SKILL.md` | 读 course.meta.md（+ 蓝图）→ 逐页生成幻灯片 → build → deck.html |
 
-典型调用序列：
+完整流程：
+- **S 档**：`nextcourse-design` → `nextcourse-slides <name>`
+- **M/L 档**：`nextcourse-design` → `nextcourse-delivery <name>` → `check` → `nextcourse-slides <name>` → `package --render`
+
+方法论参考放在各技能的 `references/`（渐进加载，用到才读）：
+`nextcourse-design/references/` 有 `bloom.md`、`kirkpatrick.md`、`output-templates.md`；
+`nextcourse-delivery/references/` 有 `kirkpatrick.md`（柯氏指标写法与题库）、
+`facilitation.md`（互动手法库）、`content-dev.md`（SME 访谈、案例卡、脱敏规则）；
+`nextcourse-slides/references/component-picker.md` 是组件决策树与密度纪律。
+
+安装说明见 `.claude/skills/README.md`。
+
+### 不支持 Skills 的 CLI Agent
+
+没有技能机制也能用，直接读文档 + 调 CLI：
+
+1. **`nextcourse docs agent`** —— 本文档，项目全貌
+2. **`nextcourse docs design-system`** —— 完整组件规范
+3. **`nextcourse docs domains`** —— 题材域适配表
+4. **读 `.claude/skills/nextcourse-slides/SKILL.md`** —— 幻灯片创作完整工作流
+5. **直接调用 CLI** 完成构建、校验、导出
+
+典型调用序列（先 `cd` 到你想放课程的目录）：
 
 ```bash
+# 0. 自检，顺便确认课程会落在哪
+nextcourse doctor
+
 # 1. 初始化课程目录（企业内训加 --scale M，会一并生成设计蓝图）
-node nextcourse.js new <name> [--scale M]
+nextcourse new <name> [--scale M]
 
 # 2. 编辑 course.meta.md（frontmatter + 大纲）
 #    M/L 档同时填 course.blueprint.md 一~五节，模块清单表的列名不要改
 
 # 3. 教学逻辑校验（M/L 档，error 必须清零）
-node nextcourse.js check <name>
+nextcourse check <name>
 
-# 4. 写 slide-*.html 片段（参考 DESIGN-SYSTEM.md 组件）
+# 4. 写 slide-*.html 片段（组件参考 nextcourse docs design-system）
 
 # 5. 校验 + 构建
-node nextcourse.js render <name>
+nextcourse render <name>
 
 # 6. 生成交付包（M/L 档）
-node nextcourse.js package <name> --render
+nextcourse package <name> --render
 
 # 7. 打包交付
-node nextcourse.js export <name> [--with-package]
+nextcourse export <name> [--with-package]
 ```
-
-### Claude Code 专属
-
-三个 Skill，按顺序使用：
-
-| Skill              | 定义文件                    | 职责                                     |
-|--------------------|-----------------------------|------------------------------------------|
-| `/course-design`   | `.claude/skills/course-design/SKILL.md`   | 对话式引导：规格诊断 → 定位 → 目标体系 → 整体设计 → 模块架构 → 写 course.meta.md（+ 蓝图一~五节） |
-| `/course-delivery` | `.claude/skills/course-delivery/SKILL.md` | **M/L 档**：教学互动 → 评估方案 → 内容开发 → 补蓝图六~十一节 → 生成 package/ |
-| `/slide-design`    | `.claude/skills/slide-design/SKILL.md`    | 读 course.meta.md（+ 蓝图）→ 逐页生成幻灯片 → build → deck.html |
-
-完整流程：
-- **S 档**：`/course-design` → `/slide-design <name>`（与 V2 一致，一个字都没多）
-- **M/L 档**：`/course-design` → `/course-delivery <name>` → `check` → `/slide-design <name>` → `package --render`
-
-`/course-delivery` 的方法论参考放在 `references/`（渐进加载，用到才读）：
-`kirkpatrick.md`（柯氏指标写法与题库）、`facilitation.md`（互动手法库）、
-`8_content-dev.md`（SME 访谈、案例卡、脱敏规则）。
 
 ---
 
