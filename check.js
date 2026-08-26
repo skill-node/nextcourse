@@ -65,7 +65,7 @@ if (!['S', 'M', 'L'].includes(scale)) {
     err('scale', `scale: "${meta.scale}" 不是 S / M / L`);
 }
 if (isMPlus && !hasBlueprint) {
-    err('scale', `${scale} 档缺少设计蓝图 ${blueprintName}——从 templates/course.blueprint.md 复制一份`);
+    err('scale', `${scale} 档缺少设计蓝图 ${blueprintName}——新建课程时加 --scale M 会自动放一份模板进去`);
 }
 if (isMPlus && hasBlueprint) {
     const REQUIRED = ['需求诊断', '定位', '目标体系', '整体设计', '模块架构'];
@@ -77,7 +77,7 @@ if (isMPlus && hasBlueprint) {
     const LATER = ['评估方案', '内容开发'];
     const missingLater = LATER.filter(k => !bpHeads.some(h => h.includes(k)));
     if (missingLater.length) {
-        info('scale', `蓝图待补章节 (${missingLater.join(' / ')})——运行 /course-delivery ${courseName}`);
+        info('scale', `蓝图待补章节 (${missingLater.join(' / ')})——运行 nextcourse-delivery 技能: ${courseName}`);
     }
     if (isBlank(meta.duration)) warn('scale', 'frontmatter 缺 duration，时长核算跳过');
     if (isBlank(meta.class_size)) warn('scale', 'frontmatter 缺 class_size（分组与互动设计依赖它）');
@@ -180,7 +180,7 @@ if (modules.length) {
 }
 
 if (slideCount === 0) {
-    info('pages', 'slides/ 还没有页面——运行 /slide-design 生成');
+    info('pages', 'slides/ 还没有页面——运行 nextcourse-slides 技能生成');
 } else if (declaredPages === 0) {
     info('pages', 'meta 大纲没标页数（### 标题里写「（6 张）」），页数一致性跳过');
 } else if (declaredPages !== slideCount) {

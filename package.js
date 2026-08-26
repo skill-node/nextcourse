@@ -58,7 +58,7 @@ if (!course) {
 if (!course.isMPlus || !course.hasBlueprint) {
     console.error(`ERROR: 交付包是 M / L 档的东西，${courseName} 现在是 ${course.scale} 档${
         course.hasBlueprint ? '' : '，也没有 course.blueprint.md'}。`);
-    console.error('       先把 frontmatter 改成 scale: M 并补上蓝图（/course-design 或 /course-delivery），');
+    console.error('       先把 frontmatter 改成 scale: M 并补上蓝图（nextcourse-design 或 nextcourse-delivery 技能），');
     console.error('       只想要讲师备注的话用 nextcourse notes。');
     process.exit(1);
 }
@@ -338,7 +338,7 @@ function facilitation() {
         out.push('## 教学方法与互动设计（来自蓝图）', '', fromBlueprint, '');
     } else {
         out.push('## 教学方法与互动设计', '');
-        out.push(TODO('运行 `/course-delivery` 补齐蓝图的「教学方法与互动设计」章节，再重跑 `nextcourse package`'));
+        out.push(TODO('运行 nextcourse-delivery 技能补齐蓝图的「教学方法与互动设计」章节，再重跑 `nextcourse package`'));
         out.push('');
         out.push('缺省建议（可直接用）：', '');
         out.push('- **每 90 分钟必须切换形态**——讲授 → 动手 → 讨论 → 互评，午后第一段绝不安排纯讲授；');
@@ -382,7 +382,7 @@ function contentDev() {
     if (fromBlueprint) {
         out.push('## 开发计划（来自蓝图）', '', fromBlueprint, '');
     } else {
-        out.push(TODO('运行 `/course-delivery` 补齐蓝图的「内容开发计划」章节，再重跑 `nextcourse package`。下面是骨架。'), '');
+        out.push(TODO('运行 nextcourse-delivery 技能补齐蓝图的「内容开发计划」章节，再重跑 `nextcourse package`。下面是骨架。'), '');
     }
 
     out.push('## SME 访谈提纲', '');

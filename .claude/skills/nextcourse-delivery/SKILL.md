@@ -1,25 +1,33 @@
 ---
-name: course-delivery
-description: M/L 档课程的交付层设计——教学互动 → 评估方案（柯氏 L1+L2）→ 内容开发计划 → 运营与路线图，补齐 course.blueprint.md 六~十一节并生成 package/ 交付包。需要一个课程名参数。
+name: nextcourse-delivery
+description: 把一门课变成能交付给客户的一整包东西——教学互动设计 → 评估方案（柯氏 L1+L2）→ 内容开发计划 → 运营与路线图，补齐 course.blueprint.md 六~十一节并生成讲师手册、学员手册、考核量规、行动承诺书。当用户说"生成讲师手册""学员手册""交付包""考核量规""评估方案""这门课要交付给客户""内训要交的东西""L1 L2 问卷""SME 访谈""内容开发计划""打印给客户"，或已经有 M/L 档蓝图要出交付物时，用这个技能。需要一个课程名参数。只做课程大纲的，用 nextcourse-design。
 ---
 
-# /course-delivery — NextCourse 交付层设计 Skill
+# nextcourse-delivery — 交付层设计
 
 ## 触发方式
 
 ```
-/course-delivery <课程名>
+nextcourse-delivery <课程名>
 ```
 
-**前置条件**：`courses/<name>/course.blueprint.md` 已有一~五节（`/course-design` 产出），
-且 `course.meta.md` 的 `scale` 是 `M` 或 `L`。没有就先跑 `/course-design`。
+**前置条件**：`courses/<name>/course.blueprint.md` 已有一~五节（`nextcourse-design` 产出），
+且 `course.meta.md` 的 `scale` 是 `M` 或 `L`。没有就先跑 `nextcourse-design`。
 
-本 skill 补齐蓝图的**六~十一节**，然后生成企业内训真正要交的那一包东西：
+本技能补齐蓝图的**六~十一节**，然后生成企业内训真正要交的那一包东西：
 讲师手册、学员手册、评估方案、考核量规、教学设计、内容开发计划、行动承诺书。
+
+## 开工前：确认引擎在
+
+```bash
+nextcourse doctor
+```
+
+没这个命令就装：`npm i -g nextcourse`（或每次用 `npx -y nextcourse`）。doctor 报出的**工作目录**下面必须能找到 `courses/<课程名>/`，找不到就先 `cd` 到课程所在的目录。
 
 ## 对话语言
 
-跟随用户的语言，与 `/course-design` 一致。字段名与文件名保持英文，内容跟随用户语言。
+跟随用户的语言，与 `nextcourse-design` 一致。字段名与文件名保持英文，内容跟随用户语言。
 
 ---
 
@@ -37,7 +45,7 @@ nextcourse check <name>                    # 闭环有没有洞
 
 | 蓝图已有 | 动作 |
 |---|---|
-| 只有一~五节（`/course-design` 刚做完） | 从 Phase 5 顺着做到 Phase 8 |
+| 只有一~五节（`nextcourse-design` 刚做完） | 从 Phase 5 顺着做到 Phase 8 |
 | 已有六节、缺七节 | 直接进 Phase 6，别重问教学手法 |
 | 用户手写了完整蓝图，只想要交付包 | 全部 Phase 跳过，直接进「生成交付包」 |
 
@@ -143,10 +151,10 @@ L3/L4 的成本不在课程设计侧，而在训前基线采集、跨部门数�
 
 ## 写入蓝图的方式
 
-模板 `templates/course.blueprint.md` 把六节之后**注释掉**留作路线图：
+`nextcourse new <name> --scale M` 拷进课程目录的蓝图模板，把六节之后**注释掉**留作路线图：
 
 ```
-<!-- 以下章节由 /course-delivery 补全（M / L 档）…
+<!-- 以下章节由 nextcourse-delivery 补全（M / L 档）…
 ## 六、教学方法与互动设计
 …
 -->
@@ -155,7 +163,7 @@ L3/L4 的成本不在课程设计侧，而在训前基线采集、跨部门数�
 **把整段注释删掉，换成真正的章节内容。** 保留在注释里 = `nextcourse check`
 和 `nextcourse package` 都读不到（两者都会先剥掉注释再解析）。
 
-一~五节是 `/course-design` 的地盘，除非用户明确要改，否则不要动。
+一~五节是 `nextcourse-design` 的地盘，除非用户明确要改，否则不要动。
 **特别不要动第五节的模块清单表**——它是 `check` 与 `package` 的解析对象。
 
 ---
@@ -189,7 +197,7 @@ nextcourse package <name> --render   # 生成 package/*.md 并渲染 package/htm
 
 **文件名的数字前缀是交付顺序，不要手动去掉。** 客户拿到的是文件夹，按名字排序就是
 阅读动线：1–4 开班当天要用，5–8 是设计与项目层证据，封面 `0_index.html` 永远第一。
-序号定义在 `package.js` 的 `DOCS`，命令会把老课程里没序号的旧文件自动改名。
+序号由 `nextcourse package` 定义，命令会把老课程里没序号的旧文件自动改名。
 
 **每份文档的 h1 只写功能名**（「讲师手册」「考核量规」），课程名由渲染器放到下一行小字，
 `<title>` 同样只写功能名。手写或手改 md 时照这个来，别把课程名写回 h1。
@@ -206,7 +214,7 @@ nextcourse package <name> --render   # 生成 package/*.md 并渲染 package/htm
 ① 背景色 / 表头底色全部保留　② 每页边距一致、内容不贴边　③ 无空白页
 ④ 表格与活动卡无腰斩　⑤ 标题不落在页尾　⑥ 强制分页点生效　⑦ 导出 PDF 与预览一致
 
-任何一条不过，改 `shared_styles/package-doc.css`，不要在单个 HTML 里打补丁。
+任何一条不过是引擎那套打印样式的问题，不要在单个 HTML 里打补丁 —— 提 issue 回 skill-node/nextcourse。
 需要在某处强制分页，在 md 里写 `<!-- pagebreak -->`；需要手写填空区写 `<!-- fill:3 -->`。
 
 ---
@@ -220,7 +228,7 @@ nextcourse package <name> --render   # 生成 package/*.md 并渲染 package/htm
   客户交付物 courses/<name>/package/html/         （双击 0_index.html）
 
 下一步：
-  /slide-design <name>                     还没做幻灯片的话
+  nextcourse-slides <name>                     还没做幻灯片的话
   nextcourse export <name> --with-package  幻灯片 + 交付包一起打包给客户
 ```
 
