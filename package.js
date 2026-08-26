@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * package.js — NextCourse V3 交付包生成
+ * package.js — NextCourse 交付包生成
  *
  * 读 course.blueprint.md + course.meta.md + slides/，汇总出企业内训真正要交的东西：
  *   package/1_facilitator-guide.md 讲师手册

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * check.js — NextCourse V3 教学设计闭环校验
+ * check.js — NextCourse 教学设计闭环校验
  *
  * lint 管样式, check 管教学逻辑。输入见 course-model.js:
  *   course.meta.md / course.blueprint.md / slides/*.html
