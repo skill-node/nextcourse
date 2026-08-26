@@ -7,7 +7,7 @@
 [![Dependencies: zero](https://img.shields.io/badge/npm%20dependencies-0-success.svg)](./package.json)
 [![Output](https://img.shields.io/badge/output-Reveal.js%20deck%20%2B%20delivery%20pack-orange.svg)](https://course.skillnode.ai/package/)
 
-[中文说明 →](./README.zh-CN.md) · [Live demo: a complete 29-slide course ↗](https://course.skillnode.ai/demo/) · [Live demo: a nine-document delivery pack ↗](https://course.skillnode.ai/package/) · [Theme gallery ↗](https://course.skillnode.ai/gallery/)
+[中文说明 →](./README.zh-CN.md) · [Live demo: a complete 29-slide course ↗](https://course.skillnode.ai/demo/) · [Live demo: an eight-document delivery pack ↗](https://course.skillnode.ai/package/) · [Theme gallery ↗](https://course.skillnode.ai/gallery/)
 
 ---
 

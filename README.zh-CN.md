@@ -7,7 +7,7 @@
 [![Dependencies: zero](https://img.shields.io/badge/npm%20dependencies-0-success.svg)](./package.json)
 [![Output](https://img.shields.io/badge/output-Reveal.js%20deck%20%2B%20delivery%20pack-orange.svg)](https://course.skillnode.ai/package/)
 
-[English →](./README.md) · [在线看一门完整的 29 页课 ↗](https://course.skillnode.ai/demo/) · [在线看一套 9 份的交付包 ↗](https://course.skillnode.ai/package/) · [主题展板 ↗](https://course.skillnode.ai/gallery/)
+[English →](./README.md) · [在线看一门完整的 29 页课 ↗](https://course.skillnode.ai/demo/) · [在线看一套 8 份的交付包 ↗](https://course.skillnode.ai/package/) · [主题展板 ↗](https://course.skillnode.ai/gallery/)
 
 ---
 
