@@ -1,6 +1,6 @@
 {
   "name": "nextcourse",
-  "version": "3.0.0",
+  "version": "4.0.0-beta.1",
   "description": "An agent that designs courses — needs, positioning and learning outcomes first, then the Reveal.js deck and the full delivery pack (facilitator guide, workbook, rubric, assessment plan) derived from them.",
   "homepage": "https://course.skillnode.ai",
   "repository": {
@@ -11,12 +11,40 @@
     "url": "https://github.com/skill-node/nextcourse/issues"
   },
   "engines": {
-    "node": "20.x"
+    "node": ">=20"
   },
   "main": "nextcourse.js",
   "bin": {
     "nextcourse": "nextcourse.js"
   },
+  "//files": "装到别人机器上的东西。lib/plugin 只带 notes —— 其余 5 个 Reveal 插件全仓库无人引用; lib/dist 整个保留, 因为 export 会把它拷进离线交付包。字体的 *.LICENSE.txt 跟着 lib/fonts 一起进包, SIL OFL 1.1 要求副本随字体分发。",
+  "files": [
+    "nextcourse.js",
+    "paths.js",
+    "build.js",
+    "check.js",
+    "package.js",
+    "export.js",
+    "lint-slides.js",
+    "animate-slides.js",
+    "render-md.js",
+    "course-model.js",
+    "shot.js",
+    "theme-gallery.js",
+    "templates/",
+    "shared_styles/",
+    "docs/",
+    "examples/",
+    "lib/dist/",
+    "lib/plugin/notes/",
+    "lib/fonts/",
+    "lib/LICENSE",
+    "DESIGN-SYSTEM.md",
+    "AGENT.md",
+    "CLI_MANUAL.md",
+    "CLI_MANUAL.en.md",
+    "THIRD-PARTY-NOTICES.md"
+  ],
   "scripts": {
     "list":   "node nextcourse.js list",
     "check":  "node nextcourse.js check",
