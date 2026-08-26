@@ -221,6 +221,34 @@ npx skills add skill-node/nextcourse
 npm i -g nextcourse
 ```
 
+<details>
+<summary><strong>If your runtime has no <code>skills add</code> command</strong> — or if you are an agent
+installing this on someone's behalf</summary>
+
+The four skills are plain directories under `.claude/skills/`. Copy them into wherever
+your runtime keeps its skills, and install the engine as above:
+
+```bash
+git clone https://github.com/skill-node/nextcourse.git
+cp -R nextcourse/.claude/skills/nextcourse* ~/.claude/skills/     # adjust the target
+npm i -g nextcourse
+```
+
+| Runtime | Project-level | Global |
+|---|---|---|
+| Claude Code | `.claude/skills/` | `~/.claude/skills/` |
+| Codex | `.agents/skills/` | `~/.codex/skills/` |
+| Cursor | `.agents/skills/` | `~/.cursor/skills/` |
+| OpenCode | `.agents/skills/` | `~/.config/opencode/skills/` |
+
+The skills are prompts only — the building, checking and packaging is done by the
+`nextcourse` command, so **both halves are required**. `npx -y nextcourse <subcommand>`
+works if you would rather not install the engine globally. More detail in
+[`.claude/skills/README.md`](./.claude/skills/README.md); run `nextcourse doctor` to
+confirm the install and see where courses will land.
+
+</details>
+
 Then just talk to your agent — *"help me design a half-day workshop on X"*. Four
 skills are now available and the agent picks the right one:
 

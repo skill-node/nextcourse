@@ -192,6 +192,31 @@ npx skills add skill-node/nextcourse
 npm i -g nextcourse
 ```
 
+<details>
+<summary><strong>你的 runtime 没有 <code>skills add</code> 命令</strong>，或者你是替用户装这套东西的 agent</summary>
+
+四个技能就是 `.claude/skills/` 下的四个普通目录，拷进你这套 runtime 放技能的地方，再装引擎即可：
+
+```bash
+git clone https://github.com/skill-node/nextcourse.git
+cp -R nextcourse/.claude/skills/nextcourse* ~/.claude/skills/     # 目标目录按下表改
+npm i -g nextcourse
+```
+
+| Runtime | 项目级 | 全局 |
+|---|---|---|
+| Claude Code | `.claude/skills/` | `~/.claude/skills/` |
+| Codex | `.agents/skills/` | `~/.codex/skills/` |
+| Cursor | `.agents/skills/` | `~/.cursor/skills/` |
+| OpenCode | `.agents/skills/` | `~/.config/opencode/skills/` |
+
+技能本身只有提示词，真正干活的构建、校验、打包由 `nextcourse` 命令完成，**两样都要装**。
+不想全局装引擎的，把命令换成 `npx -y nextcourse <子命令>` 一样能用。更多细节见
+[`.claude/skills/README.md`](./.claude/skills/README.md)；装完跑一次 `nextcourse doctor`
+复核，它会把课程将落在哪个目录报出来。
+
+</details>
+
 然后直接跟你的 agent 说话就行 —— 「帮我设计一门半天的 X 工作坊」。装好的四个技能，
 agent 会自己挑：
 
