@@ -1,7 +1,8 @@
 # NextCourse — Agent Reference
 
 NextCourse 是一个以 **AI-Native 工作流为核心的课程开发工具**。
-输入：一句话主题 → 输出：可在浏览器中全屏演示的 Reveal.js HTML 幻灯片课程。
+输入：一句话主题或一份培训需求 → 输出：可在浏览器中全屏演示的 Reveal.js HTML 幻灯片课程，
+以及 M/L 档的整套交付包（讲师手册 / 学员手册 / 量规 / 评估方案等 9 份文档）。
 
 整套流程完全 CLI 驱动，任何 agent（Claude Code / OpenClaw / Hermes / 命令行）均可调用。
 

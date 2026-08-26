@@ -1,7 +1,7 @@
 {
   "name": "nextcourse",
   "version": "3.0.0",
-  "description": "An agent that designs courses — positioning, learning outcomes and knowledge structure first, then a Reveal.js deck derived from them.",
+  "description": "An agent that designs courses — needs, positioning and learning outcomes first, then the Reveal.js deck and the full delivery pack (facilitator guide, workbook, rubric, assessment plan) derived from them.",
   "homepage": "https://course.skillnode.ai",
   "repository": {
     "type": "git",
@@ -35,6 +35,11 @@
     "course-design",
     "instructional-design",
     "learning-outcomes",
+    "curriculum-design",
+    "delivery-package",
+    "facilitator-guide",
+    "rubric",
+    "kirkpatrick",
     "reveal.js",
     "slides",
     "presentation",

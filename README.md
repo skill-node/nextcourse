@@ -1,11 +1,11 @@
 # NextCourse
 
-**An agent that designs courses — and then builds the deck.**
+**An agent that designs the course — then builds the deck and everything else you hand the client.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
 [![Node](https://img.shields.io/badge/node-20.x-informational.svg)](https://nodejs.org)
 [![Dependencies: zero](https://img.shields.io/badge/npm%20dependencies-0-success.svg)](./package.json)
-[![Reveal.js](https://img.shields.io/badge/output-Reveal.js%20HTML-orange.svg)](https://revealjs.com)
+[![Output](https://img.shields.io/badge/output-Reveal.js%20deck%20%2B%20delivery%20pack-orange.svg)](https://course.skillnode.ai/package/)
 
 [中文说明 →](./README.zh-CN.md) · [Live demo: a complete 29-slide course ↗](https://course.skillnode.ai/demo/) · [Live demo: a nine-document delivery pack ↗](https://course.skillnode.ai/package/) · [Theme gallery ↗](https://course.skillnode.ai/gallery/)
 
