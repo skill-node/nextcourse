@@ -19,10 +19,12 @@
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = __dirname;
-const SCHEME_DIR = path.join(ROOT, 'shared_styles', 'color-schemes');
-const FONTSET_DIR = path.join(ROOT, 'shared_styles', 'font-sets');
-const OUT_DIR = path.join(ROOT, 'theme-gallery');
+const { WORK_ROOT, pkg } = require('./paths');
+
+// 源数据来自引擎自带的设计系统；展板输出到调用者的目录（在仓库里跑就还是 theme-gallery/）
+const SCHEME_DIR = pkg('shared_styles', 'color-schemes');
+const FONTSET_DIR = pkg('shared_styles', 'font-sets');
+const OUT_DIR = path.join(WORK_ROOT, 'theme-gallery');
 
 /* ------------------------------------------------------------------ *
  * 读取源数据
@@ -31,7 +33,7 @@ const OUT_DIR = path.join(ROOT, 'theme-gallery');
 // 配色 → 默认字体集的权威来源是 build.js，这里直接从它的源码里抠出来，
 // 避免展板和实际构建结果说的不是一回事。
 function readDefaultFontSets() {
-    const src = fs.readFileSync(path.join(ROOT, 'build.js'), 'utf8');
+    const src = fs.readFileSync(pkg('build.js'), 'utf8');
     const block = src.match(/const DEFAULT_FONT_SET\s*=\s*\{([\s\S]*?)\}/);
     if (!block) {
         console.warn('WARN: 没能从 build.js 解析出 DEFAULT_FONT_SET，字体一栏将全部回退到 modern-sans');
@@ -94,7 +96,7 @@ function readSchemeMeta(cssPath) {
 // 配色就必须定义 —— 少一个不会报错，只会让那条规则静默失效（--bg-slide 缺失时
 // 每一页的 background-color 都解析不出来，靠透出 body 蒙混过关，就是这么躲过去的）。
 function auditTokens(schemeIds) {
-    const read = (p) => fs.readFileSync(path.join(ROOT, 'shared_styles', p), 'utf8');
+    const read = (p) => fs.readFileSync(pkg('shared_styles', p), 'utf8');
     const bare = new Set();
     for (const f of ['themes/standard.css', 'components.css', 'base_layout.css']) {
         for (const m of read(f).matchAll(/var\(\s*(--[a-z0-9-]+)\s*(,)?/g)) {
@@ -146,7 +148,7 @@ function maxWeightOf(stack, faceFiles) {
     const first = (stack.match(/^\s*'([^']+)'/) || [])[1];
     if (!first) return 700;
     for (const rel of faceFiles) {
-        const p = path.join(ROOT, rel);
+        const p = pkg(rel);
         if (!fs.existsSync(p)) continue;
         const src = fs.readFileSync(p, 'utf8');
         if (!src.includes(`font-family: '${first}'`)) continue;

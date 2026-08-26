@@ -35,7 +35,7 @@
 const fs   = require('fs');
 const path = require('path');
 
-const ROOT = __dirname;
+const { courseDir, requireCourse } = require('./paths');
 
 // ─── 参数 ────────────────────────────────────────────────────────────────────
 const args       = process.argv.slice(2);
@@ -48,7 +48,9 @@ if (!courseName) {
     process.exit(1);
 }
 
-const SLIDES_DIR = path.join(ROOT, 'courses', courseName, 'slides');
+requireCourse(courseName, 'animate');
+
+const SLIDES_DIR = path.join(courseDir(courseName), 'slides');
 if (!fs.existsSync(SLIDES_DIR)) {
     console.error(`ERROR: slides/ not found at ${SLIDES_DIR}`);
     process.exit(1);

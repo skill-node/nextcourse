@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 /**
- * nextcourse — NextCourse V3 统一 CLI
+ * nextcourse — NextCourse 统一 CLI
+ *
+ * 课程落在调用者当前目录的 courses/<name>/（或 NEXTCOURSE_HOME 指定的工作区），
+ * 引擎自带的 lib/ shared_styles/ templates/ 永远从包自身读。两个根见 paths.js。
  *
  * 命令:
+ *   nextcourse doctor                   自检：Node / 引擎资产 / Chrome / 工作目录
+ *   nextcourse docs   [name]            打印内置文档
  *   nextcourse list                     列出所有课程及状态
  *   nextcourse new    <name> [--scale]  初始化新课程目录
  *   nextcourse check  <name>            校验教学设计闭环（成果 × 模块 × 证据）
@@ -15,8 +20,8 @@
  *   nextcourse themes                   生成配色/字体展板（theme-gallery/）
  *
  * 工作流:
- *   1. /course-design              设计课程大纲（Claude Code Skill）
- *   2. /slide-design <name>        生成幻灯片（Claude Code Skill）
+ *   1. nextcourse-design           设计课程大纲（Agent Skill）
+ *   2. nextcourse-slides <name>    生成幻灯片（Agent Skill）
  *   3. nextcourse render <name>    校验 + 构建
  *   4. nextcourse export <name>    打包交付
  */
@@ -27,16 +32,20 @@ const { spawnSync } = require('child_process');
 const fs   = require('fs');
 const path = require('path');
 
-const ROOT = __dirname;
+const { PKG_ROOT, WORK_ROOT, COURSES_DIR, pkg, courseDir } = require('./paths');
+
+const VERSION = require('./package.json').version;
 const [,, cmd, ...rest] = process.argv;
 
 // ─── 工具 ────────────────────────────────────────────────────────────────────
 
+// 子进程继承调用者的 cwd —— 它们各自 require('./paths') 时要算出同一个 WORK_ROOT。
+// V3 这里写死 { cwd: ROOT }，那是课程被锁在仓库里的根因。
 function run(script, args = []) {
     const result = spawnSync(
         process.execPath,
-        [path.join(ROOT, script), ...args],
-        { cwd: ROOT, stdio: 'inherit' }
+        [pkg(script), ...args],
+        { stdio: 'inherit' }
     );
     return result.status ?? 0;
 }
@@ -56,9 +65,9 @@ function requireName(cmd) {
 const commands = {
 
     list() {
-        const coursesDir = path.join(ROOT, 'courses');
+        const coursesDir = COURSES_DIR;
         if (!fs.existsSync(coursesDir)) {
-            console.log('\n  (暂无课程)\n');
+            console.log(`\n  (${WORK_ROOT} 下还没有 courses/)\n`);
             return;
         }
         const entries = fs.readdirSync(coursesDir, { withFileTypes: true })
@@ -68,7 +77,7 @@ const commands = {
             return;
         }
 
-        console.log('\nNextCourse — 课程列表');
+        console.log(`\nNextCourse — 课程列表  (${coursesDir})`);
         console.log('─'.repeat(60));
         for (const e of entries) {
             const dir = path.join(coursesDir, e.name);
@@ -92,7 +101,7 @@ const commands = {
 
     new() {
         const name = requireName('new');
-        const dir  = path.join(ROOT, 'courses', name);
+        const dir  = courseDir(name);
         if (fs.existsSync(dir)) die(`课程 "${name}" 已存在: ${dir}`);
 
         // 档位: 不带 --scale = S 档（轻量分享课），与 V2 行为完全一致
@@ -178,19 +187,19 @@ outcomes:
         fs.writeFileSync(path.join(dir, 'course.meta.md'), meta, 'utf8');
 
         if (isMPlus) {
-            const tmpl = path.join(ROOT, 'templates', 'course.blueprint.md');
+            const tmpl = pkg('templates', 'course.blueprint.md');
             if (!fs.existsSync(tmpl)) die(`蓝图模板缺失: ${tmpl}`);
             fs.copyFileSync(tmpl, path.join(dir, 'course.blueprint.md'));
         }
 
-        console.log(`\n  ✓  课程目录已创建: courses/${name}/  (${scale} 档)`);
+        console.log(`\n  ✓  课程目录已创建: ${dir}  (${scale} 档)`);
         if (isMPlus) {
             console.log(`     course.blueprint.md  设计层真相（模块清单以它为准）`);
             console.log(`     course.meta.md       构建契约（页面级大纲）`);
         } else {
             console.log(`     编辑 course.meta.md 填写大纲`);
         }
-        console.log(`     或在 Claude Code 中运行 /course-design 进行对话式设计\n`);
+        console.log(`     或让 agent 跑 nextcourse-design 技能做对话式设计\n`);
     },
 
     check() {
@@ -238,13 +247,13 @@ outcomes:
 
     notes() {
         const name      = requireName('notes');
-        const slidesDir = path.join(ROOT, 'courses', name, 'slides');
+        const slidesDir = path.join(courseDir(name), 'slides');
         if (!fs.existsSync(slidesDir)) die(`slides/ not found: ${slidesDir}`);
         const files = fs.readdirSync(slidesDir).filter(f => f.endsWith('.html')).sort();
         if (files.length === 0) die('slides/ 目录为空');
 
         let title = name;
-        const metaPath = path.join(ROOT, 'courses', name, 'course.meta.md');
+        const metaPath = path.join(courseDir(name), 'course.meta.md');
         if (fs.existsSync(metaPath)) {
             const m = fs.readFileSync(metaPath, 'utf8').match(/^title:\s*["']?(.+?)["']?\s*$/m);
             if (m) title = m[1];
@@ -270,21 +279,89 @@ outcomes:
             out.push('');
         });
 
-        const outPath = path.join(ROOT, 'courses', name, 'handout.md');
+        const outPath = path.join(courseDir(name), 'handout.md');
         fs.writeFileSync(outPath, out.join('\n'), 'utf8');
-        console.log(`\n  ✓  讲师手册已生成: courses/${name}/handout.md`);
+        console.log(`\n  ✓  讲师手册已生成: ${outPath}`);
         console.log(`     共 ${files.length} 页, 其中 ${noteCount} 页有演讲备注`);
-        if (fs.existsSync(path.join(ROOT, 'courses', name, 'course.blueprint.md'))) {
+        if (fs.existsSync(path.join(courseDir(name), 'course.blueprint.md'))) {
             console.log(`     （M/L 档: nextcourse package ${name} 出的讲师手册按模块组织, 还带活动指令与评分点）`);
         }
         console.log('');
     },
 
+    // 技能的第一步统一调它: 确认引擎在、Node 版本够、Chrome 有没有,
+    // 并把当前的 WORK_ROOT 报出来 —— 路径语义是新用户最容易懵的地方。
+    doctor() {
+        const nodeMajor = Number(process.versions.node.split('.')[0]);
+        const chrome = [
+            process.env.CHROME_PATH,
+            '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+            '/Applications/Chromium.app/Contents/MacOS/Chromium',
+            '/usr/bin/google-chrome',
+            '/usr/bin/chromium',
+        ].filter(Boolean).find(p => fs.existsSync(p));
+
+        const ok = s => `  ✓  ${s}`;
+        const no = s => `  ✗  ${s}`;
+        const meh = s => `  ·  ${s}`;
+
+        console.log(`\nNextCourse doctor — v${VERSION}`);
+        console.log('─'.repeat(60));
+        console.log(nodeMajor >= 20
+            ? ok(`Node ${process.versions.node}`)
+            : no(`Node ${process.versions.node} —— 需要 20 或更高`));
+        console.log(ok(`引擎位置   ${PKG_ROOT}`));
+        console.log(ok(`工作目录   ${WORK_ROOT}${process.env.NEXTCOURSE_HOME ? '  (NEXTCOURSE_HOME)' : '  (当前目录)'}`));
+        console.log(fs.existsSync(COURSES_DIR)
+            ? ok(`课程目录   ${COURSES_DIR}`)
+            : meh(`课程目录   还没有 —— nextcourse new <name> 会建`));
+        console.log(chrome
+            ? ok(`Chrome     ${chrome}`)
+            : meh('Chrome     未找到 —— shot（截图/溢出检测）不可用，其余命令不受影响'));
+
+        // 资产完整性: npm 打包漏文件的话，这里会先炸而不是等到 build 出一个没样式的 deck
+        const missing = ['lib/dist/reveal.js', 'shared_styles/tokens.css', 'templates/master_template.html']
+            .filter(rel => !fs.existsSync(pkg(rel)));
+        console.log(missing.length
+            ? no(`引擎资产缺失: ${missing.join(', ')}`)
+            : ok('引擎资产   完整'));
+        console.log('');
+        process.exit(nodeMajor >= 20 && missing.length === 0 ? 0 : 1);
+    },
+
+    // 把内置文档打到 stdout。技能靠这个读设计系统, 不必把几万字复制进提示词。
+    docs() {
+        const REGISTRY = {
+            'design-system': ['DESIGN-SYSTEM.md', '24 个组件的完整参考 —— 写幻灯片前必读'],
+            'agent':         ['AGENT.md',         '目录结构 / 工作流 / 硬规则总览'],
+            'cli':           ['CLI_MANUAL.md',    '全部命令的详细说明'],
+            'domains':       ['docs/domains.md',  '题材域适配表：不同主题该用什么活动与组件'],
+        };
+        const key = rest[0];
+        if (!key || !REGISTRY[key]) {
+            console.log('\n内置文档:\n');
+            for (const [k, [, desc]] of Object.entries(REGISTRY)) {
+                console.log(`  nextcourse docs ${k.padEnd(15)} ${desc}`);
+            }
+            console.log('');
+            process.exit(key ? 1 : 0);
+        }
+        const file = pkg(REGISTRY[key][0]);
+        if (!fs.existsSync(file)) die(`文档缺失: ${REGISTRY[key][0]}（引擎安装不完整，跑 nextcourse doctor）`);
+        process.stdout.write(fs.readFileSync(file, 'utf8'));
+    },
+
+    version() {
+        console.log(VERSION);
+    },
+
     help() {
         console.log(`
-NextCourse V3 — 课程开发工具
+NextCourse V${VERSION.split('.')[0]} — 课程开发工具
 
 命令:
+  nextcourse doctor                   自检：Node / 引擎资产 / Chrome / 工作目录
+  nextcourse docs   [name]            打印内置文档（design-system / agent / cli / domains）
   nextcourse list                     列出所有课程及状态
   nextcourse new    <name> [--scale M|L]
                                       初始化新课程目录（不带 --scale = S 档轻量分享课）
@@ -302,20 +379,25 @@ NextCourse V3 — 课程开发工具
   nextcourse themes                   生成配色/字体展板 theme-gallery/index.html
 
 工作流（从零开始）:
-  /course-design                ← Claude Code: 对话式设计大纲（S 档止于此）
-  /course-delivery <name>       ← Claude Code: M/L 档补评估方案与开发计划
+  nextcourse-design             ← 技能: 对话式设计大纲（S 档止于此）
+  nextcourse-delivery <name>    ← 技能: M/L 档补评估方案与开发计划
   nextcourse check <name>       ← M/L 档: 校验教学设计闭环
-  /slide-design <name>          ← Claude Code: 生成幻灯片
+  nextcourse-slides <name>      ← 技能: 生成幻灯片
   nextcourse render <name>      ← 校验 + 构建 deck.html
   nextcourse package <name> --render   ← M/L 档: 交出讲师手册/学员手册/量规
   nextcourse export <name> --with-package  ← 打包，拷贝到任意电脑演示
 
 档位（--scale，只影响设计层，不影响构建）:
-  S 分享课   30–90 min，只有 course.meta.md + deck（默认，与 V2 完全一致）
+  S 分享课   30–90 min，只有 course.meta.md + deck（默认）
   M 内训课   半天~1 天，追加 course.blueprint.md 设计蓝图
   L 培训项目 训练营 / 体系化项目，蓝图追加运营与路线图章节
 
-文档: AGENT.md（完整说明）
+课程放在哪:
+  默认是你当前所在目录下的 courses/<name>/，所以先 cd 到你想放课程的地方。
+  想固定到一处就设 NEXTCOURSE_HOME=/path/to/workspace。
+  当前工作目录: ${WORK_ROOT}
+
+文档: nextcourse docs agent（完整说明）
 `);
     },
 };
@@ -324,6 +406,11 @@ NextCourse V3 — 课程开发工具
 
 if (!cmd || cmd === '--help' || cmd === '-h') {
     commands.help();
+    process.exit(0);
+}
+
+if (cmd === '--version' || cmd === '-v') {
+    commands.version();
     process.exit(0);
 }
 

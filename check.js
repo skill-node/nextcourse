@@ -25,7 +25,7 @@ const fs   = require('fs');
 const path = require('path');
 const { loadCourse, mapSlidesToModules, isBlank, label, parseMinutes, ALIGNMENT_FILE } = require('./course-model');
 
-const ROOT = __dirname;
+const { WORK_ROOT, courseDir, requireCourse } = require('./paths');
 
 // ─── 参数 ────────────────────────────────────────────────────────────────────
 const [,, courseName] = process.argv;
@@ -34,9 +34,11 @@ if (!courseName) {
     process.exit(1);
 }
 
-const course = loadCourse(ROOT, courseName);
+requireCourse(courseName, 'check');
+
+const course = loadCourse(WORK_ROOT, courseName);
 if (!course) {
-    console.error(`ERROR: course.meta.md not found at ${path.join(ROOT, 'courses', courseName, 'course.meta.md')}`);
+    console.error(`ERROR: course.meta.md not found at ${path.join(courseDir(courseName), 'course.meta.md')}`);
     process.exit(1);
 }
 
@@ -295,7 +297,7 @@ if (issues.length) {
 }
 
 if (alignmentPath) {
-    console.log(`\n  ✓  对齐矩阵已生成: ${path.relative(ROOT, alignmentPath)}`);
+    console.log(`\n  ✓  对齐矩阵已生成: ${path.relative(WORK_ROOT, alignmentPath)}`);
 }
 
 console.log(`\n${'─'.repeat(56)}`);

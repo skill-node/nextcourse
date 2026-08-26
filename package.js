@@ -35,7 +35,7 @@ const path = require('path');
 const { loadCourse, mapSlidesToModules, isBlank, label, ALIGNMENT_FILE } = require('./course-model');
 const { wrapDocument, accentFromTheme } = require('./render-md');
 
-const ROOT = __dirname;
+const { PKG_ROOT, WORK_ROOT, pkg, requireCourse } = require('./paths');
 
 // ─── 参数 ────────────────────────────────────────────────────────────────────
 const argv = process.argv.slice(2);
@@ -48,7 +48,9 @@ if (!courseName) {
     process.exit(1);
 }
 
-const course = loadCourse(ROOT, courseName);
+requireCourse(courseName, 'package');
+
+const course = loadCourse(WORK_ROOT, courseName);
 if (!course) {
     console.error(`ERROR: course.meta.md not found at courses/${courseName}/course.meta.md`);
     process.exit(1);
@@ -531,13 +533,13 @@ for (const doc of DOCS) {
 
 let rendered = [];
 if (RENDER) {
-    const cssPath = path.join(ROOT, 'shared_styles', 'package-doc.css');
+    const cssPath = pkg('shared_styles', 'package-doc.css');
     if (!fs.existsSync(cssPath)) {
-        console.error(`ERROR: 样式缺失 ${path.relative(ROOT, cssPath)}`);
+        console.error(`ERROR: 样式缺失 ${path.relative(PKG_ROOT, cssPath)}`);
         process.exit(1);
     }
     const css    = fs.readFileSync(cssPath, 'utf8');
-    const accent = accentFromTheme(ROOT, meta.theme || 'standard-default');
+    const accent = accentFromTheme(PKG_ROOT, meta.theme || 'standard-default');
     const htmlDir = path.join(PKG_DIR, 'html');
     fs.mkdirSync(htmlDir, { recursive: true });
 

@@ -19,7 +19,7 @@ const { spawnSync } = require('child_process');
 const fs   = require('fs');
 const path = require('path');
 
-const ROOT = __dirname;
+const { courseDir, requireCourse } = require('./paths');
 
 // ─── 参数 ────────────────────────────────────────────────────────────────────
 const [,, courseName, flag] = process.argv;
@@ -29,7 +29,9 @@ if (!courseName) {
 }
 const checkOnly = flag === '--check';
 
-const COURSE_DIR = path.join(ROOT, 'courses', courseName);
+requireCourse(courseName, 'shot');
+
+const COURSE_DIR = courseDir(courseName);
 const DECK_PATH  = path.join(COURSE_DIR, 'deck.html');
 if (!fs.existsSync(DECK_PATH)) {
     console.error(`ERROR: deck.html not found. Run 'node build.js ${courseName}' first.`);

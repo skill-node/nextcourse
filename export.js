@@ -19,7 +19,7 @@
 const fs   = require('fs');
 const path = require('path');
 
-const ROOT = __dirname;
+const { PKG_ROOT, pkg, courseDir, assetBase, requireCourse } = require('./paths');
 
 // ─── 参数 ────────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
@@ -30,7 +30,9 @@ if (!courseName) {
     process.exit(1);
 }
 
-const COURSE_DIR = path.join(ROOT, 'courses', courseName);
+requireCourse(courseName, 'export');
+
+const COURSE_DIR = courseDir(courseName);
 const DECK_PATH  = path.join(COURSE_DIR, 'deck.html');
 
 if (!fs.existsSync(DECK_PATH)) {
@@ -79,15 +81,22 @@ if (fs.existsSync(EXPORT_DIR)) {
 fs.mkdirSync(EXPORT_DIR, { recursive: true });
 
 // ─── 2. 处理 deck.html → index.html (修正所有相对路径) ──────────────────────
-// 原始路径基于 courses/<name>/deck.html 位置:
-//   ../../lib/           → ./lib/
-//   ../../shared_styles/ → ./shared_styles/
-//   ../assets/           → ./assets/      (slide 内图片)
+// deck.html 里指向引擎资产的前缀由 build.js 按 {{ASSET_BASE}} 算出 —— 课程在仓库里
+// 时是 "../.."，装成 npm 包后是别的路径。这里算出同一个前缀再抹平：
+//   <ASSET_BASE>/lib/           → ./lib/
+//   <ASSET_BASE>/shared_styles/ → ./shared_styles/
+//   ../assets/                  → ./assets/      (slide 内图片)
+// "../.." 那条单独再抹一遍，兜住 V3 时期生成、还没重新 build 过的旧 deck。
+const BASE = assetBase(courseName);
+const esc  = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 let html = fs.readFileSync(DECK_PATH, 'utf8');
-html = html
-    .replace(/\.\.\/\.\.\/lib\//g,          './lib/')
-    .replace(/\.\.\/\.\.\/shared_styles\//g, './shared_styles/')
-    .replace(/\.\.\/assets\//g,             './assets/');
+for (const prefix of new Set([BASE, '../..'])) {
+    html = html
+        .replace(new RegExp(`${esc(prefix)}/lib/`, 'g'),           './lib/')
+        .replace(new RegExp(`${esc(prefix)}/shared_styles/`, 'g'), './shared_styles/');
+}
+html = html.replace(/\.\.\/assets\//g, './assets/');
 
 fs.writeFileSync(path.join(EXPORT_DIR, 'index.html'), html, 'utf8');
 
@@ -100,21 +109,21 @@ let fileCount = 1; // index.html
 // 一门课只用得上其中一套, 下面按本课字体集实际引用的文件挑。
 for (const sub of ['dist', path.join('fonts', 'fontawesome'), path.join('plugin', 'notes')]) {
     fileCount += copyDir(
-        path.join(ROOT, 'lib', sub),
+        pkg('lib', sub),
         path.join(EXPORT_DIR, 'lib', sub)
     );
 }
 
 // Reveal.js 的 MIT 声明。MIT 要求"副本或实质部分"都保留声明,
 // 交付包里带着 dist/ 就是一份副本, 所以这一个文件必须跟着走。
-fs.copyFileSync(path.join(ROOT, 'lib', 'LICENSE'), path.join(EXPORT_DIR, 'lib', 'LICENSE'));
+fs.copyFileSync(pkg('lib', 'LICENSE'), path.join(EXPORT_DIR, 'lib', 'LICENSE'));
 fileCount++;
 
 // 设计系统 CSS: 只拷贝 index.html 实际引用的文件 (template/配色/字体集 各 1 套)
 const cssRefs = [...html.matchAll(/\.\/shared_styles\/([\w./-]+\.css)/g)]
     .map(m => m[1]);
 for (const rel of new Set(cssRefs)) {
-    const src  = path.join(ROOT, 'shared_styles', rel);
+    const src  = pkg('shared_styles', rel);
     const dest = path.join(EXPORT_DIR, 'shared_styles', rel);
     if (!fs.existsSync(src)) {
         console.error(`ERROR: deck 引用的样式不存在: shared_styles/${rel}`);
@@ -130,7 +139,7 @@ for (const rel of new Set(cssRefs)) {
     const setCss = fs.readFileSync(src, 'utf8');
     for (const m of setCss.matchAll(/@import url\('\.\.\/\.\.\/lib\/fonts\/display\/([\w.-]+\.css)'\)/g)) {
         const faceRel  = path.join('fonts', 'display', m[1]);
-        const faceSrc  = path.join(ROOT, 'lib', faceRel);
+        const faceSrc  = pkg('lib', faceRel);
         const faceDest = path.join(EXPORT_DIR, 'lib', faceRel);
         if (!fs.existsSync(faceSrc)) {
             console.error(`ERROR: 字体集引用的 @font-face 文件不存在: lib/${faceRel}`);
@@ -145,7 +154,7 @@ for (const rel of new Set(cssRefs)) {
         // 约定文件名 <slug>.LICENSE.txt, 见 THIRD-PARTY-NOTICES.md。
         const licSrc = faceSrc.replace(/\.css$/, '.LICENSE.txt');
         if (!fs.existsSync(licSrc)) {
-            console.error(`ERROR: 字体缺少协议文本: ${path.relative(ROOT, licSrc)}`);
+            console.error(`ERROR: 字体缺少协议文本: ${path.relative(PKG_ROOT, licSrc)}`);
             console.error('       见 THIRD-PARTY-NOTICES.md「If you add a font」。');
             process.exit(1);
         }

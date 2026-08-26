@@ -14,7 +14,7 @@
 const fs   = require('fs');
 const path = require('path');
 
-const ROOT = __dirname;
+const { pkg, courseDir, assetBase, requireCourse } = require('./paths');
 
 // ─── 参数 ────────────────────────────────────────────────────────────────────
 const [,, courseName] = process.argv;
@@ -23,11 +23,13 @@ if (!courseName) {
     process.exit(1);
 }
 
-const COURSE_DIR  = path.join(ROOT, 'courses', courseName);
+requireCourse(courseName, 'build');
+
+const COURSE_DIR  = courseDir(courseName);
 const META_PATH   = path.join(COURSE_DIR, 'course.meta.md');
 const SLIDES_DIR  = path.join(COURSE_DIR, 'slides');
 const DECK_PATH   = path.join(COURSE_DIR, 'deck.html');
-const TMPL_PATH   = path.join(ROOT, 'templates', 'master_template.html');
+const TMPL_PATH   = pkg('templates', 'master_template.html');
 
 // ─── 校验 ────────────────────────────────────────────────────────────────────
 for (const [label, p] of [
@@ -79,11 +81,11 @@ const theme    = meta.theme    || 'standard-default';
 const fontSet  = meta.fontset  || DEFAULT_FONT_SET[theme] || 'modern-sans';
 
 // theme / template / fontset 必须对应实际存在的 CSS 文件，否则 deck 会静默无样式
-const themeCss    = path.join(ROOT, 'shared_styles', 'color-schemes', `${theme}.css`);
-const templateCss = path.join(ROOT, 'shared_styles', 'themes', `${template}.css`);
-const fontSetCss  = path.join(ROOT, 'shared_styles', 'font-sets', `${fontSet}.css`);
+const themeCss    = pkg('shared_styles', 'color-schemes', `${theme}.css`);
+const templateCss = pkg('shared_styles', 'themes', `${template}.css`);
+const fontSetCss  = pkg('shared_styles', 'font-sets', `${fontSet}.css`);
 if (!fs.existsSync(themeCss)) {
-    const available = fs.readdirSync(path.join(ROOT, 'shared_styles', 'color-schemes'))
+    const available = fs.readdirSync(pkg('shared_styles', 'color-schemes'))
         .filter(f => f.endsWith('.css')).map(f => f.replace(/\.css$/, '')).join(', ');
     console.error(`ERROR: theme "${theme}" 不存在 (course.meta.md)`);
     console.error(`       可选: ${available}`);
@@ -94,7 +96,7 @@ if (!fs.existsSync(templateCss)) {
     process.exit(1);
 }
 if (!fs.existsSync(fontSetCss)) {
-    const available = fs.readdirSync(path.join(ROOT, 'shared_styles', 'font-sets'))
+    const available = fs.readdirSync(pkg('shared_styles', 'font-sets'))
         .filter(f => f.endsWith('.css')).map(f => f.replace(/\.css$/, '')).join(', ');
     console.error(`ERROR: fontset "${fontSet}" 不存在 (course.meta.md)`);
     console.error(`       可选: ${available}`);
@@ -125,6 +127,7 @@ const slidesContent = slideFiles
 // ─── 组装 ────────────────────────────────────────────────────────────────────
 const tmpl = fs.readFileSync(TMPL_PATH, 'utf8');
 const deck = tmpl
+    .replace(/\{\{ASSET_BASE\}\}/g,      assetBase(courseName))
     .replace(/\{\{COURSE_TITLE\}\}/g,    escapeHtml(title))
     .replace(/\{\{COLOR_SCHEME\}\}/g,    theme)
     .replace(/\{\{FONT_SET\}\}/g,        fontSet)

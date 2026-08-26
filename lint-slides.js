@@ -27,7 +27,7 @@
 const fs   = require('fs');
 const path = require('path');
 
-const ROOT = __dirname;
+const { pkg, courseDir, requireCourse } = require('./paths');
 
 // ─── 参数 ───────────────────────────────────────────────────────────────────
 const [,, courseName] = process.argv;
@@ -36,7 +36,9 @@ if (!courseName) {
     process.exit(1);
 }
 
-const SLIDES_DIR = path.join(ROOT, 'courses', courseName, 'slides');
+requireCourse(courseName, 'lint');
+
+const SLIDES_DIR = path.join(courseDir(courseName), 'slides');
 if (!fs.existsSync(SLIDES_DIR)) {
     console.error(`ERROR: slides/ not found at ${SLIDES_DIR}`);
     process.exit(1);
@@ -57,7 +59,7 @@ function extractClassesFromCss(css) {
 // 课程实际使用的 template (决定加载哪套 theme CSS 进白名单,
 // 避免 standard 课程用了 modern-only 的 class 却通过 lint)
 function courseTemplate() {
-    const metaPath = path.join(ROOT, 'courses', courseName, 'course.meta.md');
+    const metaPath = path.join(courseDir(courseName), 'course.meta.md');
     if (!fs.existsSync(metaPath)) return 'standard';
     const m = fs.readFileSync(metaPath, 'utf8').match(/^template:\s*["']?([\w-]+)["']?\s*$/m);
     return m ? m[1] : 'standard';
@@ -65,10 +67,10 @@ function courseTemplate() {
 
 // 设计系统文件 (自动提取 class)
 const DESIGN_CSS = [
-    path.join(ROOT, 'shared_styles', 'themes', `${courseTemplate()}.css`),
-    path.join(ROOT, 'shared_styles', 'components.css'),
-    path.join(ROOT, 'shared_styles', 'animations.css'),
-    path.join(ROOT, 'shared_styles', 'base_layout.css'),
+    pkg('shared_styles', 'themes', `${courseTemplate()}.css`),
+    pkg('shared_styles', 'components.css'),
+    pkg('shared_styles', 'animations.css'),
+    pkg('shared_styles', 'base_layout.css'),
 ];
 
 const ALLOWED = new Set([
