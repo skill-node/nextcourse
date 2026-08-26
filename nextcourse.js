@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * nextcourse — NextCourse V2 统一 CLI
+ * nextcourse — NextCourse V3 统一 CLI
  *
  * 命令:
  *   nextcourse list                     列出所有课程及状态
@@ -282,7 +282,7 @@ outcomes:
 
     help() {
         console.log(`
-NextCourse V2 — 课程开发工具
+NextCourse V3 — 课程开发工具
 
 命令:
   nextcourse list                     列出所有课程及状态

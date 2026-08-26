@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * lint-slides.js — NextCourse V2 样式闸
+ * lint-slides.js — NextCourse V3 样式闸
  *
  * 扫描 courses/<name>/slides/*.html, 发现违规即报告并以 exit 1 结束
  *

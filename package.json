@@ -1,6 +1,6 @@
 {
   "name": "nextcourse",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "An agent that designs courses — positioning, learning outcomes and knowledge structure first, then a Reveal.js deck derived from them.",
   "homepage": "https://course.skillnode.ai",
   "repository": {

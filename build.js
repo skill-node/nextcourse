@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * build.js — NextCourse V2 deck assembler
+ * build.js — NextCourse V3 deck assembler
  *
  * 读取 courses/<name>/course.meta.md + courses/<name>/slides/*.html
  * 组装成 courses/<name>/deck.html (零依赖离线 Reveal.js 课件)

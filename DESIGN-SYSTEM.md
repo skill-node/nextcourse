@@ -1,4 +1,4 @@
-# NextCourse V2 — 设计系统参考
+# NextCourse V3 — 设计系统参考
 
 > **唯一真相源。** `/slide-design` Skill 只读此文件。  
 > 铁律: 只用登记的 class + `var(--*)` 令牌。禁止内联 `style=` / 写死十六进制颜色 / 声明新 `font-family`。  
