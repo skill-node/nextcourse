@@ -108,9 +108,18 @@ function escapeHtml(s) {
 }
 
 // ─── 收集 slides ────────────────────────────────────────────────────────────
+// 按文件名里的数字排序, 不能用默认的字典序 —— 超过 99 页时
+// 'slide-100.html' 会排到 'slide-20.html' 前面, 整份 deck 的顺序就乱了
 const slideFiles = fs.readdirSync(SLIDES_DIR)
     .filter(f => f.endsWith('.html'))
-    .sort();
+    .sort((a, b) => {
+        const na = (a.match(/\d+/) || [])[0];
+        const nb = (b.match(/\d+/) || [])[0];
+        if (na !== undefined && nb !== undefined && Number(na) !== Number(nb)) {
+            return Number(na) - Number(nb);
+        }
+        return a.localeCompare(b);
+    });
 
 if (slideFiles.length === 0) {
     console.error(`ERROR: no .html files found in ${SLIDES_DIR}`);
