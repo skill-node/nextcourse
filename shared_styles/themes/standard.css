@@ -510,11 +510,23 @@ body {
 
 /* ===== 代码块 ===== */
 .code-block {
+    /* 与同页其他块组件等宽 —— 见 DESIGN-SYSTEM「内容栏宽原则」。
+       section 是居中的弹性列, 不写 width 的块级子元素会收缩到内容宽度 */
+    width: 100%;
+    max-width: var(--content-max-width);
     background: var(--bg-code);
     border-radius: 8px;
-    padding: 1rem;
+    padding: 1.25rem 1.5rem;
     font-family: 'SF Mono', 'Fira Code', monospace;
     font-size: 1rem;
+    line-height: 1.8;   /* 中文 prompt 常有 8~12 行, 不给行距会挤成一坨 */
+}
+
+.code-block pre {
+    margin: 0;
+    /* 幻灯片上不能横向滚动, 长行折行显示 */
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 /* ===== 文字颜色辅助类 =====

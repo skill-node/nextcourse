@@ -120,7 +120,9 @@ if (slideFiles.length === 0) {
 const slidesContent = slideFiles
     .map(f => {
         const src = fs.readFileSync(path.join(SLIDES_DIR, f), 'utf8').trim();
-        return `            <!-- ${f} -->\n            ${src.replace(/\n/g, '\n            ')}`;
+        // 原样嵌入, 不要给每行补缩进 —— <pre> 会把补进去的空格当内容渲染,
+        // 代码块/提示词块的第二行起会整体右移一截 (2026-09-09 修)
+        return `            <!-- ${f} -->\n${src}`;
     })
     .join('\n\n');
 
