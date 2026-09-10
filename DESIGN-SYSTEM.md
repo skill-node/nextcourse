@@ -842,6 +842,24 @@ animations.css 里专为 fragment 准备的缓动增强）。
 ✅ DO: 右侧必须是真实图片 (有实际 src); 左侧可以是文字 + 子组件组合  
 ❌ DON'T: 不要用占位符色块代替图片; 无图时改用 `.grid-2` 或其他组件
 
+**变体 `.layout-text-image--media-lead`** — 图占大头 (1fr / 1.5fr, 图最高 62vh)。
+用于图本身就是内容的场合：曲线图、流程示意图、信息密集的图表。
+基础版的 1fr 右栏对这类图太窄，投影上字会糊。
+
+```html
+<div class="layout-text-image layout-text-image--media-lead">
+  <div class="layout-text-image__content">
+    <div class="key-takeaway">…</div>
+  </div>
+  <div class="layout-text-image__media">
+    <img src="assets/diagrams/prompt-quality-curve.png" alt="提示词质量曲线">
+  </div>
+</div>
+```
+
+✅ DO: 图里有小字时用这个变体; 左栏放要点/小结，让图自己说话  
+❌ DON'T: 单张截图、配图性质的图不要用这个变体 (会喧宾夺主)，用基础版
+
 ---
 
 ### § 17 高亮框 (.highlight-box) — *来自 standard.css*

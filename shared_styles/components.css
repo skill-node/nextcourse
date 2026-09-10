@@ -119,6 +119,16 @@
     box-shadow: var(--shadow-hover);
 }
 
+/* 图占大头 — 图本身就是内容（曲线图、示意图）时用，文字退成旁白。
+   基础版是 1.4fr 1fr（图当配图），密集的图在那个宽度里字会糊。 */
+.layout-text-image--media-lead {
+    grid-template-columns: 1fr 1.5fr;
+}
+
+.layout-text-image--media-lead .layout-text-image__media img {
+    max-height: 62vh;
+}
+
 /* 图标 + 文字内联对 */
 .icon-text {
     display: flex;
