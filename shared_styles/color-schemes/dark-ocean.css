@@ -194,3 +194,26 @@ body {
     background: var(--secondary);
 }
 
+
+/* 表格表头（.table-compare / .rubric-table）。
+   按 DESIGN-SYSTEM.md R5，这套配色把 --primary 调亮到 #a5b4fc 是为了让它能当文字色用；
+   代价是 components.css 里两条「拿主色铺表头」的规则在这里同时失效：
+     · thead th        白字(--text-inverse #f8fafc)压在亮紫上，只有 1.91:1，投影上读不出来
+     · thead th:first-child  取 --primary-dark，而本配色的 --primary-dark(#1e293b)
+       恰好等于页面底色 —— 那一格等于没铺，表格左上角会缺一块
+   R5 的口径是「需要大面积铺色时在配色文件里单独覆盖，不要为了铺色把语义色调浅」，
+   所以只在这里翻表头的文字色、补上首列的底色，令牌本身不动。
+   加载顺序上 color-schemes 排在 components.css 之后（见 deck.html 的注释），
+   同特异性后者赢，不需要 !important。 */
+.reveal .table-compare thead th,
+.reveal .rubric-table thead th {
+    color: #1e293b;
+    /* 深板岩。压在 --primary(#a5b4fc) 上 7.34:1 */
+}
+
+/* 首列表头比其余表头深一档，维持浅色配色里「行标签列更重」的层次 */
+.table-compare thead th:first-child,
+.rubric-table thead th:first-child {
+    background: #818cf8;
+    /* 靛紫 400（= --module-4）。深板岩字压在上面 4.90:1 */
+}
