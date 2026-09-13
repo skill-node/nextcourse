@@ -1073,6 +1073,42 @@ animations.css 里专为 fragment 准备的缓动增强）。
 
 ---
 
+### § 24 课堂外链 (.slide-link) — *components.css*
+
+讲到某个概念时，现场点开一份真实材料给学员看：一份专家定义、一个技能库、一页政策原文。
+上片的是**一个按钮式的动作**，不是一条网址。
+
+```html
+<div class="icon-card">
+  <div class="icon-card__icon primary">🧠</div>
+  <h3>专家</h3>
+  <p>用哪种专业视角判断。</p>
+  <a class="slide-link" href="assets/examples/expert-xiaohongshu.html"
+     target="_blank" rel="noopener">打开一份专家定义 →</a>
+</div>
+```
+
+**三条硬规矩：**
+
+1. **目标必须是课程包里的相对路径**（`assets/…`）。deck 是整个文件夹拷到授课机上跑的，
+   指向讲师自己电脑上某个位置的链接，换台机器就是死链。
+2. **目标必须是 `.html`，不是 `.md`。** 浏览器对 `file://` 下的 `.md` 没有渲染器——
+   Chrome 会直接触发下载，投影上什么也看不到。md 留作源文件，
+   用 `render-md.js` 渲染成自包含 HTML（样式来自 `package-doc.css`，浅色、可打印、带目录）。
+3. **一律 `target="_blank"`。** 在当前标签页跳走等于把 deck 关掉，按后退回来时
+   Reveal 的页码与 fragment 状态全丢了。
+
+✅ DO: 链接文案写成动作（「打开一份专家定义 →」）；把外链材料放进 `assets/examples/`，
+md 与渲染出的 html 并排放，md 是源；在讲师备注里提醒**开课前先把页面开好标签页**
+（全屏放映时点链接会跳出全屏）
+❌ DON'T: 不要在片上写裸网址（见「工具页不写网址」）；不要链外部站点
+（现场断网就是事故，要用就把内容拷进课程包）；不要用裸 `<a>` 代替这个 class
+
+> 这是**行内**元素，不进 §N「相邻块组件的垂直呼吸」那张表，
+> `animate-slides.js` 也不必为它加规则——它总是长在某个被认领的卡片/容器里面。
+
+---
+
 ## 组合示例 — 一页内的 B 档自由组合
 
 当没有现成组件时，用基础原子自由组合:

@@ -1493,6 +1493,40 @@
    写 --text-heading 在浅色配色下就是深蓝底上的近黑字, 直接踩穿 R4。 */
 
 /* ============================================================
+   § 19. 课堂外链 (.slide-link) — 点开一份材料
+   ============================================================
+   讲到某个概念时，现场点开一份真实材料给学员看（一份专家定义、一个技能库、
+   一页政策原文）。链接目标必须是**课程包里的相对路径**，不能指向讲师自己
+   电脑上的某个位置 —— deck 是要整个文件夹拷到授课机上跑的。
+
+   一律 target="_blank"：在当前标签页跳走等于把 deck 关掉，
+   演示完再按后退，Reveal 的页码和 fragment 状态全没了。
+
+   刻意不做成通用的 `a` 选择器：课件里出现裸链接通常是设计事故
+   （网址不该上屏，见 DESIGN-SYSTEM「不写网址」），要外链就显式挂这个 class。 */
+.slide-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    margin-top: var(--space-3);
+    padding: 0.3em 0.9em;
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-sm);
+    color: var(--primary);
+    font-size: 0.8em;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.slide-link:hover,
+.slide-link:focus-visible {
+    background: var(--primary);
+    color: var(--text-inverse);
+}
+
+/* ============================================================
    §N  相邻块组件的垂直呼吸
    ============================================================
    `.reveal .slides>section` 是 flex 列且没有 gap（见 themes/standard.css），
