@@ -16,6 +16,7 @@
  *   nextcourse build  <name>            组装生成 deck.html
  *   nextcourse render <name>            lint + build 一步完成
  *   nextcourse package <name> [--render] 生成交付包 package/（讲师手册 / 学员手册 / 量规…）
+ *   nextcourse pdf    <name> [out.pdf]  导出 PDF（保留配色版式，发给学员用）
  *   nextcourse export <name> [outdir]   打包为可离线演示文件夹
  *   nextcourse themes                   生成配色/字体展板（theme-gallery/）
  *
@@ -32,7 +33,7 @@ const { spawnSync } = require('child_process');
 const fs   = require('fs');
 const path = require('path');
 
-const { PKG_ROOT, WORK_ROOT, COURSES_DIR, pkg, courseDir } = require('./paths');
+const { PKG_ROOT, WORK_ROOT, COURSES_DIR, pkg, courseDir, findChrome } = require('./paths');
 
 const VERSION = require('./package.json').version;
 const [,, cmd, ...rest] = process.argv;
@@ -236,6 +237,11 @@ outcomes:
         process.exit(run('export.js', [name, ...rest.slice(1)]));
     },
 
+    pdf() {
+        const name = requireName('pdf');
+        process.exit(run('pdf.js', [name, ...rest.slice(1)]));
+    },
+
     shot() {
         const name = requireName('shot');
         process.exit(run('shot.js', [name, ...rest.slice(1)]));
@@ -293,13 +299,7 @@ outcomes:
     // 并把当前的 WORK_ROOT 报出来 —— 路径语义是新用户最容易懵的地方。
     doctor() {
         const nodeMajor = Number(process.versions.node.split('.')[0]);
-        const chrome = [
-            process.env.CHROME_PATH,
-            '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-            '/Applications/Chromium.app/Contents/MacOS/Chromium',
-            '/usr/bin/google-chrome',
-            '/usr/bin/chromium',
-        ].filter(Boolean).find(p => fs.existsSync(p));
+        const chrome = findChrome();
 
         const ok = s => `  ✓  ${s}`;
         const no = s => `  ✗  ${s}`;
@@ -317,7 +317,7 @@ outcomes:
             : meh(`课程目录   还没有 —— nextcourse new <name> 会建`));
         console.log(chrome
             ? ok(`Chrome     ${chrome}`)
-            : meh('Chrome     未找到 —— shot（截图/溢出检测）不可用，其余命令不受影响'));
+            : meh('Chrome     未找到 —— shot（截图/溢出检测）与 pdf（导出）不可用，其余命令不受影响'));
 
         // 资产完整性: npm 打包漏文件的话，这里会先炸而不是等到 build 出一个没样式的 deck
         const missing = ['lib/dist/reveal.js', 'shared_styles/tokens.css', 'templates/master_template.html']
@@ -372,6 +372,8 @@ NextCourse V${VERSION.split('.')[0]} — 课程开发工具
   nextcourse render <name>            lint + build 一步完成（推荐）
   nextcourse package <name> [--render] [--force]
                                       生成交付包 package/*.md（--render 另出客户看的 HTML）
+  nextcourse pdf    <name> [out.pdf] [--fragments] [--size WxH]
+                                      导出 PDF：一页一张幻灯片，配色版式原样保留（需本机 Chrome）
   nextcourse export <name> [outdir] [--with-package]
                                       打包为可离线演示文件夹
   nextcourse notes  <name>            导出讲师手册 handout.md（各页演讲备注）

@@ -233,7 +233,7 @@ animations.css 里专为 fragment 准备的缓动增强）。
 
 | 类别 | 场景 | 现存位置 |
 |---|---|---|
-| **A. 压行内样式 / 压第三方的高特异性选择器** | 别无他法 | ① `standard.css` 的 `.reveal .slides>section { display: flex !important }`——reveal.js 给每个 section 写行内 `style="display:block"`；② 5 套深色配色的 `body { background: … !important }`——reveal.js 把 `.reveal-viewport` 挂在 `<body>` 上，reveal.css 的 `.reveal-viewport{background-color:#fff}` (0,1,0) 打得过 `body` (0,0,1)；③ `base_layout.css` 隐藏 reveal 自带控件 + `prefers-reduced-motion` 降级（无障碍惯例，必须压一切） |
+| **A. 压行内样式 / 压第三方的高特异性选择器** | 别无他法 | ① `standard.css` 的 `.reveal .slides>section { display: flex !important }`——reveal.js 给每个 section 写行内 `style="display:block"`；② 5 套深色配色的 `body { background: … !important }`——reveal.js 把 `.reveal-viewport` 挂在 `<body>` 上，reveal.css 的 `.reveal-viewport{background-color:#fff}` (0,1,0) 打得过 `body` (0,0,1)；③ `base_layout.css` 隐藏 reveal 自带控件 + `prefers-reduced-motion` 降级（无障碍惯例，必须压一切）；④ `base_layout.css` 的「导出 PDF」一节（见下）——它要压的是 reveal 写在每个 section 上的行内 `display:none` 和 reveal.css 的整套打印样式，没有别的办法 |
 | **B. 工具类** | 语义上就是「最后一句话」，且特异性天生偏低 | `standard.css` 的 `.text-*` / `.font-bold` 6 条；`components.css` 的 `.text-secondary` / `.text-inverse` 2 条；`animations.css` 的 `.stagger-*`（要压同文件 `.reveal .slides section .animate-fade-up` 的 `transition` 简写）和 `.fragment.smooth/.bounce` |
 
 需要压过别的规则时用**特异性**和**文件内顺序**，不要用 `!important`：
@@ -253,6 +253,23 @@ animations.css 里专为 fragment 准备的缓动增强）。
 **另一个同样的坑是「最后一层写死具体值」**：`animations.css` 曾有一条
 `.reveal .slides section.present .divider { width: 100px }` (0,3,1)，作为最后一层把宽度焊死，
 逼得三套配色各自用 `!important` 抢回来。animations.css 是纯工具层，不该参与配色博弈。
+
+### 导出 PDF 的那一层
+
+`base_layout.css` 末尾有一节 `html.print-pdf …`，只在 `nextcourse pdf` 导出时生效
+（它复制一份 deck、给 `<html>` 加上这个类、注入一条 `@page`，原文件不动）。
+这一节干的事是把「一次只显示一页的演示器」摊平成「一页接一页的长卷」：
+section 全部可见、每个占满一页、动画停在终态、reveal 自己那些浮层收掉。
+
+改它之前记住两件事：
+
+- **类名必须叫 `print-pdf`。** reveal.css 那套「印在 A4 纸上」的样式挂在
+  `@media print` + `html:not(.print-pdf)` 下，加上这个类整套就自己失效了，
+  比逐条去压它省事得多。**不要**同时加 `reveal-print`——那是 reveal 自己那套，
+  它会把每个 section 搬进一层 `.pdf-page` 容器，于是全库的 `.slides > section …`
+  选择器集体失配（画布、组件间距、模块封面底色一起蒸发）。
+- **写新组件时不必管导出。** 只要组件挂在 `.slides > section` 底下，导出就自动对；
+  唯一会翻车的是「靠 JS 在演示时才加上的 class」——纸上没有交互，那种效果印不出来。
 
 ### 怎么判断一条 `!important` 还「承重」
 

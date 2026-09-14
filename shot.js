@@ -19,7 +19,7 @@ const { spawnSync } = require('child_process');
 const fs   = require('fs');
 const path = require('path');
 
-const { courseDir, requireCourse } = require('./paths');
+const { courseDir, requireCourse, findChrome } = require('./paths');
 
 // ─── 参数 ────────────────────────────────────────────────────────────────────
 const [,, courseName, flag] = process.argv;
@@ -39,21 +39,6 @@ if (!fs.existsSync(DECK_PATH)) {
 }
 
 // ─── 定位浏览器 ──────────────────────────────────────────────────────────────
-function findChrome() {
-    const candidates = [
-        process.env.CHROME_PATH,
-        '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-        '/Applications/Chromium.app/Contents/MacOS/Chromium',
-        '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
-        '/usr/bin/google-chrome',
-        '/usr/bin/chromium-browser',
-    ].filter(Boolean);
-    for (const c of candidates) {
-        if (fs.existsSync(c)) return c;
-    }
-    return null;
-}
-
 const CHROME = findChrome();
 if (!CHROME) {
     console.error('ERROR: 未找到 Chrome/Chromium。请安装 Chrome 或设置 CHROME_PATH 环境变量。');

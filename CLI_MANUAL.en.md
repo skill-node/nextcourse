@@ -404,6 +404,64 @@ npm run notes python-basics
 
 ---
 
+#### `pdf` — export a PDF (the deck you hand to learners)
+
+```bash
+npm run pdf <course-name>
+# or
+nextcourse pdf <course-name> [output.pdf] [--size WxH] [--keep]
+```
+
+Prints `deck.html` to a PDF, one slide per page, with the palette, typefaces and layout
+exactly as they look on screen (needs a local Chrome):
+
+```
+courses/<course-name>/deck.pdf     # default output
+```
+
+**Do not tell people to hit Cmd+P in the browser.** reveal.css ships a print stylesheet
+built for paper (`@media print`): white background, 20pt black body text, decoration hidden.
+What comes out is unusable — that stylesheet is exactly what this command routes around.
+
+**Arguments:**
+
+- `output.pdf` — output path (default `courses/<course-name>/deck.pdf`)
+- `--size WxH` — page size, default `1600x900` (16:9); use `--size 1600x1200` for 4:3 projectors
+- `--keep` — keep the temporary `.deck.print.html` copy, which you can open in a browser to
+  preview exactly what gets printed
+
+**What it does** (read this before changing how exports look):
+
+1. copies `deck.html`, adds `class="print-pdf"` to `<html>` and injects one `@page` rule
+   that pins the paper size;
+2. the "导出 PDF" section of `shared_styles/base_layout.css` takes over and flattens the
+   presenter — which shows one slide at a time — into a scroll of pages. No node moves,
+   so every `.slides > section …` selector in the design system still matches: what you see
+   on screen is what lands on the page;
+3. headless Chrome prints it, then the temporary copy is deleted. `deck.html` is never touched.
+
+> This is deliberately not reveal's own `?print-pdf`. That path moves every section into a
+> `.pdf-page` wrapper, which un-matches the canvas, the component spacing and the module
+> divider colours all at once.
+
+**Self-check:** the command reports page count and paper size. More pages than slides means a
+slide overflowed the frame and got split — run `nextcourse shot <name> --check` to find it.
+
+**Examples:**
+
+```bash
+# default output at courses/python-basics/deck.pdf
+npm run pdf python-basics
+
+# explicit path and filename
+nextcourse pdf python-basics ~/Desktop/python-basics-slides.pdf
+
+# 4:3 projector, keep the preview copy
+nextcourse pdf python-basics --size 1600x1200 --keep
+```
+
+---
+
 #### `shot` — overflow detection + per-page screenshots
 
 ```bash

@@ -89,6 +89,7 @@ nextcourse render <name>            # lint + build 一步完成（推荐）
 nextcourse package <name> [--render] [--force]   # 生成交付包（M/L 档）
 nextcourse export <name> [outdir] [--with-package]  # 打包为可离线演示文件夹
 nextcourse notes  <name>            # 导出讲师手册 handout.md（各页演讲备注）
+nextcourse pdf    <name> [out.pdf]  # 导出 PDF：一页一张幻灯片，配色版式原样保留（需本机 Chrome）
 nextcourse shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（需本机 Chrome）
 ```
 
@@ -106,6 +107,7 @@ nextcourse shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（
 | `package <name>` | 汇总蓝图 + 大纲 + slide 备注，生成 package/ 交付包（讲师手册 / 学员手册 / 评估方案 / 量规 / 教学设计 / 内容开发 / 行动承诺 / 数据包说明）。`--render` 另出 package/html/（客户交付物，封面 0_index.html），`--force` 覆盖已有 md（默认不覆盖）。文件名带交付序号 `1_`…`8_`（排序即客户的阅读动线，序号定义在 package.js 的 DOCS），每份文档 h1 与 &lt;title&gt; 只写功能名、课程名走小字副标题。S 档会被拒绝 |
 | `export <name>` | 生成 courses/\<name\>/export/，只含演示必需文件，双击 index.html 即可离线演示；`--with-package` 把 package/html/ 一起打进去 |
 | `notes <name>` | 抽取各页 h2 + aside.notes，生成讲师手册 courses/\<name\>/handout.md |
+| `pdf <name>` | 用本机 Chrome headless 把 deck.html 印成 PDF，一页一张幻灯片、配色与版式原样保留，默认落在 courses/\<name\>/deck.pdf。发给学员看的课件用它，**别让用户在浏览器里 Cmd+P**——reveal 自带的 A4 打印样式会把整套配色刷成白底黑字。`--size WxH` 换纸张尺寸（默认 1600x900），`--keep` 保留临时拷贝用于预览 |
 | `shot <name>` | 用本机 Chrome headless 做溢出检测并逐页截图到 .review/，供视觉自查（`--check` 只检测不截图） |
 
 也可以通过 npm scripts：`npm run render -- openclaw_2`

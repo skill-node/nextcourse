@@ -137,3 +137,89 @@ img {
         transition-duration: 0.2s !important;
     }
 }
+/* ===================================
+   导出 PDF（html.print-pdf）
+
+   `nextcourse pdf <course>` 会复制一份 deck.html、在 <html> 上加 class="print-pdf"
+   并注入一条 @page 定尺寸，再用 headless Chrome 打印。本节负责把这份拷贝从
+   「一次只显示一页的演示器」摊平成「一页接一页的长卷」。
+
+   两个背景，改这里之前先读：
+
+   1. 为什么不用 reveal 自带的 ?print-pdf。
+      它确实能印出彩色的每页一张，但代价是把每个 section 搬进一层 .pdf-page 容器。
+      section 一旦不再是 .slides 的直接子元素，设计系统里所有 `.slides > section …`
+      选择器集体失配——themes 的画布（flex 列 + 内边距 + 满高）、components 里
+      二十多条组件间距、配色层的模块封面底色，全部一起蒸发。谁也修不过来。
+      所以这里保持 DOM 原样，只用 CSS 分页：每个 section 还是 .slides 的直接子元素，
+      屏幕上什么样，印出来就什么样。
+
+   2. 为什么类名必须叫 print-pdf。
+      reveal.css 里那套「印在 A4 纸上」的样式（背景刷白、正文 20pt 纯黑、装饰全隐藏）
+      挂在 `@media print` + `html:not(.print-pdf)` 下。加上这个类，整套就自己失效了——
+      比逐条去压它省事得多。注意**不要**同时加 reveal-print，那才是搬 DOM 的那套。
+
+   刻意不包 @media print：直接用浏览器打开这份拷贝就能预览导出效果，
+   包了就会变成"屏幕上是坏的、印出来才是好的"，没法校对。
+   =================================== */
+
+html.print-pdf,
+html.print-pdf body {
+    width: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* reveal 把 .slides 绝对定位在视口正中，还会往上面写 transform / 宽高的行内样式 */
+html.print-pdf .reveal,
+html.print-pdf .reveal .slides {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    top: auto !important;
+    left: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    zoom: 1 !important;
+    overflow: visible !important;
+    perspective: none !important;
+}
+
+/* 非当前页被 reveal 用行内 display:none 藏着，past/future 还有 opacity:0 与位移，
+   这里全部按住：每个 section 就是一页，一页一张纸。 */
+html.print-pdf .reveal .slides>section {
+    display: flex !important;
+    position: relative !important;
+    /* 两个变量由 nextcourse pdf 随 @page 一起注入；没有它们时退回视口尺寸，
+       这样手动给 <html> 加个 print-pdf 类也能在浏览器里看个大概 */
+    width: var(--pdf-page-w, 100%) !important;
+    height: var(--pdf-page-h, 100vh) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+    overflow: hidden;
+    page-break-after: always;
+    break-after: page;
+}
+
+/* 最后一页后面不要再断，否则尾部多出一张空白纸 */
+html.print-pdf .reveal .slides>section:last-of-type {
+    page-break-after: avoid;
+    break-after: auto;
+}
+
+/* 入场动画与 fragment 在纸上没有"逐步出现"可言，一律停在终态 */
+html.print-pdf .reveal .slides section [class*="animate-"],
+html.print-pdf .reveal .slides section .fragment {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: none !important;
+}
+
+/* .reveal 底下除了 .slides 全部收掉：背景层只画当前页、会盖在每一页上；
+   aria-status 是个 1px 高的无障碍播报节点，摊平之后正好把文档顶出一页空白纸；
+   pause-overlay / controls / progress 同理，纸上都没有意义。 */
+html.print-pdf .reveal> :not(.slides) {
+    display: none !important;
+}

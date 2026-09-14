@@ -365,6 +365,59 @@ npm run notes python-basics
 
 ---
 
+#### `pdf` — 导出 PDF（发给学员的课件）
+```bash
+npm run pdf <course-name>
+# 或
+nextcourse pdf <course-name> [output.pdf] [--size WxH] [--keep]
+```
+
+把 `deck.html` 印成一页一张幻灯片的 PDF，配色、字体、版式与屏幕上完全一致（需要本机有 Chrome）：
+
+```
+courses/<course-name>/deck.pdf     # 默认输出
+```
+
+**别让用户自己在浏览器里 Cmd+P。** reveal.css 自带一套「印在 A4 纸上」的打印样式
+（`@media print`）：背景刷白、正文 20pt 纯黑、装饰全隐藏。直接打印出来的东西不能看，
+不是样式坏了，是那套样式在起作用——本命令绕开的正是它。
+
+**参数：**
+- `output.pdf` — 输出路径（默认 `courses/<course-name>/deck.pdf`）
+- `--size WxH` — 纸张尺寸，默认 `1600x900`（16:9）。4:3 的投影场景用 `--size 1600x1200`
+- `--keep` — 保留打印用的临时拷贝 `.deck.print.html`，用浏览器打开即可预览导出效果
+
+**它做了什么**（想改导出效果时看这里）：
+1. 复制一份 `deck.html`，给 `<html>` 加 `class="print-pdf"`，注入一条 `@page` 定死纸张尺寸；
+2. `shared_styles/base_layout.css` 的「导出 PDF」一节接手，把「一次只显示一页的演示器」
+   摊平成「一页接一页的长卷」——DOM 一个节点都不挪，所以设计系统里
+   所有 `.slides > section …` 选择器照常命中，屏幕什么样、纸上就什么样；
+3. headless Chrome 打印，完事删掉临时拷贝。`deck.html` 全程不动。
+
+> 走的不是 reveal 官方的 `?print-pdf`。那条路会把每个 section 搬进一层 `.pdf-page` 容器，
+> 设计系统里的画布、组件间距、模块封面底色会一起失配——修不过来。
+
+**自检：** 命令跑完会报页数和纸张尺寸。页数比 slides 多，说明有页内容超出画布被拆成了两页，
+先跑 `nextcourse shot <name> --check` 找出是哪一页。
+
+**发给学员前顺手做的两件事：**
+- 文件名改成课程名（`deck.pdf` 对学员没有意义）
+- 需要的话用「导出为 PDF」再压一道，含大图的课件通常 4–8 MB，微信群发 100 MB 以内都没问题
+
+**示例：**
+```bash
+# 默认输出到 courses/python-basics/deck.pdf
+npm run pdf python-basics
+
+# 指定输出路径与文件名
+nextcourse pdf python-basics ~/Desktop/Python基础-课件.pdf
+
+# 4:3 投影 + 保留预览拷贝
+nextcourse pdf python-basics --size 1600x1200 --keep
+```
+
+---
+
 #### `shot` — 溢出检测 + 逐页截图
 ```bash
 npm run shot <course-name> [--check]

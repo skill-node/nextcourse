@@ -72,7 +72,9 @@ body {
     pointer-events: none;
 }
 
-.footer-nav .slide-num {
+/* 第二个选择器是导出 PDF 用的页码，见本文件末尾「导出 PDF」一节 */
+.footer-nav .slide-num,
+html.print-pdf .reveal .slides>section::after {
     font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -559,3 +561,23 @@ body {
 
 /* 隐藏 Reveal 默认控件的规则已删：base_layout.css 里有一份一模一样的，
    而 base_layout.css 每份 deck 都会加载，这里是纯重复。 */
+
+/* ===== 导出 PDF（html.print-pdf，见 base_layout.css「导出 PDF」一节）=====
+   屏幕上的页码是一块 position:fixed 浮层：浏览器打印时会把它原样盖在每一页上，
+   32 页全写着同一个数字。导出时换成按页自增的 CSS 计数器。 */
+html.print-pdf .footer-nav {
+    display: none;
+}
+
+html.print-pdf .reveal .slides {
+    counter-reset: pdf-page-num;
+}
+
+html.print-pdf .reveal .slides>section::after {
+    counter-increment: pdf-page-num;
+    content: counter(pdf-page-num);
+    position: absolute;
+    left: 50%;
+    bottom: calc((var(--footer-height) - 2rem) / 2);
+    transform: translateX(-50%);
+}

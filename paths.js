@@ -58,6 +58,22 @@ function assetBase(name) {
 }
 
 /**
+ * 本机的 Chrome/Chromium 在哪 —— shot（截图）、pdf（导出）、doctor 三处都要问，
+ * 所以答案只留这一份。CHROME_PATH 环境变量优先，方便用别的 Chromium 系浏览器。
+ */
+function findChrome() {
+    return [
+        process.env.CHROME_PATH,
+        '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+        '/Applications/Chromium.app/Contents/MacOS/Chromium',
+        '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+        '/usr/bin/google-chrome',
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+    ].filter(Boolean).find(p => fs.existsSync(p)) || null;
+}
+
+/**
  * 课程必须存在才继续。路径语义变了之后，"找不到课程"是最容易踩的一脚，
  * 所以这里把找过的位置和当前 WORK_ROOT 一起报出来。
  */
@@ -81,4 +97,4 @@ function requireCourse(name, script) {
     process.exit(1);
 }
 
-module.exports = { PKG_ROOT, WORK_ROOT, COURSES_DIR, pkg, courseDir, assetBase, requireCourse };
+module.exports = { PKG_ROOT, WORK_ROOT, COURSES_DIR, pkg, courseDir, assetBase, requireCourse, findChrome };

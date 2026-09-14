@@ -25,6 +25,7 @@
     "check.js",
     "package.js",
     "export.js",
+    "pdf.js",
     "lint-slides.js",
     "animate-slides.js",
     "render-md.js",
@@ -54,6 +55,7 @@
     "render": "node nextcourse.js render",
     "package": "node nextcourse.js package",
     "export": "node nextcourse.js export",
+    "pdf":    "node nextcourse.js pdf",
     "notes":  "node nextcourse.js notes",
     "shot":   "node nextcourse.js shot",
     "themes": "node nextcourse.js themes"

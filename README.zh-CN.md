@@ -237,6 +237,7 @@ nextcourse doctor                 # 自检：Node / 引擎资产 / Chrome / 工�
 nextcourse render <name>          # lint + 构建 deck.html（推荐）
 nextcourse check  <name>          # 教学设计闭环校验（成果 × 模块 × 证据）
 nextcourse package <name> --render        # 生成交付包 md + 客户 HTML（M/L 档）
+nextcourse pdf    <name>          # 导出 PDF（一页一张幻灯片，配色版式原样保留）
 nextcourse shot   <name>          # 溢出检测 + 逐页截图自查
 nextcourse export <name> --with-package   # 打包为可离线演示文件夹
 nextcourse docs   design-system   # 打印内置的组件参考
