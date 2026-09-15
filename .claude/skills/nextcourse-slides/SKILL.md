@@ -105,13 +105,13 @@ ls courses/<课程名>/course.blueprint.md
    M/L 档再跑一次: nextcourse check <课程名>
    → 页数与大纲对不上、模块缺 Activity 页都会在这里报出来
 7. 视觉自查: nextcourse shot <课程名>
-8. 发给学员: nextcourse pdf <课程名>（配色版式原样保留；别让用户自己在浏览器里打印）
-   学员要打印到纸上加 --theme print-light；不外发的页在 <section> 上写 data-print="off"
    → 溢出报告有问题页立即修复
    → 逐张查看 .review/slide-XX.png, 按下方 rubric 自我批判并修正, 再交用户
 8. 告知用户打开 courses/<课程名>/deck.html 审阅
 9. 根据用户反馈定位问题页, 修改对应 slide-XX.html（内容变化同步回 slide-plan.md）
 10. 重新 nextcourse build <课程名>
+11. 要发给学员时: nextcourse pdf <课程名>（配色版式原样保留；别让用户自己在浏览器里打印）
+    学员要打印到纸上加 --theme print-light；不外发的页在 <section> 上写 data-print="off"
 ```
 
 > 第 5–7 步的 lint / build / check / shot 也可以一步走完：`nextcourse render <课程名>` = lint + build。
