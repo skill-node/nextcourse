@@ -201,6 +201,35 @@ through AI, the file formats that models can read, diff and verify are the ones 
 compound. Choosing HTML over `.pptx` is choosing to work in a format your tools can
 actually reason about.
 
+## Handing it out: a PDF that still looks like the course
+
+The deck is HTML, but what learners get afterwards is almost always a PDF. One command,
+one slide per page, palette and typeface and layout exactly as they are on screen:
+
+```bash
+nextcourse pdf <name>                       # → courses/<name>/pdf/deck.pdf
+nextcourse pdf <name> --theme print-light   # a paper version, for learners who print
+```
+
+**Do not reach for Cmd+P in the browser.** Reveal.js ships a print stylesheet written
+for "put the handout on A4" — white background, 20pt black body, decoration hidden. That
+stylesheet, not a broken theme, is behind every *"the printout looks nothing like the
+deck"*. `nextcourse pdf` goes around it: the DOM is left untouched and only the paging is
+done in CSS, so every `.slides > section` rule in the design system still matches and the
+page prints as designed.
+
+Two things the copy you send usually needs:
+
+- **`--theme print-light`** — a palette made for paper: white ground, shadows dropped in
+  favour of hairline rules, module covers reduced to a title on white, code blocks flipped
+  to dark-on-light. Layout and type do not move by a pixel, because the palette is its own
+  layer. It stays out of `course.meta.md` — put it there and you will be projecting a
+  white deck.
+- **`data-print="off"`** on a `<section>` — the live-demo page, the client-sensitive case,
+  anything that shouldn't leave the room drops out of the export. Page numbers are a CSS
+  counter, so they close the gap on their own, and the deck you teach from still carries
+  the page. One source of truth, in `slides/`.
+
 ## Quick start
 
 Requires **Node 20 or newer** and, for the screenshot pass, a local **Chrome /
