@@ -1,0 +1,119 @@
+/* ===================================
+   打印浅色方案 (Print Light Color Scheme)
+   实际观感: 纯白底 + 深灰字, 卡片靠 1px 发丝线分隔, 无阴影无满版色块
+   适用于: 导出发给学员、学员自己打印到纸上 —— 不是给屏幕演讲用的
+   EN tagline: Paper-first light scheme, hairline borders, no fills
+   EN use: PDF handouts learners will print
+   默认字体集: 不指定 —— 导出时只换配色, 字体仍由课件自己的 font-set 决定
+   Gallery: off
+   =================================== */
+
+/* 这套配色只在 `nextcourse pdf <course> --theme print-light` 时出场：
+   导出脚本把打印拷贝里那一行 `color-schemes/<原配色>.css` 换成本文件，
+   版式、字体、组件结构一律不动，只换颜色。**不要**在 course.meta.md 里
+   写 `theme: print-light` —— 那会让你在投影上讲一份白底课件。
+
+   派生自 warm-sand（它是全库唯一的纯令牌配色，颜色也逐条做过白底对比度审计），
+   只改四组值，改的理由都是「纸」而不是「屏」：
+
+   1. 底色压成纯白 —— 背景不吃墨。屏幕上米白更护眼，纸上米白只是一层灰。
+   2. 阴影全部取消 —— 组件本来就都带 `1px solid var(--border-card)`（全库 15 处），
+      去掉阴影后卡片靠发丝线分隔，纸面干净；而且深色阴影在 PDF 里会被位图化，
+      边界会露出一个方框（页码那颗胶囊就是这么冒出深色框的）。
+      边框比 warm-sand 深一档，因为现在只剩它一个分隔手段。
+   3. 模块封面留白 —— 10 个模块色全部改成白色，文字色换成近黑。满版彩色封面
+      在投影上是节奏，在打印机里是小半个墨盒。字号字重字距一个都没动。
+   4. 代码块翻成浅底深字 —— 原本是深底浅字，纸上同样是一整块墨。
+      注意 `--text-code` 必须跟着翻，components.css 的 `.code-block` 是裸用它的。
+
+   其余 40 多个令牌原样继承 warm-sand，不重新调色：那批值的白底对比度
+   已经在 warm-sand 里逐条标注过，重调一遍只会引入没审计过的新颜色。
+   =================================== */
+
+:root,
+[data-color-scheme="print-light"] {
+    /* ===== 主色调（同 warm-sand，白底对比度已审计）===== */
+    --primary: #7c3aed;
+    /* 紫罗兰 - 主色 */
+    --primary-dark: #5b21b6;
+    /* 深紫 —— "更深的主色底", 不是标题文字色 */
+    --text-title: #5b21b6;
+    /* h1 文字色 */
+    --secondary: #047857;
+    /* 翠绿 emerald-700  白底 5.13:1 */
+    --accent: #c2410c;
+    /* 橙红 orange-700   白底 4.85:1 */
+    --danger: #dc2626;
+    /* 红色 */
+    --success: #15803d;
+    /* 深绿 */
+
+    /* ===== 模块封面：留白 =====
+       10 套全白, 文字改近黑。--text-on-module 是专供模块封面的文字色令牌,
+       不要改 --text-inverse —— 那个是"深色底上的文字", 两者语义不同。
+       右下角那个装饰大数字是 opacity:0.1, 翻成近黑后会变成一片极浅的灰,
+       正好: 纸上还看得出层次, 又几乎不吃墨。 */
+    --module-1: #ffffff;
+    --module-2: #ffffff;
+    --module-3: #ffffff;
+    --module-4: #ffffff;
+    --module-5: #ffffff;
+    --module-6: #ffffff;
+    --module-7: #ffffff;
+    --module-8: #ffffff;
+    --module-9: #ffffff;
+    --module-10: #ffffff;
+    --text-on-module: #1c1917;
+    /* stone-900  白底 16.8:1 */
+
+    /* ===== 背景色 ===== */
+    --bg-page: #ffffff;
+    --bg-slide: #ffffff;
+    --bg-card: #ffffff;
+    --bg-code: #f5f5f4;
+    /* stone-100 浅底代码块 */
+    --bg-header: linear-gradient(90deg, #5b21b6 0%, #7c3aed 100%);
+    --bg-highlight: rgba(124, 58, 237, 0.08);
+    --bg-tag: rgba(124, 58, 237, 0.12);
+    --text-tag: #7c3aed;
+    --bg-vs-good: rgba(21, 128, 61, 0.08);
+    --bg-vs-bad: rgba(220, 38, 38, 0.08);
+    --border-vs-good: rgba(21, 128, 61, 0.28);
+    --border-vs-bad: rgba(220, 38, 38, 0.28);
+
+    /* 带色调的卡片背景：留着淡色块。黑白打印时它们会塌成几乎一样的浅灰，
+       但课件本身用 ✓/✗ 与边框承载区分，不是只靠颜色，所以不致命。 */
+    --bg-card-primary: #f5f3ff;
+    --bg-card-secondary: #ecfdf5;
+    --bg-card-accent: #fff7ed;
+    --bg-card-danger: #fef2f2;
+
+    /* ===== 文字色 ===== */
+    --text-heading: #1c1917;
+    /* stone-900  16.8:1 */
+    --text-body: rgba(28, 25, 23, 0.92);
+    /* 正文   约 14:1 */
+    --text-muted: rgba(28, 25, 23, 0.72);
+    /* 弱化   约 8:1 —— 比屏幕版更硬, 打印机对浅灰不友好 */
+    --text-inverse: #ffffff;
+    --text-code: #1c1917;
+    /* 浅底代码块的配对文字, 必须跟着 --bg-code 一起翻 */
+    --text-code-accent: #0f766e;
+    /* teal-700 在 stone-100 上 4.83:1 */
+
+    /* ===== 边框 ===== */
+    --border-card: #d6d3d1;
+    /* stone-300 —— 比 warm-sand 深一档: 阴影没了, 分隔全靠它 */
+    --border-primary: var(--primary);
+    --border-secondary: var(--secondary);
+    --border-accent: var(--accent);
+    --border-danger: var(--danger);
+
+    /* ===== 阴影：纸上没有阴影 ===== */
+    --shadow-card: none;
+    --shadow-hover: none;
+
+    /* ===== 玻璃效果：纸上也没有毛玻璃 ===== */
+    --glass-bg: #ffffff;
+    --glass-border: #d6d3d1;
+}

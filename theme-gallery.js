@@ -53,6 +53,9 @@ function readSchemeMeta(cssPath) {
     const titleLine = header.match(/^\s*(.+?)\s*(?:—|-)\s*(.+)$/m);
     const useFor = header.match(/适用于[：:]\s*(.+)/);
     const fontHint = header.match(/默认字体集[：:]\s*([a-z-]+)/);
+    // 头注释写 `Gallery: off` 的配色不进展板 —— 目前只有 print-light:
+    // 它是导出 PDF 时临时换上的纸面配色，不该出现在"这门课长什么样"的选择清单里
+    const galleryOff = /Gallery[：:]\s*off/i.test(header);
     const taglineEn = header.match(/EN tagline[：:]\s*(.+)/);
     const useForEn = header.match(/EN use[：:]\s*(.+)/);
 
@@ -84,6 +87,7 @@ function readSchemeMeta(cssPath) {
         useFor: useFor ? useFor[1].trim() : '',
         useForEn: useForEn ? useForEn[1].trim() : '',
         fontHint: fontHint ? fontHint[1] : null,
+        galleryOff,
         // 生成期解析出来只给 index.html 的缩略图用；详情页一律走运行时取值
         vars: Object.fromEntries(
             [...src.matchAll(/^\s*(--[a-z0-9-]+)\s*:\s*([^;]+);/gim)].map((m) => [m[1], m[2].trim()])
@@ -776,6 +780,9 @@ const all = fs.readdirSync(SCHEME_DIR)
         const fontSet = defaults[id] || meta.fontHint || 'modern-sans';
         return { id, meta, fontSet, stacks: readFontStacks(fontSet) };
     })
+    // 头注释写了 `Gallery: off` 的不进展板（print-light 是导出用的纸面配色，
+    // 不是给人挑来讲课的），见 readSchemeMeta
+    .filter((s) => !s.meta.galleryOff)
     .sort((a, b) => a.id.localeCompare(b.id));
 
 if (!fs.existsSync(OUT_DIR)) fs.mkdirSync(OUT_DIR, { recursive: true });

@@ -106,6 +106,7 @@ ls courses/<课程名>/course.blueprint.md
    → 页数与大纲对不上、模块缺 Activity 页都会在这里报出来
 7. 视觉自查: nextcourse shot <课程名>
 8. 发给学员: nextcourse pdf <课程名>（配色版式原样保留；别让用户自己在浏览器里打印）
+   学员要打印到纸上加 --theme print-light；不外发的页在 <section> 上写 data-print="off"
    → 溢出报告有问题页立即修复
    → 逐张查看 .review/slide-XX.png, 按下方 rubric 自我批判并修正, 再交用户
 8. 告知用户打开 courses/<课程名>/deck.html 审阅

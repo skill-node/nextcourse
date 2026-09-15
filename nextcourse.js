@@ -16,7 +16,7 @@
  *   nextcourse build  <name>            组装生成 deck.html
  *   nextcourse render <name>            lint + build 一步完成
  *   nextcourse package <name> [--render] 生成交付包 package/（讲师手册 / 学员手册 / 量规…）
- *   nextcourse pdf    <name> [out.pdf]  导出 PDF（保留配色版式，发给学员用）
+ *   nextcourse pdf    <name> [out.pdf]  导出 PDF（保留配色版式；--theme print-light 出学员打印版）
  *   nextcourse export <name> [outdir]   打包为可离线演示文件夹
  *   nextcourse themes                   生成配色/字体展板（theme-gallery/）
  *
@@ -372,8 +372,10 @@ NextCourse V${VERSION.split('.')[0]} — 课程开发工具
   nextcourse render <name>            lint + build 一步完成（推荐）
   nextcourse package <name> [--render] [--force]
                                       生成交付包 package/*.md（--render 另出客户看的 HTML）
-  nextcourse pdf    <name> [out.pdf] [--fragments] [--size WxH]
+  nextcourse pdf    <name> [out.pdf] [--theme <配色>] [--size WxH] [--keep] [--source <file>]
                                       导出 PDF：一页一张幻灯片，配色版式原样保留（需本机 Chrome）
+                                      --theme print-light 出学员可打印的浅色版
+                                      slide 上写 data-print="off" 的页不进 PDF
   nextcourse export <name> [outdir] [--with-package]
                                       打包为可离线演示文件夹
   nextcourse notes  <name>            导出讲师手册 handout.md（各页演讲备注）

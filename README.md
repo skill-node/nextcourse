@@ -271,6 +271,7 @@ nextcourse render <name>          # lint + build deck.html  (recommended)
 nextcourse check  <name>          # teaching-design closure check (outcome x module x evidence)
 nextcourse package <name> --render        # delivery package: md source + client HTML (M/L)
 nextcourse pdf    <name>          # export a PDF, one slide per page, palette intact
+                                  #   --theme print-light for a printable light version
 nextcourse shot   <name>          # overflow check + per-page screenshots
 nextcourse export <name> --with-package   # package as an offline-playable folder
 nextcourse docs   design-system   # print the bundled component reference

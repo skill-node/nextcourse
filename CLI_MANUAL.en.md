@@ -409,14 +409,15 @@ npm run notes python-basics
 ```bash
 npm run pdf <course-name>
 # or
-nextcourse pdf <course-name> [output.pdf] [--size WxH] [--keep]
+nextcourse pdf <course-name> [output.pdf] [--theme <scheme>] [--size WxH] [--keep] [--source <file>]
 ```
 
 Prints `deck.html` to a PDF, one slide per page, with the palette, typefaces and layout
 exactly as they look on screen (needs a local Chrome):
 
 ```
-courses/<course-name>/deck.pdf     # default output
+courses/<course-name>/deck.pdf              # default output (the teaching palette)
+courses/<course-name>/deck.print-light.pdf  # with --theme print-light
 ```
 
 **Do not tell people to hit Cmd+P in the browser.** reveal.css ships a print stylesheet
@@ -426,25 +427,80 @@ What comes out is unusable — that stylesheet is exactly what this command rout
 **Arguments:**
 
 - `output.pdf` — output path (default `courses/<course-name>/deck.pdf`)
+- `--theme <scheme>` — export with a different colour scheme; layout and typefaces do not move
+  a pixel. Use `--theme print-light` for something learners can print (below); any existing
+  scheme name works. The output filename gets a suffix, so it never overwrites the teaching PDF
 - `--size WxH` — page size, default `1600x900` (16:9); use `--size 1600x1200` for 4:3 projectors
-- `--keep` — keep the temporary `.deck.print.html` copy, which you can open in a browser to
-  preview exactly what gets printed
+- `--keep` — keep the print copy as `deck.print.html` (open it in a browser to preview, or edit it)
+- `--source <file>` — print a file from the course directory, normally a hand-edited `deck.print.html`
 
-**What it does** (read this before changing how exports look):
+---
 
-1. copies `deck.html`, adds `class="print-pdf"` to `<html>` and injects one `@page` rule
-   that pins the paper size;
+##### The deck you teach from is not the deck you send out
+
+Live demos and client-sensitive cases often should not leave the room. Two routes, pick by how
+much has to change:
+
+**Drop whole pages (preferred)** — add one attribute to the `<section>` in `slides/slide-XX.html`:
+
+```html
+<section data-print="off">
+```
+
+That page is dropped at export time. Page numbers are a CSS counter, so **they stay consecutive**;
+the attribute has no effect on the presentation, and the teaching `deck.html` still carries the
+page. One source of truth, in `slides/`, and a rebuild never loses it.
+
+**Change the content** — keep the print copy, edit it, print from it:
+
+```bash
+nextcourse pdf my-course --keep                     # PDF, plus deck.print.html
+# edit deck.print.html: cut half a page, add a "how to practise this" note, swap a screenshot
+nextcourse pdf my-course --source deck.print.html   # print the edited copy
+```
+
+> `deck.print.html` is generated output: rebuilding `deck.html` with `render` does not update it,
+> you have to `--keep` again. So whatever `data-print="off"` can handle, let it handle.
+
+---
+
+##### When learners will print on paper: `--theme print-light`
+
+A dark deck wastes toner and reads badly on paper. One flag gives you a paper-first light version
+with **identical layout**:
+
+```bash
+nextcourse pdf my-course --theme print-light   # → deck.print-light.pdf
+```
+
+`print-light` derives from `warm-sand` and changes four things, all for paper: pure white
+background (no ink), no shadows (cards separate on a 1px hairline border), **module dividers left
+blank except the title** (type size and weight untouched), and light-on-dark code blocks flipped.
+It is kept out of the theme gallery, and it does not belong in `course.meta.md`'s `theme:` —
+that would have you presenting a white deck on a projector.
+
+Two limits worth stating up front: printed in black and white, the red/green semantic colours
+collapse into similar greys (the slides carry ✓/✗ marks and borders too, so meaning does not rest
+on colour alone); and dark screenshots stay dark — that is content, not theme.
+
+---
+
+##### What it actually does (read this before changing how exports look)
+
+1. copies `deck.html`, adds `class="print-pdf"` to `<html>` and injects one `@page` rule that pins
+   the paper size; drops opted-out pages and swaps the `color-schemes/*.css` line if asked;
 2. the "导出 PDF" section of `shared_styles/base_layout.css` takes over and flattens the
    presenter — which shows one slide at a time — into a scroll of pages. No node moves,
    so every `.slides > section …` selector in the design system still matches: what you see
    on screen is what lands on the page;
-3. headless Chrome prints it, then the temporary copy is deleted. `deck.html` is never touched.
+3. headless Chrome prints it, then the temporary copy is deleted (unless `--keep`).
+   `deck.html` is never touched.
 
 > This is deliberately not reveal's own `?print-pdf`. That path moves every section into a
 > `.pdf-page` wrapper, which un-matches the canvas, the component spacing and the module
 > divider colours all at once.
 
-**Self-check:** the command reports page count and paper size. More pages than slides means a
+**Self-check:** the command reports page count and paper size. More pages than expected means a
 slide overflowed the frame and got split — run `nextcourse shot <name> --check` to find it.
 
 **Examples:**
@@ -456,8 +512,8 @@ npm run pdf python-basics
 # explicit path and filename
 nextcourse pdf python-basics ~/Desktop/python-basics-slides.pdf
 
-# 4:3 projector, keep the preview copy
-nextcourse pdf python-basics --size 1600x1200 --keep
+# printable version for learners, at 4:3
+nextcourse pdf python-basics --theme print-light --size 1600x1200
 ```
 
 ---

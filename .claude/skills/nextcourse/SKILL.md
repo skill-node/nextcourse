@@ -45,6 +45,8 @@ nextcourse list
 | 「这页太挤了 / 换个配色」 | 单页修改 | `nextcourse-slides` |
 | 「要打包发给客户 / 拷到别的电脑讲」 | 只是导出 | 直接 `nextcourse export <name> --with-package` |
 | 「把课件发给学员 / 要个 PDF」 | 只是导出 | 直接 `nextcourse pdf <name>`；**别教用户在浏览器里 Cmd+P**，reveal 自带的 A4 打印样式会把配色刷成白底黑字 |
+| 「学员要打印出来 / 深色太费墨」 | 只是导出 | `nextcourse pdf <name> --theme print-light`（纸面浅色版，版式不变） |
+| 「这几页不适合外发」 | 只是导出 | 在那几页的 `<section>` 上加 `data-print="off"`，再导一次；页码会自动连号 |
 | 「一门课从头到尾」 | 全链路 | 见下面工作流 A |
 
 **判断不了就问一句**：「你现在手上已经有什么了？—— 只有一个主题、已经有大纲、还是课件都做完了？」不要凭猜进入某个 Phase。
@@ -98,7 +100,7 @@ nextcourse check <name>                    # 教学设计闭环校验
 nextcourse render <name>                   # lint + build，出 deck.html
 nextcourse package <name> --render         # 出交付包 md + 客户看的 HTML
 nextcourse export <name> --with-package    # 打包成可离线演示的文件夹
-nextcourse pdf <name>                      # 导出 PDF：一页一张幻灯片，配色版式原样保留
+nextcourse pdf <name> [--theme print-light]  # 导出 PDF：一页一张幻灯片，配色版式原样保留
 nextcourse shot <name>                     # 溢出检测 + 逐页截图（需本机 Chrome）
 nextcourse docs <name>                     # design-system / agent / cli / domains
 ```

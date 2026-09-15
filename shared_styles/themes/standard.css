@@ -72,9 +72,7 @@ body {
     pointer-events: none;
 }
 
-/* 第二个选择器是导出 PDF 用的页码，见本文件末尾「导出 PDF」一节 */
-.footer-nav .slide-num,
-html.print-pdf .reveal .slides>section::after {
+.footer-nav .slide-num {
     font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: 0.1em;
@@ -573,6 +571,11 @@ html.print-pdf .reveal .slides {
     counter-reset: pdf-page-num;
 }
 
+/* 纸上的页码不做胶囊，就是一个安静的数字。
+   屏幕上那颗胶囊带 background: var(--bg-slide) + box-shadow: var(--shadow-card)，
+   这两样在导出时都会坏事：深色配色里胶囊底色与页底色本来就同色（dark-ocean 两者
+   都是 #1e293b），于是唯一看得见的就剩那圈阴影，而 Chrome 写 PDF 时会把大模糊阴影
+   位图化、露出它的外框——成品上每页底部因此浮着一个深色方块。 */
 html.print-pdf .reveal .slides>section::after {
     counter-increment: pdf-page-num;
     content: counter(pdf-page-num);
@@ -580,4 +583,8 @@ html.print-pdf .reveal .slides>section::after {
     left: 50%;
     bottom: calc((var(--footer-height) - 2rem) / 2);
     transform: translateX(-50%);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
 }

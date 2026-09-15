@@ -369,13 +369,14 @@ npm run notes python-basics
 ```bash
 npm run pdf <course-name>
 # 或
-nextcourse pdf <course-name> [output.pdf] [--size WxH] [--keep]
+nextcourse pdf <course-name> [output.pdf] [--theme <配色>] [--size WxH] [--keep] [--source <file>]
 ```
 
 把 `deck.html` 印成一页一张幻灯片的 PDF，配色、字体、版式与屏幕上完全一致（需要本机有 Chrome）：
 
 ```
-courses/<course-name>/deck.pdf     # 默认输出
+courses/<course-name>/deck.pdf              # 默认输出（授课版配色）
+courses/<course-name>/deck.print-light.pdf  # 加 --theme print-light 时
 ```
 
 **别让用户自己在浏览器里 Cmd+P。** reveal.css 自带一套「印在 A4 纸上」的打印样式
@@ -384,25 +385,75 @@ courses/<course-name>/deck.pdf     # 默认输出
 
 **参数：**
 - `output.pdf` — 输出路径（默认 `courses/<course-name>/deck.pdf`）
+- `--theme <配色>` — 换一套配色再导出，版式与字体一个像素不动。给学员打印用
+  `--theme print-light`（见下）；也接受任何已有配色名。指定后输出名自动带后缀，
+  不会覆盖授课版
 - `--size WxH` — 纸张尺寸，默认 `1600x900`（16:9）。4:3 的投影场景用 `--size 1600x1200`
-- `--keep` — 保留打印用的临时拷贝 `.deck.print.html`，用浏览器打开即可预览导出效果
+- `--keep` — 留下打印稿 `deck.print.html`（浏览器打开即是导出效果，也可以手改）
+- `--source <file>` — 从课程目录里的某个文件打印，通常是手改过的 `deck.print.html`
 
-**它做了什么**（想改导出效果时看这里）：
+---
+
+##### 授课版 ≠ 发出去的版本
+
+现场演示页、客户敏感案例往往不适合外发。两条路，按改动大小挑：
+
+**页级去留（首选）** —— 在 `slides/slide-XX.html` 的 `<section>` 上写一个属性：
+
+```html
+<section data-print="off">
+```
+
+导出时整页摘掉。页码是 CSS 计数器，**会自动连号**，不会跳号；这条属性对演示毫无影响，
+授课用的 `deck.html` 照常带着这一页。真相只有一份，在 `slides/` 里，重建不会丢。
+
+**要改内容** —— 先 `--keep` 留下打印稿，手改完再从它打印：
+
+```bash
+nextcourse pdf my-course --keep                     # 出 PDF，并留下 deck.print.html
+# 手改 deck.print.html：删半页、补一句「回去怎么练」、换张截图
+nextcourse pdf my-course --source deck.print.html   # 从手改稿再印一次
+```
+
+> `deck.print.html` 是生成物：`render` 重建 `deck.html` 后它不会自动跟上，需要重新 `--keep`。
+> 所以能用 `data-print="off"` 解决的，就别用它。
+
+---
+
+##### 学员要打印到纸上：`--theme print-light`
+
+深色课件在纸上既费墨又难看。加一个参数就能出一份纸面浅色版，**版式布局完全不变**：
+
+```bash
+nextcourse pdf my-course --theme print-light   # → deck.print-light.pdf
+```
+
+`print-light` 派生自 `warm-sand`，按"纸"改了四组值：底色压纯白（背景不吃墨）、阴影全撤
+（卡片靠 1px 发丝线分隔）、**模块封面留白只剩标题**（字号字重一个没动）、代码块翻成浅底深字。
+它不进配色展板，也不要写进 `course.meta.md` 的 `theme:`——那会让你在投影上讲一份白底课件。
+
+两个提前说清的局限：黑白打印时红/绿语义色会塌成相近的灰（课件本身用 ✓/✗ 与边框承载区分，
+不是只靠颜色，所以不致命）；深色截图不会跟着变浅，那是内容问题不是主题问题。
+
+---
+
+##### 它做了什么（想改导出效果时看这里）
+
 1. 复制一份 `deck.html`，给 `<html>` 加 `class="print-pdf"`，注入一条 `@page` 定死纸张尺寸；
+   按需摘页、按需换掉那一行 `color-schemes/*.css`；
 2. `shared_styles/base_layout.css` 的「导出 PDF」一节接手，把「一次只显示一页的演示器」
    摊平成「一页接一页的长卷」——DOM 一个节点都不挪，所以设计系统里
    所有 `.slides > section …` 选择器照常命中，屏幕什么样、纸上就什么样；
-3. headless Chrome 打印，完事删掉临时拷贝。`deck.html` 全程不动。
+3. headless Chrome 打印，完事删掉临时拷贝（除非 `--keep`）。`deck.html` 全程不动。
 
 > 走的不是 reveal 官方的 `?print-pdf`。那条路会把每个 section 搬进一层 `.pdf-page` 容器，
 > 设计系统里的画布、组件间距、模块封面底色会一起失配——修不过来。
 
-**自检：** 命令跑完会报页数和纸张尺寸。页数比 slides 多，说明有页内容超出画布被拆成了两页，
+**自检：** 命令跑完会报页数和纸张尺寸。页数比应印页数多，说明有页内容超出画布被拆成了两页，
 先跑 `nextcourse shot <name> --check` 找出是哪一页。
 
-**发给学员前顺手做的两件事：**
-- 文件名改成课程名（`deck.pdf` 对学员没有意义）
-- 需要的话用「导出为 PDF」再压一道，含大图的课件通常 4–8 MB，微信群发 100 MB 以内都没问题
+**发给学员前顺手做的一件事：** 文件名改成课程名（`deck.pdf` 对学员没有意义）。
+含大图的课件通常 4–8 MB，微信发送没问题。
 
 **示例：**
 ```bash
@@ -412,8 +463,8 @@ npm run pdf python-basics
 # 指定输出路径与文件名
 nextcourse pdf python-basics ~/Desktop/Python基础-课件.pdf
 
-# 4:3 投影 + 保留预览拷贝
-nextcourse pdf python-basics --size 1600x1200 --keep
+# 学员打印版 + 4:3 投影尺寸
+nextcourse pdf python-basics --theme print-light --size 1600x1200
 ```
 
 ---

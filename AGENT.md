@@ -107,7 +107,7 @@ nextcourse shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（
 | `package <name>` | 汇总蓝图 + 大纲 + slide 备注，生成 package/ 交付包（讲师手册 / 学员手册 / 评估方案 / 量规 / 教学设计 / 内容开发 / 行动承诺 / 数据包说明）。`--render` 另出 package/html/（客户交付物，封面 0_index.html），`--force` 覆盖已有 md（默认不覆盖）。文件名带交付序号 `1_`…`8_`（排序即客户的阅读动线，序号定义在 package.js 的 DOCS），每份文档 h1 与 &lt;title&gt; 只写功能名、课程名走小字副标题。S 档会被拒绝 |
 | `export <name>` | 生成 courses/\<name\>/export/，只含演示必需文件，双击 index.html 即可离线演示；`--with-package` 把 package/html/ 一起打进去 |
 | `notes <name>` | 抽取各页 h2 + aside.notes，生成讲师手册 courses/\<name\>/handout.md |
-| `pdf <name>` | 用本机 Chrome headless 把 deck.html 印成 PDF，一页一张幻灯片、配色与版式原样保留，默认落在 courses/\<name\>/deck.pdf。发给学员看的课件用它，**别让用户在浏览器里 Cmd+P**——reveal 自带的 A4 打印样式会把整套配色刷成白底黑字。`--size WxH` 换纸张尺寸（默认 1600x900），`--keep` 保留临时拷贝用于预览 |
+| `pdf <name>` | 用本机 Chrome headless 把 deck.html 印成 PDF，一页一张幻灯片、配色与版式原样保留，默认落在 courses/\<name\>/deck.pdf。发给学员看的课件用它，**别让用户在浏览器里 Cmd+P**——reveal 自带的 A4 打印样式会把整套配色刷成白底黑字。`--theme print-light` 出学员可打印的纸面浅色版（输出名自动带后缀，不覆盖授课版）；`--size WxH` 换纸张尺寸（默认 1600x900）；`--keep` 留下可手改的 deck.print.html，配 `--source <file>` 从手改稿打印。slide 的 `<section>` 上写 `data-print="off"` 可让该页不进 PDF（演示页 / 敏感案例），页码自动连号 |
 | `shot <name>` | 用本机 Chrome headless 做溢出检测并逐页截图到 .review/，供视觉自查（`--check` 只检测不截图） |
 
 也可以通过 npm scripts：`npm run render -- openclaw_2`
@@ -203,6 +203,9 @@ theme: bold-signal
 | `warm-sand`        | 米白底 + 紫绿点缀（商务浅色）  |
 | `notebook-tabs`    | 奶油底 + 衬线粉彩（手记/轻松） |
 | `standard-default` | 白底学术蓝（严肃/学术）        |
+
+另有 `print-light`：**只给 `nextcourse pdf --theme print-light` 用**的纸面配色（纯白、无阴影、
+模块封面留白），不进展板，也不要写进 `course.meta.md` 的 `theme:`。
 
 修改后重新 `nextcourse render <name>` 即生效，无需改任何幻灯片文件。
 
