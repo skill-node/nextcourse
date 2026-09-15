@@ -16,11 +16,11 @@ courses/
 # 例外: examples/*/package/html/ **刻意入库** —— 那是客户实际拿到的交付物,
 # clone 下来双击就该看见成品与打印分页, 不该先装环境跑命令。别往这里加它。
 examples/*/deck.html
-examples/*/deck.pdf
-examples/*/deck.*.pdf
+examples/*/pdf/
 examples/*/deck.print.html
 examples/*/.deck.print.html
 examples/*/export/
+examples/*/archive/
 examples/*/.review/
 
 # IDE

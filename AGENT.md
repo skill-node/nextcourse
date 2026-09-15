@@ -60,17 +60,30 @@ nextcourse/
 │   └── ai-agent-insurance-workshop/  ← M 档样例：1 天 / 31 页 + 蓝图 + 交付包
 └── courses/              ← 用户自己的课程（整个目录 gitignore，不入库）
     └── <course-name>/
+        │   ── 源：手写的、进版本库的 ──
         ├── course.meta.md      ← 构建契约：元数据 + 页面级大纲（build.js 只认它）
         ├── course.blueprint.md ← 设计层真相（M/L 档；模块清单以它为准）
-        ├── package/            ← 交付包（M/L 档；md 为源，html/ 为客户交付物）
         ├── slide-plan.md       ← 每页内容规划（Phase 4 产出，人审内容用）
         ├── slides/
         │   ├── slide-01.html   ← 每个文件 = 一张幻灯片 <section>
         │   ├── slide-02.html
         │   └── ...
         ├── assets/             ← 课程图片（可选）
-        └── deck.html           ← 由 build 生成，勿手动编辑
+        ├── materials/          ← 课件之外的手写材料（课前预习稿、通知、话术…，可选）
+        ├── tools/              ← 这门课自带的脚本（生成演示数据等，可选）
+        │   ── 生成物：随时可重跑，全部 gitignore ──
+        ├── deck.html           ← 由 build 生成，勿手动编辑
+        ├── handout.md          ← 由 notes 生成（各页演讲备注）
+        ├── pdf/                ← 由 pdf 生成的全部 PDF（授课版 / 打印版 / 外发版）
+        ├── package/            ← 交付包（M/L 档；md 为源，html/ 为客户交付物）
+        ├── export/             ← 离线演示包
+        ├── .review/            ← shot 的逐页截图
+        └── archive/            ← 改版前的手工备份（不入库，也不该有人依赖它）
 ```
+
+**根目录只放源。** 一门课跑久了会攒下一堆 PDF、备份、截图，散在根目录会把
+course.meta.md / slides/ 这几样真正要看的东西淹掉。生成物各归各的目录，
+清理时的判断也简单：根目录以外的目录，删了都能重跑出来（archive/ 除外）。
 
 ---
 
@@ -107,7 +120,7 @@ nextcourse shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（
 | `package <name>` | 汇总蓝图 + 大纲 + slide 备注，生成 package/ 交付包（讲师手册 / 学员手册 / 评估方案 / 量规 / 教学设计 / 内容开发 / 行动承诺 / 数据包说明）。`--render` 另出 package/html/（客户交付物，封面 0_index.html），`--force` 覆盖已有 md（默认不覆盖）。文件名带交付序号 `1_`…`8_`（排序即客户的阅读动线，序号定义在 package.js 的 DOCS），每份文档 h1 与 &lt;title&gt; 只写功能名、课程名走小字副标题。S 档会被拒绝 |
 | `export <name>` | 生成 courses/\<name\>/export/，只含演示必需文件，双击 index.html 即可离线演示；`--with-package` 把 package/html/ 一起打进去 |
 | `notes <name>` | 抽取各页 h2 + aside.notes，生成讲师手册 courses/\<name\>/handout.md |
-| `pdf <name>` | 用本机 Chrome headless 把 deck.html 印成 PDF，一页一张幻灯片、配色与版式原样保留，默认落在 courses/\<name\>/deck.pdf。发给学员看的课件用它，**别让用户在浏览器里 Cmd+P**——reveal 自带的 A4 打印样式会把整套配色刷成白底黑字。`--theme print-light` 出学员可打印的纸面浅色版（输出名自动带后缀，不覆盖授课版）；`--size WxH` 换纸张尺寸（默认 1600x900）；`--keep` 留下可手改的 deck.print.html，配 `--source <file>` 从手改稿打印。slide 的 `<section>` 上写 `data-print="off"` 可让该页不进 PDF（演示页 / 敏感案例），页码自动连号 |
+| `pdf <name>` | 用本机 Chrome headless 把 deck.html 印成 PDF，一页一张幻灯片、配色与版式原样保留，默认落在 courses/\<name\>/pdf/deck.pdf。发给学员看的课件用它，**别让用户在浏览器里 Cmd+P**——reveal 自带的 A4 打印样式会把整套配色刷成白底黑字。`--theme print-light` 出学员可打印的纸面浅色版（输出名自动带后缀，不覆盖授课版）；`--size WxH` 换纸张尺寸（默认 1600x900）；`--keep` 留下可手改的 deck.print.html，配 `--source <file>` 从手改稿打印。slide 的 `<section>` 上写 `data-print="off"` 可让该页不进 PDF（演示页 / 敏感案例），页码自动连号 |
 | `shot <name>` | 用本机 Chrome headless 做溢出检测并逐页截图到 .review/，供视觉自查（`--check` 只检测不截图） |
 
 也可以通过 npm scripts：`npm run render -- openclaw_2`

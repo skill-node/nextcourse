@@ -375,16 +375,19 @@ nextcourse pdf <course-name> [output.pdf] [--theme <配色>] [--size WxH] [--kee
 把 `deck.html` 印成一页一张幻灯片的 PDF，配色、字体、版式与屏幕上完全一致（需要本机有 Chrome）：
 
 ```
-courses/<course-name>/deck.pdf              # 默认输出（授课版配色）
-courses/<course-name>/deck.print-light.pdf  # 加 --theme print-light 时
+courses/<course-name>/pdf/deck.pdf              # 默认输出（授课版配色）
+courses/<course-name>/pdf/deck.print-light.pdf  # 加 --theme print-light 时
 ```
+
+一门课会攒下好几份 PDF（授课版 / 打印版 / 删过页的外发版 / 手工改名的那份），
+所以它们统一落在 `pdf/` 下，课程根目录只留源文件。
 
 **别让用户自己在浏览器里 Cmd+P。** reveal.css 自带一套「印在 A4 纸上」的打印样式
 （`@media print`）：背景刷白、正文 20pt 纯黑、装饰全隐藏。直接打印出来的东西不能看，
 不是样式坏了，是那套样式在起作用——本命令绕开的正是它。
 
 **参数：**
-- `output.pdf` — 输出路径（默认 `courses/<course-name>/deck.pdf`）
+- `output.pdf` — 输出路径（默认 `courses/<course-name>/pdf/deck.pdf`；给了路径就按你给的来）
 - `--theme <配色>` — 换一套配色再导出，版式与字体一个像素不动。给学员打印用
   `--theme print-light`（见下）；也接受任何已有配色名。指定后输出名自动带后缀，
   不会覆盖授课版
@@ -457,11 +460,11 @@ nextcourse pdf my-course --theme print-light   # → deck.print-light.pdf
 
 **示例：**
 ```bash
-# 默认输出到 courses/python-basics/deck.pdf
+# 默认输出到 courses/python-basics/pdf/deck.pdf
 npm run pdf python-basics
 
 # 指定输出路径与文件名
-nextcourse pdf python-basics ~/Desktop/Python基础-课件.pdf
+nextcourse pdf python-basics pdf/Python基础-课件.pdf
 
 # 学员打印版 + 4:3 投影尺寸
 nextcourse pdf python-basics --theme print-light --size 1600x1200

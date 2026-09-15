@@ -30,7 +30,7 @@
  *   要改内容：--keep 留下 deck.print.html，手改完用 --source 打印它。
  *
  * Usage:
- *   node pdf.js <course-name>                        # → courses/<name>/deck.pdf
+ *   node pdf.js <course-name>                        # → courses/<name>/pdf/deck.pdf
  *   node pdf.js <course-name> ~/Desktop/x.pdf        # 指定输出文件
  *   node pdf.js <course-name> --theme print-light    # 换成纸面浅色配色导出
  *   node pdf.js <course-name> --size 1920x1080       # 换纸张尺寸（默认 1600x900，16:9）
@@ -111,10 +111,12 @@ if (!fs.existsSync(SRC_DECK)) {
     process.exit(1);
 }
 
-// 输出名带上配色后缀，免得浅色版把授课版覆盖掉
+// 一门课会攒下好几份 PDF（授课版 / 打印版 / 改过页的外发版 / 手工改名的那份），
+// 全堆在课程根目录会把源文件淹掉，所以统一落在 pdf/ 下。
+// 输出名带上配色后缀，免得浅色版把授课版覆盖掉。
 const OUT_PATH = outputArg
     ? path.resolve(outputArg)
-    : path.join(COURSE_DIR, themeArg ? `deck.${themeArg}.pdf` : 'deck.pdf');
+    : path.join(COURSE_DIR, 'pdf', themeArg ? `deck.${themeArg}.pdf` : 'deck.pdf');
 fs.mkdirSync(path.dirname(OUT_PATH), { recursive: true });
 
 const CHROME = findChrome();

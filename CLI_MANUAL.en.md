@@ -416,9 +416,13 @@ Prints `deck.html` to a PDF, one slide per page, with the palette, typefaces and
 exactly as they look on screen (needs a local Chrome):
 
 ```
-courses/<course-name>/deck.pdf              # default output (the teaching palette)
-courses/<course-name>/deck.print-light.pdf  # with --theme print-light
+courses/<course-name>/pdf/deck.pdf              # default output (the teaching palette)
+courses/<course-name>/pdf/deck.print-light.pdf  # with --theme print-light
 ```
+
+A course accumulates several PDFs over time (the teaching one, the printable one, a trimmed
+one for sending out, a renamed copy), so they all land under `pdf/` and the course root keeps
+only source files.
 
 **Do not tell people to hit Cmd+P in the browser.** reveal.css ships a print stylesheet
 built for paper (`@media print`): white background, 20pt black body text, decoration hidden.
@@ -426,7 +430,7 @@ What comes out is unusable — that stylesheet is exactly what this command rout
 
 **Arguments:**
 
-- `output.pdf` — output path (default `courses/<course-name>/deck.pdf`)
+- `output.pdf` — output path (default `courses/<course-name>/pdf/deck.pdf`; an explicit path wins)
 - `--theme <scheme>` — export with a different colour scheme; layout and typefaces do not move
   a pixel. Use `--theme print-light` for something learners can print (below); any existing
   scheme name works. The output filename gets a suffix, so it never overwrites the teaching PDF
@@ -506,11 +510,11 @@ slide overflowed the frame and got split — run `nextcourse shot <name> --check
 **Examples:**
 
 ```bash
-# default output at courses/python-basics/deck.pdf
+# default output at courses/python-basics/pdf/deck.pdf
 npm run pdf python-basics
 
 # explicit path and filename
-nextcourse pdf python-basics ~/Desktop/python-basics-slides.pdf
+nextcourse pdf python-basics pdf/python-basics-slides.pdf
 
 # printable version for learners, at 4:3
 nextcourse pdf python-basics --theme print-light --size 1600x1200
