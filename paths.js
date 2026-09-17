@@ -34,6 +34,9 @@ function pkg(...segments) {
 
 /** 某门课的目录 */
 function courseDir(name) {
+    const contextDir = process.env.NEXTCOURSE_CONTEXT_DIR;
+    const contextName = process.env.NEXTCOURSE_CONTEXT_NAME;
+    if (contextDir && (!contextName || contextName === name)) return path.resolve(contextDir);
     return path.join(COURSES_DIR, name);
 }
 

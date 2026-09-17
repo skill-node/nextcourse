@@ -258,13 +258,18 @@ CLI 你也可以直接用：
 
 ```bash
 nextcourse doctor                 # 自检：Node / 引擎资产 / Chrome / 工作目录
+nextcourse compose <name> --dry-run      # 预览组合课的来源、版本与诊断
+nextcourse validate <name>               # 纯校验组合课，不写报告或生成物
+nextcourse trace <name> <id>             # 查看实例／实体／页面的来源链
+nextcourse impact <source-id>            # 查看直接／传递使用者与冻结状态
+nextcourse sync <name> --dry-run         # 预览更新；用 --apply <plan-id> 显式接受
 nextcourse render <name>          # lint + 构建 deck.html（推荐）
 nextcourse check  <name>          # 教学设计闭环校验（成果 × 模块 × 证据）
-nextcourse package <name> --render        # 生成交付包 md + 客户 HTML（M/L 档）
+nextcourse package <name> --render        # 独立 M/L 或组合 slides+lab/full 交付包
 nextcourse pdf    <name>          # 导出 PDF（一页一张幻灯片，配色版式原样保留）
                                   #   --theme print-light 出学员可打印的浅色版
 nextcourse shot   <name>          # 溢出检测 + 逐页截图自查
-nextcourse export <name> --with-package   # 打包为可离线演示文件夹
+nextcourse export <name> --with-package   # 组合课默认 student；讲师包加 --audience facilitator
 nextcourse docs   design-system   # 打印内置的组件参考
 ```
 

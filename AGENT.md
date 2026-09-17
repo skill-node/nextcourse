@@ -20,6 +20,16 @@ NextCourse 是一个以 **AI-Native 工作流为核心的课程开发工具**。
 
 ---
 
+## 开发接续（仅仓库工作区）
+
+开发资料统一入口：[resource/development/README.md](./resource/development/README.md)。
+接续项目开发先读 [FOLLOWUP.md](./resource/development/FOLLOWUP.md)，确认当前阶段与下一步，
+再读对应方案。乐高组合当前方案是 [LEGO-COURSE-DEVPLAN.md](./resource/development/LEGO-COURSE-DEVPLAN.md)。
+
+所有项目开发 followup（包括以后新增的其他专题）统一在该目录维护；每次收尾更新状态、
+验证结果、未解决问题和下一步。课程内容与实跑数据保留在 `courses/`，开发方案不再放进课程库。
+`resource/` 当前被 Git 忽略，不随 clone／npm 分发；本地资料缺失时应明确说明，不能据历史方案猜进度。
+
 ## 目录结构
 
 ```
@@ -94,13 +104,18 @@ course.meta.md / slides/ 这几样真正要看的东西淹掉。生成物各归�
 ```bash
 nextcourse list                     # 列出所有课程及状态
 nextcourse new    <name> [--scale M|L]  # 初始化新课程目录（不带 --scale = S 档）
+nextcourse compose <name> [--recipe <id>] [--dry-run]  # 预览候选；已有 lock 只重建
+nextcourse validate <name> [--json]                    # 纯校验，不写对齐矩阵
+nextcourse trace <name> <entity-or-instance-id>        # 来源链与当前页面映射
+nextcourse impact <source-id>                          # 直接／传递影响与冻结状态
+nextcourse sync <name> [--dry-run|--apply <plan-id>]   # 显式接受无冲突更新
 nextcourse check  <name>            # 教学设计闭环校验（成果 × 模块 × 证据）
 nextcourse lint   <name>            # 校验幻灯片样式规范
 nextcourse animate <name> [--strip] # 批量打入/剥离组件入场动画（不碰手写 fragment）
 nextcourse build  <name>            # 组装生成 deck.html
 nextcourse render <name>            # lint + build 一步完成（推荐）
-nextcourse package <name> [--render] [--force]   # 生成交付包（M/L 档）
-nextcourse export <name> [outdir] [--with-package]  # 打包为可离线演示文件夹
+nextcourse package <name> [--render] [--force]   # 独立 M/L 或组合 slides+lab/full 交付包
+nextcourse export <name> [outdir] [--with-package] [--audience student|facilitator]
 nextcourse notes  <name>            # 导出讲师手册 handout.md（各页演讲备注）
 nextcourse pdf    <name> [out.pdf]  # 导出 PDF：一页一张幻灯片，配色版式原样保留（需本机 Chrome）
 nextcourse shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（需本机 Chrome）
@@ -112,13 +127,16 @@ nextcourse shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（
 |------|------|
 | `list` | 显示 courses/ 下所有课程，标注 meta/slides/deck/export 完成状态 |
 | `new <name>` | 创建 courses/\<name\>/ 目录结构 + course.meta.md 模板；`--scale M\|L` 另生成 course.blueprint.md 并在 frontmatter 补 scale/duration/class_size |
+| `compose <name>` | `--dry-run` 预览公开引用候选；候选经 `sync --apply` 接受后，只从匹配 lock 生成 `.build/<recipe>/` 视图，不接受上游更新 |
+| `validate / trace / impact` | 共用只读领域 API；可用 `--json` 给 UI 消费，不调用会写对齐矩阵的旧 `check` |
+| `sync <name>` | 预览候选版本与差异；仅 `--apply <plan-id>` 接受当前基线仍匹配的无冲突更新，冻结与变体冲突不覆盖 |
 | `check <name>` | 教学逻辑校验：闭环（每条 outcome 有 module 教到 + evidence 测到）、蓝图↔大纲↔slides 一致性、Bloom 深度、活动落地（有活动的模块必须有 Activity 页）、时长核算、M/L 章节完整度；并生成 package/7_alignment.md 对齐矩阵。有 error 时 exit 1 |
 | `lint <name>` | 扫描 slide-*.html，检查 5 类违规（内联 style / 硬编码色 / 硬编码 RGB / 新字体 / 未注册 class） |
 | `animate <name>` | 按组件结构批量给 slides 打入场动画 class；`--strip` 一键剥离，`--dry` 只报告。幂等，且绝不改动手写的 `fragment`（详见 CLI_MANUAL.md） |
 | `build <name>` | 读 course.meta.md frontmatter + 拼接 slides/ → 生成 deck.html |
 | `render <name>` | lint 通过后再 build，是日常最常用的命令 |
-| `package <name>` | 汇总蓝图 + 大纲 + slide 备注，生成 package/ 交付包（讲师手册 / 学员手册 / 评估方案 / 量规 / 教学设计 / 内容开发 / 行动承诺 / 数据包说明）。`--render` 另出 package/html/（客户交付物，封面 0_index.html），`--force` 覆盖已有 md（默认不覆盖）。文件名带交付序号 `1_`…`8_`（排序即客户的阅读动线，序号定义在 package.js 的 DOCS），每份文档 h1 与 &lt;title&gt; 只写功能名、课程名走小字副标题。S 档会被拒绝 |
-| `export <name>` | 生成 courses/\<name\>/export/，只含演示必需文件，双击 index.html 即可离线演示；`--with-package` 把 package/html/ 一起打进去 |
+| `package <name>` | 独立 M/L 保持旧 `package/` 流程；组合 `slides+lab` 从锁定案例生成 `package-src/<recipe>/{student,facilitator}` 草稿并分 audience 构建，绝不覆盖现有 Markdown；`full` 要求完整八份源 |
+| `export <name>` | 生成离线演示包；组合课 `--with-package` 默认只带 student，讲师答案须显式 `--audience facilitator` |
 | `notes <name>` | 抽取各页 h2 + aside.notes，生成讲师手册 courses/\<name\>/handout.md |
 | `pdf <name>` | 用本机 Chrome headless 把 deck.html 印成 PDF，一页一张幻灯片、配色与版式原样保留，默认落在 courses/\<name\>/pdf/deck.pdf。发给学员看的课件用它，**别让用户在浏览器里 Cmd+P**——reveal 自带的 A4 打印样式会把整套配色刷成白底黑字。`--theme print-light` 出学员可打印的纸面浅色版（输出名自动带后缀，不覆盖授课版）；`--size WxH` 换纸张尺寸（默认 1600x900）；`--keep` 留下可手改的 deck.print.html，配 `--source <file>` 从手改稿打印。slide 的 `<section>` 上写 `data-print="off"` 可让该页不进 PDF（演示页 / 敏感案例），页码自动连号 |
 | `shot <name>` | 用本机 Chrome headless 做溢出检测并逐页截图到 .review/，供视觉自查（`--check` 只检测不截图） |

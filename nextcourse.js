@@ -10,12 +10,17 @@
  *   nextcourse docs   [name]            打印内置文档
  *   nextcourse list                     列出所有课程及状态
  *   nextcourse new    <name> [--scale]  初始化新课程目录
+ *   nextcourse compose <name> [--recipe] 预览候选或从已接受 lock 生成视图
+ *   nextcourse validate <name>          纯校验组合课（不写报告或生成物）
+ *   nextcourse trace <name> <id>        查看实例、实体或当前页的来源链
+ *   nextcourse impact <source-id>       查看直接／传递使用者
+ *   nextcourse sync <name>              预览或接受上游更新计划
  *   nextcourse check  <name>            校验教学设计闭环（成果 × 模块 × 证据）
  *   nextcourse lint   <name>            校验幻灯片样式规范
  *   nextcourse animate <name> [--strip] 批量打入/剥离组件入场动画
  *   nextcourse build  <name>            组装生成 deck.html
  *   nextcourse render <name>            lint + build 一步完成
- *   nextcourse package <name> [--render] 生成交付包 package/（讲师手册 / 学员手册 / 量规…）
+ *   nextcourse package <name> [--render] 生成独立或组合课程交付包
  *   nextcourse pdf    <name> [out.pdf]  导出 PDF（保留配色版式；--theme print-light 出学员打印版）
  *   nextcourse export <name> [outdir]   打包为可离线演示文件夹
  *   nextcourse themes                   生成配色/字体展板（theme-gallery/）
@@ -30,10 +35,22 @@
 'use strict';
 
 const { spawnSync } = require('child_process');
+const crypto = require('crypto');
 const fs   = require('fs');
 const path = require('path');
 
 const { PKG_ROOT, WORK_ROOT, COURSES_DIR, pkg, courseDir, findChrome } = require('./paths');
+const {
+    planRecipeLock,
+    materializeRecipe,
+    validateRecipe,
+    validateWorkspace,
+    traceSource,
+    impactSource,
+    planCourseUpdate,
+    applyCourseUpdate,
+    packageComposedCourse,
+} = require('./composition');
 
 const VERSION = require('./package.json').version;
 const [,, cmd, ...rest] = process.argv;
@@ -42,11 +59,11 @@ const [,, cmd, ...rest] = process.argv;
 
 // 子进程继承调用者的 cwd —— 它们各自 require('./paths') 时要算出同一个 WORK_ROOT。
 // V3 这里写死 { cwd: ROOT }，那是课程被锁在仓库里的根因。
-function run(script, args = []) {
+function run(script, args = [], extraEnv = {}) {
     const result = spawnSync(
         process.execPath,
         [pkg(script), ...args],
-        { stdio: 'inherit' }
+        { stdio: 'inherit', env: { ...process.env, ...extraEnv } }
     );
     return result.status ?? 0;
 }
@@ -61,9 +78,189 @@ function requireName(cmd) {
     return rest[0];
 }
 
+function optionValue(flag) {
+    const direct = rest.find(value => value.startsWith(`${flag}=`));
+    if (direct) return direct.slice(flag.length + 1);
+    const index = rest.indexOf(flag);
+    return index >= 0 ? rest[index + 1] : null;
+}
+
+function withoutOption(args, flag) {
+    const output = [];
+    for (let index = 0; index < args.length; index++) {
+        if (args[index] === flag) { index++; continue; }
+        if (args[index].startsWith(`${flag}=`)) continue;
+        output.push(args[index]);
+    }
+    return output;
+}
+
+function printDiagnostics(diagnostics) {
+    for (const item of diagnostics || []) {
+        const mark = item.severity === 'warning' ? 'WARN' : 'ERROR';
+        console.error(`  ${mark} ${item.code}${item.path ? ` ${item.path}` : ''}: ${item.message}`);
+    }
+}
+
+function printJson(value) {
+    process.stdout.write(`${JSON.stringify(value, (key, item) => key === 'applyPlan' ? undefined : item, 2)}\n`);
+}
+
+function resolvedContext(name, recipeId) {
+    const sourceDir = path.join(COURSES_DIR, name);
+    if (!fs.existsSync(path.join(sourceDir, 'course.compose.json'))) return { composed: false, dir: sourceDir, env: {} };
+    const result = materializeRecipe(WORK_ROOT, name, recipeId);
+    if (!result.materialized) {
+        printDiagnostics(result.diagnostics);
+        die(`组合视图不可用；先运行 nextcourse compose ${name}${recipeId ? ` --recipe ${recipeId}` : ''}`);
+    }
+    return {
+        composed: true,
+        dir: result.outputDir,
+        recipeId: recipeId || JSON.parse(fs.readFileSync(path.join(result.outputDir, 'build.manifest.json'), 'utf8')).recipeId,
+        env: {
+            NEXTCOURSE_CONTEXT_DIR: result.outputDir,
+            NEXTCOURSE_CONTEXT_NAME: name,
+        },
+    };
+}
+
 // ─── 命令 ────────────────────────────────────────────────────────────────────
 
 const commands = {
+
+    compose() {
+        const name = requireName('compose');
+        const recipeId = optionValue('--recipe');
+        const currentLockPath = path.join(COURSES_DIR, name, 'course.lock.json');
+        if (!rest.includes('--dry-run') && fs.existsSync(currentLockPath)) {
+            let currentLock = null;
+            try { currentLock = JSON.parse(fs.readFileSync(currentLockPath, 'utf8')); } catch { /* normal plan reports it below */ }
+            const composePath = path.join(COURSES_DIR, name, 'course.compose.json');
+            const composeHash = fs.existsSync(composePath)
+                ? `sha256:${crypto.createHash('sha256').update(fs.readFileSync(composePath)).digest('hex')}`
+                : null;
+            if (currentLock && currentLock.composeHash === composeHash && (!recipeId || currentLock.recipeId === recipeId)) {
+                const materialized = materializeRecipe(WORK_ROOT, name, recipeId);
+                printDiagnostics(materialized.diagnostics);
+                if (!materialized.materialized) process.exit(1);
+                console.log(`\nNextCourse compose — ${name}/${currentLock.recipeId}`);
+                console.log('─'.repeat(60));
+                console.log(`  使用现有 lock；未检查或接受上游更新`);
+                console.log(`  ✓ view     ${materialized.outputDir} (${materialized.pageCount} slides)\n`);
+                return;
+            }
+        }
+        const plan = planRecipeLock(WORK_ROOT, name, recipeId);
+        printDiagnostics(plan.diagnostics);
+        if (!plan.valid) process.exit(1);
+        console.log(`\nNextCourse compose — ${name}/${plan.recipeId}`);
+        console.log('─'.repeat(60));
+        for (const reference of plan.lock.references) {
+            console.log(`  ${reference.occurrenceId} → ${reference.ref}@${reference.version}`);
+            console.log(`    ${reference.exportPath.join(' → ')}`);
+        }
+        console.log(`  plan ${plan.planId}`);
+        if (rest.includes('--dry-run')) {
+            console.log('  dry-run：未写入 lock、快照或构建视图\n');
+            return;
+        }
+        console.error(`\nERROR: 尚无与当前配方匹配的已接受 lock。先运行 nextcourse sync ${name} --dry-run，`);
+        console.error(`       审阅后用 nextcourse sync ${name} --apply <plan-id> 接受，再重新 compose。`);
+        process.exit(1);
+    },
+
+    validate() {
+        const name = requireName('validate');
+        const result = validateRecipe(WORK_ROOT, name, optionValue('--recipe'));
+        if (rest.includes('--json')) printJson(result);
+        else {
+            console.log(`\nNextCourse validate — ${name}/${result.recipeId || '-'}`);
+            console.log('─'.repeat(60));
+            printDiagnostics(result.diagnostics);
+            console.log(`  ${result.valid ? '✓' : '✗'} ${result.valid ? '校验通过' : '校验失败'}（纯读取，未写文件）`);
+            if (result.estimatedMinutes !== undefined) console.log(`  预计时长   ${result.estimatedMinutes} min`);
+            if (result.generated && result.generated.present) console.log(`  构建视图   ${result.generated.clean ? 'clean' : 'drift'}`);
+            console.log('');
+        }
+        if (!result.valid) process.exit(1);
+    },
+
+    trace() {
+        const name = requireName('trace');
+        const query = rest[1];
+        if (!query) die('Usage: nextcourse trace <course-name> <entity-or-instance-id> [--recipe <id>]');
+        const result = traceSource(WORK_ROOT, name, query, optionValue('--recipe'));
+        if (rest.includes('--json')) printJson(result);
+        else {
+            console.log(`\nNextCourse trace — ${name}/${result.recipeId || '-'} · ${query}`);
+            console.log('─'.repeat(60));
+            printDiagnostics(result.diagnostics);
+            for (const match of result.matches) {
+                console.log(`  ${match.occurrenceId}  ${match.contentMode || '-'} / ${match.updatePolicy || '-'}`);
+                if (match.exportPath.length) console.log(`    ${match.exportPath.join(' → ')} @ ${match.version}`);
+                else console.log(`    local → ${match.pages.map(page => page.sourcePath).join(', ')}`);
+                for (const page of match.pages) console.log(`    page ${page.index}: ${page.entityId} → ${page.output}`);
+                if (match.variant) console.log(`    variant ${match.variant.path} (baseline ${match.variant.baselineHash})`);
+            }
+            if (!result.found) console.log('  未找到匹配的来源记录');
+            console.log('');
+        }
+        if (!result.found || result.diagnostics.some(item => item.severity === 'error')) process.exit(1);
+    },
+
+    impact() {
+        const sourceId = requireName('impact');
+        const result = impactSource(WORK_ROOT, sourceId);
+        if (rest.includes('--json')) printJson(result);
+        else {
+            console.log(`\nNextCourse impact — ${sourceId}`);
+            console.log('─'.repeat(60));
+            printDiagnostics(result.diagnostics);
+            for (const item of result.impacts) {
+                console.log(`  ${item.relation.padEnd(10)} ${item.courseName}/${item.recipeId} · ${item.occurrenceId}`);
+                console.log(`    ${item.requestedRef} → ${item.resolvedRef}@${item.version} · ${item.frozen ? 'frozen' : 'manual'} · ${item.locked ? 'locked' : 'unlocked'}`);
+            }
+            console.log(`  ${result.direct} direct · ${result.transitive} transitive\n`);
+        }
+        if (!result.valid) process.exit(1);
+    },
+
+    sync() {
+        const name = requireName('sync');
+        const recipeId = optionValue('--recipe');
+        const requestedPlanId = optionValue('--apply');
+        const plan = planCourseUpdate(WORK_ROOT, name, recipeId);
+        if (requestedPlanId) {
+            const result = applyCourseUpdate(plan, requestedPlanId);
+            if (rest.includes('--json')) printJson({ ...result, planId: plan.planId, conflicts: plan.conflicts });
+            else {
+                printDiagnostics(result.diagnostics);
+                if (result.applied) console.log(`\n  ✓ update applied  ${name}/${plan.recipeId} · ${plan.planId}\n`);
+            }
+            if (!result.applied) process.exit(1);
+            return;
+        }
+        if (rest.includes('--json')) printJson(plan);
+        else {
+            console.log(`\nNextCourse sync — ${name}/${plan.recipeId || '-'}`);
+            console.log('─'.repeat(60));
+            printDiagnostics(plan.diagnostics);
+            for (const change of plan.changes) {
+                console.log(`  ${change.status.padEnd(16)} ${change.occurrenceId} · ${change.requestedRef}`);
+                if (change.diff.from || change.diff.to) {
+                    console.log(`    ${change.diff.from ? `${change.diff.from.version} ${change.diff.from.contentHash}` : '(new)'}`);
+                    console.log(`    → ${change.diff.to ? `${change.diff.to.version} ${change.diff.to.contentHash}` : '(removed)'}`);
+                }
+                if (change.conflict) console.log(`    CONFLICT ${change.conflict}`);
+                if (change.diff.files.length) console.log(`    ${change.diff.files.map(file => `${file.status}:${file.path}`).join(', ')}`);
+            }
+            console.log(`  plan ${plan.planId || '-'}`);
+            console.log(`  ${plan.applicable ? `接受：nextcourse sync ${name} --apply ${plan.planId}` : '计划不可应用；先处理上方错误或冲突'}`);
+            console.log('  preview：未写入源、lock、快照、构建视图或对齐矩阵\n');
+        }
+        if (!plan.valid) process.exit(1);
+    },
 
     list() {
         const coursesDir = COURSES_DIR;
@@ -204,47 +401,100 @@ outcomes:
     },
 
     check() {
-        process.exit(run('check.js', [requireName('check')]));
+        if (rest.includes('--workspace')) {
+            const result = validateWorkspace(WORK_ROOT);
+            if (rest.includes('--json')) printJson(result);
+            else {
+                console.log(`\nNextCourse check --workspace — ${WORK_ROOT}`);
+                console.log('─'.repeat(60));
+                printDiagnostics(result.diagnostics);
+                for (const course of result.courses) console.log(`  ${course.valid ? '✓' : '✗'} ${course.courseName} (${course.kind})`);
+                console.log('  纯读取；未写对齐矩阵或构建产物\n');
+            }
+            if (!result.valid) process.exit(1);
+            return;
+        }
+        const name = requireName('check');
+        const context = resolvedContext(name, optionValue('--recipe'));
+        process.exit(run('check.js', [name], context.env));
     },
 
     package() {
         const name = requireName('package');
+        if (fs.existsSync(path.join(COURSES_DIR, name, 'course.compose.json'))) {
+            const recipeId = optionValue('--recipe');
+            resolvedContext(name, recipeId);
+            const result = packageComposedCourse(WORK_ROOT, PKG_ROOT, name, recipeId, { render: rest.includes('--render') });
+            printDiagnostics(result.diagnostics);
+            if (!result.packaged) process.exit(1);
+            console.log(`\nNextCourse Package — ${name}/${result.plan.recipeId}`);
+            console.log('─'.repeat(60));
+            for (const file of result.writtenSources) console.log(`  ✓ source   ${file}`);
+            if (!result.writtenSources.length) console.log('  · source   已存在，未覆盖人工 Markdown');
+            console.log(`  ✓ student  ${path.join(result.outputRoot, 'student')}`);
+            console.log(`  ✓ teacher  ${path.join(result.outputRoot, 'facilitator')}`);
+            console.log(`  ${rest.includes('--render') ? '✓ HTML 已渲染' : '· 未渲染 HTML；加 --render 生成交付页面'}\n`);
+            return;
+        }
         process.exit(run('package.js', [name, ...rest.slice(1)]));
     },
 
     lint() {
-        process.exit(run('lint-slides.js', [requireName('lint')]));
+        const name = requireName('lint');
+        const context = resolvedContext(name, optionValue('--recipe'));
+        process.exit(run('lint-slides.js', [name], context.env));
     },
 
     animate() {
         const name = requireName('animate');
+        if (fs.existsSync(path.join(COURSES_DIR, name, 'course.compose.json'))) {
+            die(`组合课不能修改 .build 产物；请修改本地源／变体，或先回到提供该页的共享源`);
+        }
         process.exit(run('animate-slides.js', [name, ...rest.slice(1)]));
     },
 
     build() {
-        process.exit(run('build.js', [requireName('build')]));
+        const name = requireName('build');
+        const context = resolvedContext(name, optionValue('--recipe'));
+        process.exit(run('build.js', [name], context.env));
     },
 
     render() {
         const name = requireName('render');
-        const lintCode = run('lint-slides.js', [name]);
+        const context = resolvedContext(name, optionValue('--recipe'));
+        const lintCode = run('lint-slides.js', [name], context.env);
         if (lintCode !== 0) process.exit(lintCode);
-        process.exit(run('build.js', [name]));
+        process.exit(run('build.js', [name], context.env));
     },
 
     export() {
         const name = requireName('export');
-        process.exit(run('export.js', [name, ...rest.slice(1)]));
+        const context = resolvedContext(name, optionValue('--recipe'));
+        if (context.composed) {
+            const buildCode = run('build.js', [name], context.env);
+            if (buildCode !== 0) process.exit(buildCode);
+        }
+        process.exit(run('export.js', [name, ...withoutOption(rest.slice(1), '--recipe')], context.env));
     },
 
     pdf() {
         const name = requireName('pdf');
-        process.exit(run('pdf.js', [name, ...rest.slice(1)]));
+        const context = resolvedContext(name, optionValue('--recipe'));
+        if (context.composed) {
+            const buildCode = run('build.js', [name], context.env);
+            if (buildCode !== 0) process.exit(buildCode);
+        }
+        process.exit(run('pdf.js', [name, ...withoutOption(rest.slice(1), '--recipe')], context.env));
     },
 
     shot() {
         const name = requireName('shot');
-        process.exit(run('shot.js', [name, ...rest.slice(1)]));
+        const context = resolvedContext(name, optionValue('--recipe'));
+        if (context.composed) {
+            const buildCode = run('build.js', [name], context.env);
+            if (buildCode !== 0) process.exit(buildCode);
+        }
+        process.exit(run('shot.js', [name, ...withoutOption(rest.slice(1), '--recipe')], context.env));
     },
 
     themes() {
@@ -253,13 +503,15 @@ outcomes:
 
     notes() {
         const name      = requireName('notes');
-        const slidesDir = path.join(courseDir(name), 'slides');
+        const context   = resolvedContext(name, optionValue('--recipe'));
+        const activeDir = context.dir;
+        const slidesDir = path.join(activeDir, 'slides');
         if (!fs.existsSync(slidesDir)) die(`slides/ not found: ${slidesDir}`);
         const files = fs.readdirSync(slidesDir).filter(f => f.endsWith('.html')).sort();
         if (files.length === 0) die('slides/ 目录为空');
 
         let title = name;
-        const metaPath = path.join(courseDir(name), 'course.meta.md');
+        const metaPath = path.join(activeDir, 'course.meta.md');
         if (fs.existsSync(metaPath)) {
             const m = fs.readFileSync(metaPath, 'utf8').match(/^title:\s*["']?(.+?)["']?\s*$/m);
             if (m) title = m[1];
@@ -285,11 +537,11 @@ outcomes:
             out.push('');
         });
 
-        const outPath = path.join(courseDir(name), 'handout.md');
+        const outPath = path.join(activeDir, 'handout.md');
         fs.writeFileSync(outPath, out.join('\n'), 'utf8');
         console.log(`\n  ✓  讲师手册已生成: ${outPath}`);
         console.log(`     共 ${files.length} 页, 其中 ${noteCount} 页有演讲备注`);
-        if (fs.existsSync(path.join(courseDir(name), 'course.blueprint.md'))) {
+        if (fs.existsSync(path.join(activeDir, 'course.blueprint.md'))) {
             console.log(`     （M/L 档: nextcourse package ${name} 出的讲师手册按模块组织, 还带活动指令与评分点）`);
         }
         console.log('');
@@ -365,18 +617,31 @@ NextCourse V${VERSION.split('.')[0]} — 课程开发工具
   nextcourse list                     列出所有课程及状态
   nextcourse new    <name> [--scale M|L]
                                       初始化新课程目录（不带 --scale = S 档轻量分享课）
-  nextcourse check  <name>            校验教学设计闭环：成果 × 模块 × 证据 + 时长 + 页数
+  nextcourse compose <name> [--recipe <id>] [--dry-run]
+                                      预览候选；已有已接受 lock 时只重建隔离视图
+  nextcourse validate <name> [--recipe <id>] [--json]
+                                      纯校验组合课，不写报告、lock 或构建视图
+  nextcourse trace <name> <entity-or-instance-id> [--recipe <id>] [--json]
+                                      查看实例、实体或当前页码的完整来源链
+  nextcourse impact <source-id> [--json]
+                                      查看工作区内直接／传递使用者及冻结状态
+  nextcourse sync <name> [--recipe <id>] [--dry-run] [--json]
+  nextcourse sync <name> --apply <plan-id>
+                                      预览更新；仅接受匹配当前基线且无冲突的计划
+  nextcourse check  <name>            兼容校验：教学闭环并按旧行为写报告
+  nextcourse check --workspace [--json]
+                                      纯校验工作区组合契约、快照与漂移
   nextcourse lint   <name>            校验幻灯片样式规范
   nextcourse animate <name> [--strip] 批量打入/剥离组件入场动画（不碰手写 fragment）
   nextcourse build  <name>            组装生成 deck.html
   nextcourse render <name>            lint + build 一步完成（推荐）
-  nextcourse package <name> [--render] [--force]
-                                      生成交付包 package/*.md（--render 另出客户看的 HTML）
+  nextcourse package <name> [--recipe <id>] [--render] [--force]
+                                      独立 M/L 或组合 slides+lab/full 交付包
   nextcourse pdf    <name> [out.pdf] [--theme <配色>] [--size WxH] [--keep] [--source <file>]
                                       导出 PDF：一页一张幻灯片，配色版式原样保留（需本机 Chrome）
                                       --theme print-light 出学员可打印的浅色版
                                       slide 上写 data-print="off" 的页不进 PDF
-  nextcourse export <name> [outdir] [--with-package]
+  nextcourse export <name> [outdir] [--with-package] [--audience student|facilitator]
                                       打包为可离线演示文件夹
   nextcourse notes  <name>            导出讲师手册 handout.md（各页演讲备注）
   nextcourse shot   <name> [--check]  溢出检测 + 逐页截图到 .review/（需本机 Chrome）
@@ -387,6 +652,8 @@ NextCourse V${VERSION.split('.')[0]} — 课程开发工具
   nextcourse-delivery <name>    ← 技能: M/L 档补评估方案与开发计划
   nextcourse check <name>       ← M/L 档: 校验教学设计闭环
   nextcourse-slides <name>      ← 技能: 生成幻灯片
+  nextcourse compose <name>     ← 组合课: 锁定引用并生成 .build/<recipe>/
+  nextcourse sync <name>        ← 组合课: 预览上游更新并用 plan ID 显式接受
   nextcourse render <name>      ← 校验 + 构建 deck.html
   nextcourse package <name> --render   ← M/L 档: 交出讲师手册/学员手册/量规
   nextcourse export <name> --with-package  ← 打包，拷贝到任意电脑演示

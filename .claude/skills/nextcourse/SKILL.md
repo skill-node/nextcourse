@@ -47,6 +47,7 @@ nextcourse list
 | 「把课件发给学员 / 要个 PDF」 | 只是导出 | 直接 `nextcourse pdf <name>`；**别教用户在浏览器里 Cmd+P**，reveal 自带的 A4 打印样式会把配色刷成白底黑字 |
 | 「学员要打印出来 / 深色太费墨」 | 只是导出 | `nextcourse pdf <name> --theme print-light`（纸面浅色版，版式不变） |
 | 「这几页不适合外发」 | 只是导出 | 在那几页的 `<section>` 上加 `data-print="off"`，再导一次；页码会自动连号 |
+| 「复用另一门课／组合几个模块／这页跟上游同步」 | 课程组合 | 先看 `course.compose.json`；预览用 `nextcourse compose <name> --dry-run`，不要复制页或改 `.build/` |
 | 「一门课从头到尾」 | 全链路 | 见下面工作流 A |
 
 **判断不了就问一句**：「你现在手上已经有什么了？—— 只有一个主题、已经有大纲、还是课件都做完了？」不要凭猜进入某个 Phase。
@@ -79,6 +80,17 @@ nextcourse export <name> --with-package   → 打包交付
 
 课件已经做完，客户临时要手册：直接 `nextcourse-delivery <name>`。它会先读现状再只问缺的，不会从头问一遍。
 
+### D · 组合／复用已有课程单元
+
+先设计本课目标，再确认要复用的公开单元与成果映射。已有 `course.compose.json` 时先跑：
+
+```bash
+nextcourse compose <name> --dry-run
+```
+
+来源、版本、循环或重复问题清楚后再正式 `compose`。`.build/<recipe>/` 是生成视图；
+要改内容必须回到本地源、当前课程变体或提供该单元的共享源，不能直接改生成页。
+
 ---
 
 ## 硬性关卡（不要替用户跳过）
@@ -96,6 +108,7 @@ nextcourse export <name> --with-package   → 打包交付
 nextcourse doctor                          # 自检 + 报出工作目录
 nextcourse list                            # 有哪些课、各自到哪一步了
 nextcourse new <name> [--scale M|L]        # 建课程目录
+nextcourse compose <name> [--dry-run]      # 预览／应用组合配方与精确版本锁
 nextcourse check <name>                    # 教学设计闭环校验
 nextcourse render <name>                   # lint + build，出 deck.html
 nextcourse package <name> --render         # 出交付包 md + 客户看的 HTML

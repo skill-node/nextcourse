@@ -296,13 +296,18 @@ The CLI is also yours to drive directly:
 
 ```bash
 nextcourse doctor                 # self-check: Node, engine assets, Chrome, working dir
+nextcourse compose <name> --dry-run      # preview a composed course's sources and versions
+nextcourse validate <name>               # read-only validation; writes no reports or views
+nextcourse trace <name> <id>             # trace an occurrence, entity, or current page
+nextcourse impact <source-id>            # direct/transitive consumers and frozen state
+nextcourse sync <name> --dry-run         # preview; accept explicitly with --apply <plan-id>
 nextcourse render <name>          # lint + build deck.html  (recommended)
 nextcourse check  <name>          # teaching-design closure check (outcome x module x evidence)
-nextcourse package <name> --render        # delivery package: md source + client HTML (M/L)
+nextcourse package <name> --render        # independent M/L or composed slides+lab/full package
 nextcourse pdf    <name>          # export a PDF, one slide per page, palette intact
                                   #   --theme print-light for a printable light version
 nextcourse shot   <name>          # overflow check + per-page screenshots
-nextcourse export <name> --with-package   # package as an offline-playable folder
+nextcourse export <name> --with-package   # composed defaults to student; use --audience facilitator for trainers
 nextcourse docs   design-system   # print the bundled component reference
 ```
 

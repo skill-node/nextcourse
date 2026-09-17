@@ -24,9 +24,26 @@ const { PKG_ROOT, pkg, courseDir, assetBase, requireCourse } = require('./paths'
 // ─── 参数 ────────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
 const WITH_PACKAGE = args.includes('--with-package');
-const [courseName, outputBase] = args.filter(a => !a.startsWith('--'));
+function optionValue(flag) {
+    const direct = args.find(value => value.startsWith(`${flag}=`));
+    if (direct) return direct.slice(flag.length + 1);
+    const index = args.indexOf(flag);
+    return index >= 0 ? args[index + 1] : null;
+}
+const audience = optionValue('--audience') || 'student';
+if (!['student', 'facilitator'].includes(audience)) {
+    console.error('ERROR: --audience must be student or facilitator');
+    process.exit(1);
+}
+const positional = [];
+for (let index = 0; index < args.length; index++) {
+    if (args[index] === '--audience') { index++; continue; }
+    if (args[index].startsWith('--audience=')) continue;
+    if (!args[index].startsWith('--')) positional.push(args[index]);
+}
+const [courseName, outputBase] = positional;
 if (!courseName) {
-    console.error('Usage: node export.js <course-name> [output-dir] [--with-package]');
+    console.error('Usage: node export.js <course-name> [output-dir] [--with-package] [--audience student|facilitator]');
     process.exit(1);
 }
 
@@ -182,12 +199,17 @@ if (fs.existsSync(assetsDir)) {
 // md 是我们的源文件, 不进客户手里的包。
 let packagedDocs = 0;
 if (WITH_PACKAGE) {
-    const pkgHtml = path.join(COURSE_DIR, 'package', 'html');
+    const audiencePackage = path.join(COURSE_DIR, 'package', audience);
+    const isComposedPackage = fs.existsSync(audiencePackage);
+    const pkgHtml = isComposedPackage ? path.join(audiencePackage, 'html') : path.join(COURSE_DIR, 'package', 'html');
     if (!fs.existsSync(pkgHtml)) {
-        console.error(`ERROR: package/html/ 不存在。先运行 'node package.js ${courseName} --render'`);
+        console.error(`ERROR: package HTML 不存在。先运行 'nextcourse package ${courseName} --render'`);
         process.exit(1);
     }
-    packagedDocs = copyDir(pkgHtml, path.join(EXPORT_DIR, 'package'));
+    packagedDocs = copyDir(pkgHtml, isComposedPackage ? path.join(EXPORT_DIR, 'package', 'html') : path.join(EXPORT_DIR, 'package'));
+    if (isComposedPackage) {
+        packagedDocs += copyDir(path.join(audiencePackage, 'materials'), path.join(EXPORT_DIR, 'package', 'materials'));
+    }
     fileCount += packagedDocs;
 }
 
@@ -199,9 +221,12 @@ console.log(`${'─'.repeat(50)}`);
 console.log(`  输出目录 : ${EXPORT_DIR}`);
 console.log(`  文件总数 : ${fileCount}`);
 console.log(`  打包大小 : ${sizeMB} MB`);
-if (WITH_PACKAGE) console.log(`  交付包   : package/ ${packagedDocs} 个文档`);
+if (WITH_PACKAGE) console.log(`  交付包   : package/ ${packagedDocs} 个文件（${audience}）`);
 console.log(`\n  ✓  完成。`);
 console.log(`     将整个 "${path.basename(EXPORT_DIR)}" 文件夹`);
 console.log(`     拷贝到 U 盘 / 云盘 / 任意电脑`);
 console.log(`     双击 index.html 即可演示（无需联网）`);
-if (WITH_PACKAGE) console.log(`     交付文档在 package/0_index.html\n`); else console.log('');
+if (WITH_PACKAGE) {
+    const composedEntry = fs.existsSync(path.join(EXPORT_DIR, 'package', 'html', '0_index.html'));
+    console.log(`     交付文档在 ${composedEntry ? 'package/html/0_index.html' : 'package/0_index.html'}\n`);
+} else console.log('');

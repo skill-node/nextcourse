@@ -30,6 +30,7 @@
     "animate-slides.js",
     "render-md.js",
     "course-model.js",
+    "composition/",
     "shot.js",
     "theme-gallery.js",
     "templates/",
@@ -47,6 +48,12 @@
     "THIRD-PARTY-NOTICES.md"
   ],
   "scripts": {
+    "test": "node --test test/*.test.js",
+    "compose": "node nextcourse.js compose",
+    "validate": "node nextcourse.js validate",
+    "trace": "node nextcourse.js trace",
+    "impact": "node nextcourse.js impact",
+    "sync": "node nextcourse.js sync",
     "list":   "node nextcourse.js list",
     "check":  "node nextcourse.js check",
     "lint":   "node nextcourse.js lint",

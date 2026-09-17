@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nextcourse.dev/schemas/unit.v1.schema.json",
+  "title": "NextCourse reusable teaching unit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "version", "title", "durationMinutes", "outcomes", "pages"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "$ref": "#/$defs/unitId" },
+    "version": { "$ref": "#/$defs/version" },
+    "title": { "type": "string", "minLength": 1 },
+    "durationMinutes": { "type": "integer", "minimum": 0 },
+    "outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "do", "bloom", "evidence"],
+        "properties": {
+          "id": { "$ref": "#/$defs/localId" },
+          "do": { "type": "string", "minLength": 1 },
+          "bloom": { "enum": ["remember", "understand", "apply", "analyze", "evaluate", "create"] },
+          "evidence": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "prerequisites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["capability"],
+        "properties": {
+          "capability": { "type": "string", "minLength": 1 },
+          "required": { "type": "boolean", "default": true }
+        }
+      }
+    },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "path", "estimatedMinutes", "role"],
+        "properties": {
+          "id": { "$ref": "#/$defs/pageId" },
+          "path": { "$ref": "#/$defs/relativePath" },
+          "estimatedMinutes": { "type": "integer", "minimum": 0 },
+          "role": { "enum": ["activation", "concept", "demo", "practice", "assessment", "takeaway", "transition"] }
+        }
+      }
+    },
+    "cases": { "type": "array", "items": { "$ref": "#/$defs/caseId" }, "uniqueItems": true },
+    "assets": { "type": "array", "items": { "$ref": "#/$defs/assetId" }, "uniqueItems": true }
+  },
+  "$defs": {
+    "part": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$" },
+    "localId": { "$ref": "#/$defs/part" },
+    "unitId": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?:unit:[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$" },
+    "pageId": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?:page:[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$" },
+    "caseId": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?:case:[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$" },
+    "assetId": { "type": "string", "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?:asset:[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$" },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    }
+  }
+}

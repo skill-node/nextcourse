@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nextcourse.dev/schemas/course.compose.v1.schema.json",
+  "title": "NextCourse composition recipes",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "courseId", "defaultRecipe", "recipes"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "courseId": { "$ref": "#/$defs/localId" },
+    "defaultRecipe": { "$ref": "#/$defs/localId" },
+    "recipes": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/localId" },
+      "additionalProperties": { "$ref": "#/$defs/recipe" }
+    }
+  },
+  "$defs": {
+    "localId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"
+    },
+    "entityId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?:(unit|sequence|page|case|asset):[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"
+    },
+    "pageId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?:page:[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    },
+    "hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "pageSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ref": { "$ref": "#/$defs/pageId" },
+        "id": { "$ref": "#/$defs/pageId" },
+        "path": { "$ref": "#/$defs/relativePath" }
+      },
+      "oneOf": [
+        { "required": ["ref"], "not": { "required": ["path"] } },
+        { "required": ["id", "path"], "not": { "required": ["ref"] } }
+      ]
+    },
+    "operation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op", "target", "with"],
+      "properties": {
+        "op": { "enum": ["insert_before", "insert_after", "replace"] },
+        "target": { "$ref": "#/$defs/pageId" },
+        "with": { "$ref": "#/$defs/pageSource" }
+      }
+    },
+    "pages": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "include": { "type": "array", "items": { "$ref": "#/$defs/pageId" }, "uniqueItems": true },
+        "omit": { "type": "array", "items": { "$ref": "#/$defs/pageId" }, "uniqueItems": true }
+      }
+    },
+    "item": {
+      "type": "object",
+      "required": ["id", "contentMode", "updatePolicy"],
+      "properties": {
+        "id": { "$ref": "#/$defs/localId" },
+        "ref": { "$ref": "#/$defs/entityId" },
+        "contentMode": { "enum": ["reference", "variant", "local"] },
+        "updatePolicy": { "enum": ["manual", "frozen"] },
+        "plannedMinutes": { "type": "integer", "minimum": 0 },
+        "outcomeMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          }
+        },
+        "local": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "path"],
+          "properties": {
+            "id": { "$ref": "#/$defs/entityId" },
+            "path": { "$ref": "#/$defs/relativePath" }
+          }
+        },
+        "variant": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "baselineHash"],
+          "properties": {
+            "path": { "$ref": "#/$defs/relativePath" },
+            "baselineHash": { "$ref": "#/$defs/hash" }
+          }
+        },
+        "pages": { "$ref": "#/$defs/pages" },
+        "operations": { "type": "array", "items": { "$ref": "#/$defs/operation" } }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "contentMode": { "const": "local" } }, "required": ["contentMode"] },
+          "then": { "required": ["local"], "not": { "required": ["ref"] } },
+          "else": { "required": ["ref"], "not": { "required": ["local"] } }
+        },
+        {
+          "if": { "properties": { "contentMode": { "const": "variant" } }, "required": ["contentMode"] },
+          "then": { "required": ["variant"] },
+          "else": { "not": { "required": ["variant"] } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "items"],
+      "properties": {
+        "id": { "$ref": "#/$defs/localId" },
+        "title": { "type": "string", "minLength": 1 },
+        "moduleNumber": {
+          "oneOf": [
+            { "type": "integer", "minimum": 1 },
+            { "type": "null" }
+          ]
+        },
+        "plannedMinutes": { "type": "integer", "minimum": 0 },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/item" } }
+      }
+    },
+    "recipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selection", "groups"],
+      "properties": {
+        "selection": { "const": "explicit" },
+        "durationMinutes": { "type": "integer", "minimum": 0 },
+        "deliveryProfile": { "enum": ["slides", "slides+lab", "full"] },
+        "groups": { "type": "array", "items": { "$ref": "#/$defs/group" } }
+      }
+    }
+  }
+}

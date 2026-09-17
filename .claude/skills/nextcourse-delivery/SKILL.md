@@ -25,6 +25,11 @@ nextcourse doctor
 
 没这个命令就装：`npm i -g nextcourse`（或每次用 `npx -y nextcourse`）。doctor 报出的**工作目录**下面必须能找到 `courses/<课程名>/`，找不到就先 `cd` 到课程所在的目录。
 
+课程存在 `course.compose.json` 时先读当前配方与 lock，案例和材料只能取当前配方闭包。
+组合课用 `package-src/<recipe>/{student,facilitator}/` 保存人工 Markdown；`slides+lab` 可补建最小草稿，
+`full` 必须先备齐八份源。不要把交付 Markdown 写进 `.build/`，也不要覆盖已有手册；
+离线导出默认只带 student 包，讲师答案须显式选择 facilitator audience。
+
 ## 对话语言
 
 跟随用户的语言，与 `nextcourse-design` 一致。字段名与文件名保持英文，内容跟随用户语言。

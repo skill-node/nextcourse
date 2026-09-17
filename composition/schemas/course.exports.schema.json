@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://nextcourse.dev/schemas/course.exports.v1.schema.json",
+  "title": "NextCourse public exports",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "courseId", "exports"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "courseId": { "$ref": "#/$defs/courseId" },
+    "aliases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/courseId" },
+      "uniqueItems": true
+    },
+    "exports": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/export" }
+    }
+  },
+  "$defs": {
+    "courseId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"
+    },
+    "entityId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?:(unit|sequence|page|case|asset):[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    },
+    "export": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "version", "title"],
+      "properties": {
+        "id": { "$ref": "#/$defs/entityId" },
+        "kind": { "enum": ["unit", "sequence", "page", "case", "asset"] },
+        "version": { "$ref": "#/$defs/version" },
+        "title": { "type": "string", "minLength": 1 },
+        "source": { "$ref": "#/$defs/relativePath" },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ref", "version"],
+          "properties": {
+            "ref": { "$ref": "#/$defs/entityId" },
+            "version": { "$ref": "#/$defs/version" }
+          }
+        }
+      },
+      "oneOf": [
+        { "required": ["source"], "not": { "required": ["target"] } },
+        { "required": ["target"], "not": { "required": ["source"] } }
+      ]
+    }
+  }
+}

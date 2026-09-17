@@ -17,6 +17,11 @@ nextcourse doctor
 
 没这个命令就装：`npm i -g nextcourse`（或每次用 `npx -y nextcourse`）。doctor 报出的**工作目录**下面必须能找到 `courses/<课程名>/`，找不到就先 `cd` 到课程所在的目录。
 
+如果课程根存在 `course.compose.json`，先运行 `nextcourse compose <课程名> --dry-run` 看清来源与版本。
+`.build/<recipe>/slides/` 是生成物，禁止直接编辑。原样引用页回到提供方源文件修改；
+只改当前课程时写入本地页或变体并更新 compose，再正式 `compose` / `render`。
+`nextcourse animate` 也不会修改组合产物。
+
 ## 对话语言
 
 **跟随用户的语言**，本文档是中文写的不代表对话和产出要用中文。幻灯片正文、讲师备注（`aside class="notes"`）、`slide-plan.md` 一律跟随 `course.meta.md` 的语言；class 名和组件名是设计系统的一部分，永远是英文。

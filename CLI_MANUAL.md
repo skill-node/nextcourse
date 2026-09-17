@@ -70,6 +70,47 @@ nextcourse new leadership-workshop --scale M # M 档，同时生成蓝图
 
 ### 开发工作流
 
+#### `compose` — 预览或重建组合课程视图
+
+```bash
+nextcourse compose <course-name> [--recipe <id>] [--dry-run]
+```
+
+仅当课程存在 `course.compose.json` 时使用。`--dry-run` 会解析显式公开接口和再导出链，检查循环、
+菱形重复与版本冲突，并显示当前工作区候选、来源链和诊断，不写任何文件。候选须通过 `sync --apply`
+显式接受为 lock；已有匹配 lock 时，正式 `compose` 只从该 lock 生成 `.build/<recipe>/`，不顺便升级上游。
+
+组合课后续运行 `build`、`render`、`lint`、`check`、`notes`、`export`、`pdf` 或 `shot` 时，
+会自动读取已锁版本并在 `.build/<recipe>/` 工作；不会覆盖课程根的设计源和人工 slides。
+生成视图如被手改会拒绝重建，应把修改保存到本地源或变体。输入未变时会复用视图，保留已生成的 deck 与 package。
+
+```bash
+nextcourse compose office --recipe workshop --dry-run  # 纯预览
+nextcourse sync office --recipe workshop --dry-run     # 取得并审阅 plan ID
+nextcourse sync office --apply <plan-id>                # 写 lock 与内容寻址快照
+nextcourse compose office --recipe workshop            # 从已接受 lock 生成视图
+nextcourse render office --recipe workshop             # 输出到 .build/workshop/deck.html
+```
+
+#### `validate` / `trace` / `impact` / `sync` — 组合课维护
+
+```bash
+nextcourse validate office [--recipe workshop] [--json]
+nextcourse trace office <entity-or-instance-id|page-number> [--json]
+nextcourse impact <source-id> [--json]
+nextcourse sync office [--recipe workshop] [--dry-run] [--json]
+nextcourse sync office --apply <plan-id>
+nextcourse check --workspace [--json]
+```
+
+`validate` 与 `check --workspace` 是纯校验，不写旧 `check` 的对齐矩阵。`trace` 返回实例、页面、
+再导出链、精确版本、快照和本地变体；`impact` 跨课程列出直接／传递使用者、当前 lock 与冻结状态。
+`sync` 默认只预览候选版本及逐文件差异，普通 render 仍使用旧 lock。只有无冲突且 plan ID 与当前
+compose、lock、源文件基线全部匹配时，`--apply` 才原子更新 lock；冻结项保持原版本，变体遇到
+上游变化会给出旧基线／新上游／本地文件三方信息并拒绝覆盖。`--json` 是 CLI 与工作台共用的机器接口。
+
+---
+
 #### `lint` — 校验幻灯片样式规范
 ```bash
 npm run lint <course-name>
@@ -235,12 +276,20 @@ NextCourse Check — leadership-workshop
 
 ### 交付工作流
 
-#### `package` — 生成交付包（M / L 档）
+#### `package` — 生成交付包（独立 M/L 或组合 slides+lab/full）
 ```bash
 npm run package <course-name>
 # 或
 nextcourse package <course-name> [--render] [--force]
 ```
+
+独立课程保持原行为：M/L 汇总蓝图、大纲和备注到 `package/`，S 档拒绝。组合课程按配方的
+`deliveryProfile` 工作：`slides+lab` 即使是 S 档也会从已锁案例生成讲师／学员草稿；`full` 必须先在
+`package-src/<recipe>/` 备齐完整八份 Markdown，信息不足会明确拒绝。
+
+组合课的 Markdown 源分别位于 `package-src/<recipe>/student/` 与 `facilitator/`，首次补草稿后永不覆盖
+人工修改；生成物位于 `.build/<recipe>/package/<audience>/`。学员目录只包含 student/both 材料，
+讲师答案和生成脚本只进入 facilitator。`--force` 只保留给独立课旧流程，对组合课不会覆盖源。
 
 汇总蓝图 + 大纲 + slide 备注，生成企业内训真正要交的那一包：
 
@@ -282,7 +331,7 @@ md 里的 h1 就写功能名即可，课程名由渲染器补。
 蓝图六~八节（教学方法 / 评估方案 / 内容开发）没写时，对应文档会留 `> **待补**：…` 标记
 ——那就是这门课离「能开班」还差的东西，跑 `nextcourse-delivery` 补齐蓝图后重跑本命令即可。
 
-> S 档课程跑这个命令会被拒绝并提示改用 `notes`——交付包是 M/L 档的东西。
+> 独立 S 档仍会被拒绝；显式 `deliveryProfile: slides+lab` 的组合 S 课是例外。
 
 **打印验收**（`--render` 后在 Chrome 打印预览里逐项过）：
 ① 背景色 / 表头底色保留 ② 每页边距一致 ③ 无空白页 ④ 表格不腰斩
@@ -293,8 +342,8 @@ md 里的 h1 就写功能名即可，课程名由渲染器补。
 
 #### `export` — 打包为可离线演示文件夹
 
-> M / L 档加 `--with-package` 可把 `package/html/` 一起打进离线包，
-> 客户拿到的文件夹里同时有课件与交付文档（需先跑过 `package --render`）。
+> 加 `--with-package` 可把交付包一起打进离线包。组合课默认 `--audience student`，不会带答案；
+> 讲师包必须显式加 `--audience facilitator`（需先跑过 `package --render`）。
 
 ```bash
 npm run export <course-name> [outdir]
@@ -313,6 +362,8 @@ npm run export <course-name> [outdir]
 
 **可选参数：**
 - `outdir` — 输出目录（默认为 `courses/<course-name>/export/`）
+- `--with-package` — 携带已渲染交付包
+- `--audience student|facilitator` — 组合课交付对象，默认 `student`
 
 **输出结构：**
 ```
@@ -608,6 +659,11 @@ npm run export my-course
 |------|------|--------|
 | `list` | 列出所有课程 | 项目开始时 |
 | `new <name>` | 创建新课程 | 开发新课程 |
+| `compose <name>` | 预览候选／从现有精确锁重建 | 课程引用共享单元时 |
+| `validate <name>` | 纯校验组合课 | 构建或接受更新前 |
+| `trace <name> <id>` | 查看来源链 | 判断页面／实例来自哪里 |
+| `impact <source-id>` | 查直接／传递影响 | 修改共享源前 |
+| `sync <name>` | 预览／接受上游更新 | 有新版本时 |
 | `lint <name>` | 校验规范 | 编辑后检查 |
 | `build <name>` | 生成 deck.html | 内部使用（用 render 代替） |
 | `render <name>` | Lint + Build | ⭐ **最常用**，每次编辑后 |

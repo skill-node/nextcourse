@@ -80,6 +80,53 @@ nextcourse new leadership-workshop --scale M  # M, blueprint included
 
 ### Development workflow
 
+#### `compose` — preview or materialize a composed course
+
+```bash
+nextcourse compose <course-name> [--recipe <id>] [--dry-run]
+```
+
+Use this only for a course with `course.compose.json`. `--dry-run` resolves public
+exports and re-export chains, diagnoses cycles, diamond paths and version conflicts,
+and reports workspace candidates without writing. Accept the plan explicitly with
+`sync --apply`; with a matching lock, regular `compose` materializes `.build/<recipe>/`
+from that lock without accepting upstream updates.
+
+For a composed course, `build`, `render`, `lint`, `check`, `notes`, `export`, `pdf`
+and `shot` automatically use the locked recipe view. They do not overwrite the design
+source or hand-authored root slides. A hand-edited generated view is rejected; save
+the change as local source or a variant. Delivery-package adaptation is scheduled for
+the delivery phase, so `package` currently refuses composed courses.
+
+```bash
+nextcourse compose office --recipe workshop --dry-run
+nextcourse sync office --recipe workshop --dry-run
+nextcourse sync office --apply <plan-id>
+nextcourse compose office --recipe workshop
+nextcourse render office --recipe workshop
+```
+
+#### `validate` / `trace` / `impact` / `sync` — composition maintenance
+
+```bash
+nextcourse validate office [--recipe workshop] [--json]
+nextcourse trace office <entity-or-instance-id|page-number> [--json]
+nextcourse impact <source-id> [--json]
+nextcourse sync office [--recipe workshop] [--dry-run] [--json]
+nextcourse sync office --apply <plan-id>
+nextcourse check --workspace [--json]
+```
+
+`validate` and `check --workspace` are read-only and never write the legacy alignment
+report. `trace` exposes the full re-export and page provenance; `impact` separates
+direct and transitive locked consumers and marks frozen instances. `sync` only previews
+candidate versions and file diffs by default. Applying requires a conflict-free plan ID
+whose compose, lock and source baselines still match. Frozen items remain pinned, while
+an upstream change to a variant produces three-way review data and is never overwritten.
+`--json` exposes the same machine-readable results intended for the local studio.
+
+---
+
 #### `lint` — check slides against the design system
 
 ```bash
@@ -254,13 +301,24 @@ not forced into closure; they get a single informational line.
 
 ### Delivery workflow
 
-#### `package` — build the delivery package (M/L only)
+#### `package` — build a delivery package (independent M/L or composed slides+lab/full)
 
 ```bash
 npm run package <course-name>
 # or
 nextcourse package <course-name> [--render] [--force]
 ```
+
+Independent courses keep the existing behaviour: M/L derives `package/` from the
+blueprint, outline and notes, while S is refused. A composed `slides+lab` recipe may be
+S-scale: locked cases seed separate student and facilitator drafts. A `full` recipe must
+already contain all eight Markdown sources under `package-src/<recipe>/`.
+
+For a composed course, editable sources live under the `student/` and `facilitator/`
+branches of `package-src/<recipe>/` and are never overwritten. Generated material lives
+under `.build/<recipe>/package/<audience>/`. Student output contains only student/both
+materials; answers and generator scripts exist only in facilitator output. `--force`
+continues to apply only to the legacy independent-course flow.
 
 Pulls the blueprint, the outline and the slide notes together into what in-house
 delivery actually requires:
@@ -310,7 +368,7 @@ Where blueprint sections 6–8 are missing, the corresponding documents carry
 `> **待补**: …` markers — that is the backlog standing between this course and a real
 cohort. Fill the blueprint via `nextcourse-delivery`, then run this again.
 
-> Running it on an S-scale course is refused, pointing you at `notes` instead.
+> An independent S course is still refused; an explicit composed `slides+lab` recipe is the exception.
 
 **Print acceptance** (walk through Chrome's print preview after `--render`):
 ① backgrounds and header fills preserved ② consistent margins ③ no blank pages
@@ -321,8 +379,8 @@ cohort. Fill the blueprint via `nextcourse-delivery`, then run this again.
 
 #### `export` — package as an offline-playable folder
 
-> At M/L, add `--with-package` to fold `package/html/` into the offline bundle, so the
-> client receives deck and delivery documents in one folder (run `package --render` first).
+> Add `--with-package` to include rendered delivery material. Composed export defaults
+> to `--audience student`; use `--audience facilitator` explicitly for the trainer bundle.
 
 ```bash
 npm run export <course-name> [outdir]
@@ -347,6 +405,8 @@ Produces a self-contained presentation folder:
 **Optional argument:**
 
 - `outdir` — output directory (default `courses/<course-name>/export/`)
+- `--with-package` — include the rendered package
+- `--audience student|facilitator` — composed-package audience; defaults to `student`
 
 **Structure:**
 
@@ -666,6 +726,11 @@ npm run export my-course
 |---|---|---|
 | `list` | list every course | starting a session |
 | `new <name>` | scaffold a course | starting a course |
+| `compose <name>` | preview candidates/rebuild from an exact lock | when a course reuses shared units |
+| `validate <name>` | validate a composed course without writes | before builds or updates |
+| `trace <name> <id>` | inspect complete provenance | when locating a page or instance source |
+| `impact <source-id>` | find direct/transitive consumers | before changing shared source |
+| `sync <name>` | preview/apply an upstream update | when a new version is available |
 | `lint <name>` | check the rules | after editing |
 | `build <name>` | produce deck.html | internal — use `render` |
 | `render <name>` | lint + build | ⭐ **most used**, after every edit |
