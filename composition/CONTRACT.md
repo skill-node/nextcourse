@@ -17,7 +17,7 @@
 |---|---|
 | `course.exports.json` | 本课允许其他课程引用的接口；`source` 是本课源，`target` 是显式再导出，两者只能选一个 |
 | `course.compose.json` | 本课配方、实例、顺序、局部变体与显式选页；这是内容选择的唯一权威 |
-| `course.lock.json` | 一个配方解析后的精确版本、完整接口链、哈希与不可变快照位置 |
+| `course.lock.json` / `course.locks/<recipe>.lock.json` | 各配方分别保存精确版本、完整接口链、哈希与不可变快照位置 |
 | 序列描述文件 | 可复用模块的标题、总时长及有序 unit/page 引用；由 sequence export 的 `source` 指向 |
 | 单元描述文件 | 单元成果、前置、时长、页面、案例与资产闭包；由 export 的 `source` 指向 |
 | 案例描述文件 | 案例输入、任务、预期产出、答案／量规、材料 audience 与可复现生成记录 |
@@ -36,6 +36,7 @@ JSON Schema 位于 `composition/schemas/`。首版组合清单只允许显式选
 不能退回按文件名或当前页码猜测。
 操作的新页面可以是本地完整页面，也可以是公开 page export；外部页面会以派生 occurrence 写入 lock 和快照。
 组的 `moduleNumber` 可显式指定正整数，包装组可设为 `null`；省略时按组序从 1 编号。
+模块标签保留真实序号，CSS 色板按 1–10 循环，避免长课生成未注册的 module-11 等颜色 class。
 配方可用 `title` 保存面向人的名称。实例的 `caseOverrides` 以稳定 case ID 声明 `from → to`；
 替换案例会形成独立的派生 lock occurrence，只改变当前配方的交付材料，不修改共享单元描述文件。
 
@@ -48,6 +49,14 @@ JSON Schema 位于 `composition/schemas/`。首版组合清单只允许显式选
 `sourceSequence` 保留精确来源与版本；lock 同时锁定序列描述和展开后的各内容引用。
 
 ## 锁与快照
+
+默认配方继续写 `course.lock.json`；其他配方写 `course.locks/<recipe>.lock.json`，接受一个配方不覆盖其他配方。
+读取时优先该配方的独立锁；旧根锁若属于请求的非默认配方仍可读取，下一次显式接受会写独立锁。
+若默认配方发生改变或旧根锁属于另一配方，新默认锁也写独立路径，保留原锁。缺失或损坏的独立锁不会回退到另一个配方的内容。
+新锁可带 `recipeHash`，按 courseId/schemaVersion/recipeId 与当前配方的规范化内容计算；修改其他配方不使它失效。
+`composeHash` 仍记录接受时完整文件字节哈希，计划应用前仍检查完整文件是否变化；旧锁没有 recipeHash 时继续按 composeHash 判定。
+首次接受前若目标锁被另一操作创建或修改，原计划过期，不能覆盖；计划身份也包含配方 ID 和目标锁基线。
+
 
 锁中的每个外部 occurrence 都保留：最终实体、精确版本、内容哈希、快照路径、
 快照内的 `sourcePath`、`exportPath`（中间公开接口链）和 `dependencyPath`（实际展开链）。快照路径必须位于工作区内，

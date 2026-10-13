@@ -106,6 +106,15 @@ nextcourse compose office --recipe workshop
 nextcourse render office --recipe workshop
 ```
 
+Each recipe keeps its own accepted lock: the default recipe retains `course.lock.json`,
+while other recipes use `course.locks/<recipe>.lock.json`. `--recipe` selects the matching
+lock for sync, compose, build, validate, trace, package and export. Accepting a short
+course does not overwrite the full course. New locks include a scoped `recipeHash`, so
+editing another recipe does not invalidate them; applying a plan still checks the full
+composition file for concurrent changes. Legacy root locks remain readable and move
+to a recipe-specific path only on explicit acceptance, without replacing another recipe.
+
+
 #### `validate` / `trace` / `impact` / `sync` — composition maintenance
 
 ```bash

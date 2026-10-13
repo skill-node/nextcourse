@@ -7,6 +7,7 @@ const { sha256 } = require('./baseline');
 const { validateCase, validateComposeManifest, validateLockManifest } = require('./contracts');
 const { DIAGNOSTIC_CODES: C, diagnostic } = require('./diagnostics');
 const { loadSnapshot } = require('./lock');
+const { recipeLockPath, lockMatchesRecipe } = require('./recipe-lock');
 const { resolveInside } = require('./resolver');
 const { wrapDocument, accentFromTheme } = require('../render-md');
 
@@ -114,16 +115,17 @@ function planDeliveryPackage(workRoot, courseName, recipeId) {
     const courseDir = path.join(coursesRoot, courseName);
     const diagnostics = [];
     const composePath = path.join(courseDir, 'course.compose.json');
-    const lockPath = path.join(courseDir, 'course.lock.json');
     const compose = readJson(composePath, diagnostics, `courses/${courseName}/course.compose.json`);
-    const lock = readJson(lockPath, diagnostics, `courses/${courseName}/course.lock.json`);
+    if (!compose) return { valid: false, diagnostics, courseName, cases: [] };
+    const selectedRecipe = recipeId || compose.defaultRecipe;
+    const lockPath = recipeLockPath(courseDir, compose, selectedRecipe);
+    const lock = readJson(lockPath, diagnostics, path.relative(root, lockPath).split(path.sep).join('/'));
     if (!compose || !lock) return { valid: false, diagnostics, courseName, cases: [] };
     diagnostics.push(...validateComposeManifest(compose).diagnostics, ...validateLockManifest(lock).diagnostics);
     const composeHash = sha256(fs.readFileSync(composePath));
-    if (lock.composeHash !== composeHash) {
+    if (!lockMatchesRecipe(lock, compose, composeHash, selectedRecipe)) {
         diagnostics.push(diagnostic(C.SOURCE_DRIFT, 'course.compose.json changed after this lock was accepted.', 'course.compose.json'));
     }
-    const selectedRecipe = recipeId || compose.defaultRecipe;
     const recipe = compose.recipes && compose.recipes[selectedRecipe];
     if (!recipe || lock.recipeId !== selectedRecipe) {
         diagnostics.push(diagnostic(C.RECIPE_NOT_FOUND, `Accepted lock is not for recipe ${selectedRecipe}.`, '/recipeId'));

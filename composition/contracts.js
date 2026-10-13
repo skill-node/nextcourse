@@ -322,6 +322,7 @@ function validateLockManifest(doc) {
     for (const [key, value] of [['composeHash', doc.composeHash], ['sourceManifestHash', doc.sourceManifestHash]]) {
         if (!SHA256_RE.test(value || '')) diagnostics.push(diagnostic(C.HASH_INVALID, `${key} must be sha256:<64 hex>.`, `/${key}`));
     }
+    if (doc.recipeHash !== undefined && !SHA256_RE.test(doc.recipeHash || '')) diagnostics.push(diagnostic(C.HASH_INVALID, 'recipeHash must be sha256:<64 hex>.', '/recipeHash'));
     if (!Array.isArray(doc.references)) {
         diagnostics.push(diagnostic(C.LOCK_REFERENCE_INVALID, 'references must be an array.', '/references'));
         return result(diagnostics);

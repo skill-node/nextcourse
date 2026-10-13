@@ -7,6 +7,7 @@ const { buildCatalog } = require('./catalog');
 const { validateComposeManifest, validateLockManifest, validateUnit } = require('./contracts');
 const { DIAGNOSTIC_CODES: C, diagnostic } = require('./diagnostics');
 const { planRecipeLock, applyLockPlan, loadSnapshot } = require('./lock');
+const { recipeLockPath, lockMatchesRecipe } = require('./recipe-lock');
 const { resolveInside, resolveExport } = require('./resolver');
 const { verifyGeneratedView } = require('./materialize');
 const { planDeliveryPackage } = require('./delivery');
@@ -166,7 +167,8 @@ function validateRecipe(workRoot, courseName, recipeId) {
     const courseDir = path.join(coursesRoot, courseName);
     const diagnostics = [];
     const composeRead = readJson(path.join(courseDir, 'course.compose.json'), diagnostics, `courses/${courseName}/course.compose.json`);
-    const lockRead = readJson(path.join(courseDir, 'course.lock.json'), diagnostics, `courses/${courseName}/course.lock.json`);
+    const lockPath = composeRead && recipeLockPath(courseDir, composeRead.value, recipeId || composeRead.value.defaultRecipe);
+    const lockRead = lockPath && readJson(lockPath, diagnostics, path.relative(root, lockPath).split(path.sep).join('/'));
     if (!composeRead || !lockRead) return { valid: false, kind: 'composed', courseName, diagnostics };
 
     const composeValidation = validateComposeManifest(composeRead.value);
@@ -180,7 +182,7 @@ function validateRecipe(workRoot, courseName, recipeId) {
     if (selected.recipe && lock.recipeId !== selected.id) {
         diagnostics.push(diagnostic(C.RECIPE_NOT_FOUND, `Lock is for ${lock.recipeId}; requested ${selected.id}.`, '/recipeId'));
     }
-    if (lock.composeHash !== composeRead.hash) {
+    if (!lockMatchesRecipe(lock, composeRead.value, composeRead.hash, selected.id)) {
         diagnostics.push(diagnostic(C.SOURCE_DRIFT, 'course.compose.json changed after this lock was created.', 'course.compose.json'));
     }
 
@@ -272,9 +274,14 @@ function traceSource(workRoot, courseName, query, recipeId) {
     const courseDir = path.join(root, 'courses', courseName);
     const diagnostics = [];
     const composeRead = readJson(path.join(courseDir, 'course.compose.json'), diagnostics, `courses/${courseName}/course.compose.json`);
-    const lockRead = readJson(path.join(courseDir, 'course.lock.json'), diagnostics, `courses/${courseName}/course.lock.json`);
+    const lockPath = composeRead && recipeLockPath(courseDir, composeRead.value, recipeId || composeRead.value.defaultRecipe);
+    const lockRead = lockPath && readJson(lockPath, diagnostics, path.relative(root, lockPath).split(path.sep).join('/'));
     if (!composeRead || !lockRead) return { found: false, courseName, query, matches: [], diagnostics };
     const selected = selectedRecipe(composeRead.value, recipeId, diagnostics);
+    if (lockRead.value.recipeId !== selected.id) {
+        diagnostics.push(diagnostic(C.RECIPE_NOT_FOUND, `Lock is for ${lockRead.value.recipeId}; requested ${selected.id}.`, '/recipeId'));
+        return { found: false, courseName, recipeId: selected.id, query, matches: [], diagnostics };
+    }
     const manifest = readBuildManifest(courseDir, selected.id);
     const occurrenceMap = recipeOccurrences(selected.recipe);
     const requestedPage = /^\d+$/.test(String(query)) ? Number(query) : null;
@@ -342,9 +349,10 @@ function impactSource(workRoot, sourceId) {
     for (const directory of directories) {
         const courseDir = path.join(coursesRoot, directory.name);
         const composeRead = readJson(path.join(courseDir, 'course.compose.json'), diagnostics, `courses/${directory.name}/course.compose.json`, false);
-        const lockRead = readJson(path.join(courseDir, 'course.lock.json'), diagnostics, `courses/${directory.name}/course.lock.json`, false);
         if (!composeRead) continue;
         for (const [recipeId, recipe] of Object.entries(composeRead.value.recipes || {})) {
+            const lockPath = recipeLockPath(courseDir, composeRead.value, recipeId);
+            const lockRead = readJson(lockPath, diagnostics, path.relative(root, lockPath).split(path.sep).join('/'), false);
             const occurrences = recipeOccurrences(recipe);
             let references;
             let locked;
@@ -433,8 +441,10 @@ function planCourseUpdate(workRoot, courseName, recipeId) {
     const composeRead = readJson(path.join(courseDir, 'course.compose.json'), diagnostics, `courses/${courseName}/course.compose.json`);
     if (!composeRead) return { valid: false, applicable: false, courseName, diagnostics, changes: [], conflicts: [] };
     const selected = selectedRecipe(composeRead.value, recipeId, diagnostics);
-    const lockPath = path.join(courseDir, 'course.lock.json');
-    const lockRead = readJson(lockPath, diagnostics, `courses/${courseName}/course.lock.json`, false);
+    const lockPath = recipeLockPath(courseDir, composeRead.value, selected.id);
+    let lockRead = readJson(lockPath, diagnostics, path.relative(root, lockPath).split(path.sep).join('/'), false);
+    // A legacy single lock belonging to another recipe is not this recipe's baseline.
+    if (lockRead && lockRead.value.recipeId !== selected.id) lockRead = null;
     if (lockRead) diagnostics.push(...validateLockManifest(lockRead.value).diagnostics);
     const candidate = planRecipeLock(root, courseName, selected.id);
     diagnostics.push(...candidate.diagnostics);
@@ -472,7 +482,7 @@ function planCourseUpdate(workRoot, courseName, recipeId) {
             && oldReference.contentHash !== candidateReference.contentHash && !frozen) {
             conflict = 'version-not-bumped';
         }
-        if (changed && context && context.item.contentMode === 'variant' && !frozen) conflict = 'variant-three-way-review';
+        if (changed && oldReference && context && context.item.contentMode === 'variant' && !frozen) conflict = 'variant-three-way-review';
         if (changed && frozen) status = 'available-frozen';
         if (conflict) conflicts.push({ occurrenceId, type: conflict, baseline: oldReference && oldReference.contentHash, candidate: candidateReference && candidateReference.contentHash });
         if (candidateReference || oldReference) {
@@ -503,7 +513,7 @@ function planCourseUpdate(workRoot, courseName, recipeId) {
     const usedHashes = new Set(targetReferences.map(reference => reference.contentHash));
     const targetSnapshots = candidate.snapshots.filter(snapshot => usedHashes.has(snapshot.contentHash));
     const inputs = candidate.inputs.slice();
-    if (lockRead) inputs.push({ path: lockPath, workspacePath: `courses/${courseName}/course.lock.json`, hash: lockRead.hash });
+    if (lockRead) inputs.push({ path: lockPath, workspacePath: path.relative(root, lockPath).split(path.sep).join('/'), hash: lockRead.hash });
     const baselineLockHash = lockRead ? lockRead.hash : null;
     const identity = {
         courseName,

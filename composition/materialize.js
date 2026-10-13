@@ -8,6 +8,7 @@ const { entityParts, validateComposeManifest, validateLockManifest, validateUnit
 const { DIAGNOSTIC_CODES: C, diagnostic } = require('./diagnostics');
 const { resolveInside } = require('./resolver');
 const { loadSnapshot } = require('./lock');
+const { recipeLockPath, lockMatchesRecipe } = require('./recipe-lock');
 
 function readJson(filePath, diagnostics, displayPath) {
     try {
@@ -132,9 +133,10 @@ function applyPagePlan(pages, pagePlan, diagnostics, pointer) {
 
 function addModuleClass(html, moduleNumber) {
     if (moduleNumber === null) return String(html);
-    const moduleClass = `module-${moduleNumber}`;
+    const colorNumber = (moduleNumber - 1) % 10 + 1;
+    const moduleClass = `module-${colorNumber}`;
     let output = String(html)
-        .replaceAll('__MODULE_N__', String(moduleNumber))
+        .replaceAll('__MODULE_N__', String(colorNumber))
         .replaceAll('__MODULE_NO__', String(moduleNumber).padStart(2, '0'));
     return output.replace(/<section\b([^>]*)>/i, (match, attributes) => {
         if (!/\bdata-role=(['"])divider\1/i.test(attributes) && !/\bmodule-\d+\b/.test(attributes)) return match;
@@ -244,20 +246,22 @@ function materializeRecipe(workRoot, courseName, recipeId, options = {}) {
     const courseDir = path.join(coursesRoot, courseName);
     const diagnostics = [];
     const composeRead = readJson(path.join(courseDir, 'course.compose.json'), diagnostics, `courses/${courseName}/course.compose.json`);
-    const lockRead = readJson(path.join(courseDir, 'course.lock.json'), diagnostics, `courses/${courseName}/course.lock.json`);
+    if (!composeRead) return { materialized: false, diagnostics };
+    const selectedRecipe = recipeId || composeRead.value.defaultRecipe;
+    const lockPath = recipeLockPath(courseDir, composeRead.value, selectedRecipe);
+    const lockRead = readJson(lockPath, diagnostics, path.relative(root, lockPath).split(path.sep).join('/'));
     if (!composeRead || !lockRead) return { materialized: false, diagnostics };
     const composeValidation = validateComposeManifest(composeRead.value);
     const lockValidation = validateLockManifest(lockRead.value);
     diagnostics.push(...composeValidation.diagnostics, ...lockValidation.diagnostics);
     if (!composeValidation.valid || !lockValidation.valid) return { materialized: false, diagnostics };
 
-    const selectedRecipe = recipeId || composeRead.value.defaultRecipe;
     const recipe = composeRead.value.recipes[selectedRecipe];
     const lock = lockRead.value;
     if (!recipe || lock.recipeId !== selectedRecipe) {
         diagnostics.push(diagnostic(C.RECIPE_NOT_FOUND, `Lock is for ${lock.recipeId}; requested ${selectedRecipe}.`, '/recipeId'));
     }
-    if (lock.composeHash !== composeRead.hash) {
+    if (!lockMatchesRecipe(lock, composeRead.value, composeRead.hash, selectedRecipe)) {
         diagnostics.push(diagnostic(C.SOURCE_DRIFT, 'course.compose.json changed after this lock was created.', 'course.compose.json'));
     }
     if (diagnostics.some(item => item.severity === 'error')) return { materialized: false, diagnostics };

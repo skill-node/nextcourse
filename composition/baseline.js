@@ -46,6 +46,7 @@ function toPosix(value) {
 
 function classify(relativePath) {
     if (relativePath === 'course.meta.md' || relativePath === 'course.blueprint.md' || relativePath === 'slide-plan.md') return 'design';
+    if (/^course\.locks\/[^/]+\.lock\.json$/.test(relativePath)) return 'composition';
     if (relativePath === 'course.compose.json' || relativePath === 'course.exports.json' || relativePath === 'course.lock.json') return 'composition';
     if (/^(slides|slides-src)\//.test(relativePath) && relativePath.endsWith('.html')) return 'slide';
     if (/^modules\//.test(relativePath)) return 'unit';

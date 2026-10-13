@@ -145,6 +145,12 @@ nextcourse shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（
 
 ---
 
+组合课的多配方分别锁定：默认保留 `course.lock.json`，其他配方使用 `course.locks/<recipe>.lock.json`。
+CLI 的 `--recipe` 选择对应锁；接受某一配方不覆盖其他配方。新锁按 recipeHash 检查本配方是否变化，
+完整 composeHash 仍用于接受计划的并发保护；旧根锁继续兼容。不要为切换配方而覆盖根锁。
+
+---
+
 ## 课程创作工作流
 
 ### 流程一：从零开始设计新课程（推荐路径）

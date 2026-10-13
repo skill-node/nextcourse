@@ -92,6 +92,13 @@ nextcourse compose office --recipe workshop            # 从已接受 lock 生�
 nextcourse render office --recipe workshop             # 输出到 .build/workshop/deck.html
 ```
 
+同一课程的多份配方分别锁定：默认配方保留 `course.lock.json`，其他配方使用
+`course.locks/<recipe>.lock.json`。`sync / compose / build / validate / trace / package / export`
+均按 `--recipe` 选择对应锁；接受短课不会覆盖全量课。新锁的 `recipeHash` 只随本配方改变，
+修改其他配方不会迫使它重新接受；计划应用仍要求完整组合清单未在预览后变化。
+旧的单一根锁仍可读取，显式同步时按配方保存；不会自动迁移或覆盖其他配方的锁。
+
+
 #### `validate` / `trace` / `impact` / `sync` — 组合课维护
 
 ```bash

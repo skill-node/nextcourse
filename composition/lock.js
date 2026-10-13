@@ -9,6 +9,8 @@ const { sha256 } = require('./baseline');
 const { validateComposeManifest, validateLockManifest, validateUnit } = require('./contracts');
 const { DIAGNOSTIC_CODES: C, diagnostic } = require('./diagnostics');
 
+const { recipeHash, recipeLockPath } = require('./recipe-lock');
+
 const ENGINE_VERSION = require('../package.json').version;
 
 function readJsonFile(filePath, diagnostics, displayPath) {
@@ -211,13 +213,16 @@ function planRecipeLock(workRoot, courseName, recipeId) {
         recipeId: selectedRecipe,
         engineVersion: ENGINE_VERSION,
         composeHash: composeRead.hash,
+        recipeHash: recipeHash(compose, selectedRecipe),
         sourceManifestHash,
         references,
     };
     const lockValidation = validateLockManifest(lock);
     diagnostics.push(...lockValidation.diagnostics);
     const valid = !diagnostics.some(item => item.severity === 'error');
-    const planIdentity = JSON.stringify({ composeHash: composeRead.hash, sourceManifestHash, references });
+    const lockPath = recipeLockPath(courseDir, compose, selectedRecipe, true);
+    const baselineLockHash = fs.existsSync(lockPath) ? sha256(fs.readFileSync(lockPath)) : null;
+    const planIdentity = JSON.stringify({ recipeId: selectedRecipe, composeHash: composeRead.hash, sourceManifestHash, references, lockPath: path.relative(courseDir, lockPath), baselineLockHash });
     return {
         valid,
         planId: sha256(Buffer.from(planIdentity, 'utf8')),
@@ -227,6 +232,8 @@ function planRecipeLock(workRoot, courseName, recipeId) {
         courseName,
         courseDir,
         recipeId: selectedRecipe,
+        lockPath,
+        baselineLockHash,
         inputs: allInputs,
         snapshots: [...snapshots.values()],
         lock: valid ? lock : null,
@@ -313,10 +320,15 @@ function applyLockPlan(plan) {
     }
     if (diagnostics.some(item => item.severity === 'error')) return { applied: false, diagnostics };
 
+    const lockPath = plan.lockPath;
+    if (!lockPath || (fs.existsSync(lockPath) ? sha256(fs.readFileSync(lockPath)) : null) !== plan.baselineLockHash) {
+        diagnostics.push(diagnostic(C.PLAN_STALE, 'Recipe lock changed after planning.', lockPath || '/lockPath'));
+        return { applied: false, diagnostics };
+    }
     let temporaryLock = null;
     try {
         for (const snapshot of plan.snapshots) writeSnapshot(plan.coursesRoot, snapshot);
-        const lockPath = path.join(plan.courseDir, 'course.lock.json');
+        fs.mkdirSync(path.dirname(lockPath), { recursive: true });
         temporaryLock = `${lockPath}.tmp-${process.pid}-${crypto.randomUUID()}`;
         fs.writeFileSync(temporaryLock, `${JSON.stringify(plan.lock, null, 2)}\n`, { encoding: 'utf8', flag: 'wx' });
         fs.renameSync(temporaryLock, lockPath);
@@ -324,7 +336,7 @@ function applyLockPlan(plan) {
         return { applied: true, diagnostics, lockPath };
     } catch (error) {
         if (temporaryLock && fs.existsSync(temporaryLock)) fs.rmSync(temporaryLock, { force: true });
-        diagnostics.push(diagnostic(C.DOCUMENT_INVALID, `Could not apply lock plan: ${error.message}`, `courses/${plan.courseName}/course.lock.json`));
+        diagnostics.push(diagnostic(C.DOCUMENT_INVALID, `Could not apply lock plan: ${error.message}`, path.relative(plan.workRoot, lockPath).split(path.sep).join('/')));
         return { applied: false, diagnostics };
     }
 }

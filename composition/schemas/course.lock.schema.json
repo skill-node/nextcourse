@@ -11,6 +11,7 @@
     "recipeId": { "$ref": "#/$defs/localId" },
     "engineVersion": { "$ref": "#/$defs/version" },
     "composeHash": { "$ref": "#/$defs/hash" },
+    "recipeHash": { "$ref": "#/$defs/hash" },
     "sourceManifestHash": { "$ref": "#/$defs/hash" },
     "references": {
       "type": "array",

@@ -49,6 +49,8 @@ const {
     impactSource,
     planCourseUpdate,
     applyCourseUpdate,
+    recipeLockPath,
+    lockMatchesRecipe,
     packageComposedCourse,
 } = require('./composition');
 
@@ -132,15 +134,18 @@ const commands = {
     compose() {
         const name = requireName('compose');
         const recipeId = optionValue('--recipe');
-        const currentLockPath = path.join(COURSES_DIR, name, 'course.lock.json');
-        if (!rest.includes('--dry-run') && fs.existsSync(currentLockPath)) {
+        const composePath = path.join(COURSES_DIR, name, 'course.compose.json');
+        let compose = null;
+        try { compose = JSON.parse(fs.readFileSync(composePath, 'utf8')); } catch { /* planner diagnoses invalid compose */ }
+        const selectedRecipe = recipeId || (compose && compose.defaultRecipe);
+        const currentLockPath = compose && recipeLockPath(path.join(COURSES_DIR, name), compose, selectedRecipe);
+        if (!rest.includes('--dry-run') && currentLockPath && fs.existsSync(currentLockPath)) {
             let currentLock = null;
             try { currentLock = JSON.parse(fs.readFileSync(currentLockPath, 'utf8')); } catch { /* normal plan reports it below */ }
-            const composePath = path.join(COURSES_DIR, name, 'course.compose.json');
             const composeHash = fs.existsSync(composePath)
                 ? `sha256:${crypto.createHash('sha256').update(fs.readFileSync(composePath)).digest('hex')}`
                 : null;
-            if (currentLock && currentLock.composeHash === composeHash && (!recipeId || currentLock.recipeId === recipeId)) {
+            if (lockMatchesRecipe(currentLock, compose, composeHash, selectedRecipe)) {
                 const materialized = materializeRecipe(WORK_ROOT, name, recipeId);
                 printDiagnostics(materialized.diagnostics);
                 if (!materialized.materialized) process.exit(1);
