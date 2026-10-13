@@ -591,6 +591,32 @@ test('S plus lab package keeps editable sources and physically separates student
     assert(drift.diagnostics.some(item => item.code === DIAGNOSTIC_CODES.GENERATED_DRIFT));
 });
 
+test('rendered package material links open filenames with spaces, Unicode and URL punctuation', t => {
+    const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'nextcourse-package-links-'));
+    t.after(() => fs.rmSync(temporaryRoot, { recursive: true, force: true }));
+    fs.cpSync(COMPOSITION_WORKSPACE, temporaryRoot, { recursive: true });
+    const caseDir = path.join(temporaryRoot, 'courses/prompt-engineering/units/prompt-basics/cases/rewrite-request');
+    const descriptorPath = path.join(caseDir, 'case.json');
+    const descriptor = JSON.parse(fs.readFileSync(descriptorPath, 'utf8'));
+    const materialPath = 'student/截图 甲#1(最终)%?.txt';
+    fs.writeFileSync(path.join(caseDir, materialPath), 'Material with a portable filename.');
+    descriptor.materials.push({ id: 'spaced-file', title: '产品截图', path: materialPath, role: 'input', audience: 'both' });
+    fs.writeFileSync(descriptorPath, JSON.stringify(descriptor));
+    const plan = planRecipeLock(temporaryRoot, 'office', 'workshop');
+    assert.equal(applyLockPlan(plan).applied, true, JSON.stringify(plan.diagnostics));
+    const packaged = packageComposedCourse(temporaryRoot, ROOT, 'office', 'workshop', { render: true });
+    assert.equal(packaged.packaged, true, JSON.stringify(packaged.diagnostics));
+    for (const [audience, filename] of [['student', '2_workbook.html'], ['facilitator', '1_facilitator-guide.html']]) {
+        const htmlPath = path.join(packaged.outputRoot, audience, 'html', filename);
+        const html = fs.readFileSync(htmlPath, 'utf8');
+        const link = html.match(/<a href="([^"]+)">产品截图<\/a>/);
+        assert(link, 'Material must render as a clickable anchor, not raw Markdown.');
+        assert(!/[ #?()]/.test(link[1]));
+        const file = path.resolve(path.dirname(htmlPath), decodeURIComponent(link[1]));
+        assert.equal(fs.readFileSync(file, 'utf8'), 'Material with a portable filename.');
+    }
+});
+
 test('full delivery requires and preserves all eight authored package sources', t => {
     const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'nextcourse-package-full-'));
     t.after(() => fs.rmSync(temporaryRoot, { recursive: true, force: true }));

@@ -218,7 +218,9 @@ function casePackagePath(caseId) {
 }
 
 function materialLink(caseRecord, material) {
-    return `../materials/${casePackagePath(caseRecord.id)}/${material.path}`;
+    const relativePath = `../materials/${casePackagePath(caseRecord.id)}/${material.path}`;
+    return relativePath.split('/').map(segment => encodeURIComponent(segment)
+        .replace(/[!'()*]/g, character => `%${character.charCodeAt(0).toString(16).toUpperCase()}`)).join('/');
 }
 
 function studentWorkbook(plan, title) {

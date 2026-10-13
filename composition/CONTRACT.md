@@ -98,6 +98,9 @@ resolver 按 `实体 ID + 精确版本` 展开再导出链，实体递归环会�
 先具备完整的八份 package source，不能拿轻量草稿冒充完整企业交付包。组合课 export 默认 student，
 只有显式 `--audience facilitator` 才携带答案、生成脚本和讲师材料。
 
+自动生成的手册材料链接按路径段做 URL 编码，保留目录层级；含空格、中文、`#`、`%`、`?` 或括号的文件名
+仍能在渲染 HTML 与离线包中打开，物理文件名不变。已有人工 Markdown 不自动重写；历史无效链接需在源文件中修正后重新渲染。
+
 ## 诊断契约
 
 诊断统一返回 `{ code, severity, message, path, details? }`。`code` 和 `path` 给 CLI、UI 与测试消费，
