@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="nextcourse-session" content="__NEXTCOURSE_SESSION__">
+  <title>NextCourse Studio</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <a class="skip-link" href="#outline">跳到课程大纲</a>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span><strong>NextCourse</strong><span>Studio</span></div>
+    <div class="topbar-actions">
+      <div class="workspace-state" id="workspace-state">正在读取工作区…</div>
+      <div class="edit-actions" id="edit-actions">
+        <button class="quiet-button" id="edit-course" type="button">编辑组合</button>
+        <button class="quiet-button" id="restore-edit" type="button" hidden>恢复上版</button>
+        <button class="quiet-button" id="undo-edit" type="button" hidden>撤销</button>
+        <button class="quiet-button danger-button" id="discard-edit" type="button" hidden>放弃</button>
+        <button class="primary-button" id="save-edit" type="button" hidden>保存配方</button>
+      </div>
+    </div>
+  </header>
+  <main class="studio-shell">
+    <aside class="catalog panel" aria-label="课程与内容目录">
+      <div class="panel-heading">
+        <h1>课程工作区</h1>
+        <button class="quiet-button" id="refresh" type="button">刷新</button>
+      </div>
+      <label class="search-field"><span>查找课程或公开内容</span><input id="search" type="search" placeholder="输入名称、来源或 ID"></label>
+      <nav class="view-tabs" aria-label="目录范围">
+        <button class="tab is-active" data-view="courses" type="button">课程</button>
+        <button class="tab" data-view="library" type="button">可复用内容</button>
+      </nav>
+      <div id="catalog-list" class="catalog-list" aria-live="polite"></div>
+    </aside>
+
+    <section class="outline panel" id="outline" tabindex="-1">
+      <div class="empty-state" id="course-empty">
+        <span class="empty-glyph" aria-hidden="true">⌁</span>
+        <h2>从左侧选择一门组合课</h2>
+        <p>这里会按教学顺序展开配方、实例和页面，不会修改任何源文件。</p>
+      </div>
+      <div id="course-view" hidden>
+        <header class="course-heading">
+          <div><p class="context-line" id="course-id"></p><h2 id="course-title"></h2></div>
+          <label class="recipe-picker">配方<select id="recipe-select"></select></label>
+        </header>
+        <section class="draft-panel" id="draft-panel" hidden aria-label="配方设置">
+          <div class="draft-panel-copy"><span class="status-dot"></span><strong>组合草稿</strong><span id="draft-copy">修改只影响当前配方，保存前不会写入文件。</span></div>
+          <div class="recipe-fields">
+            <label><span>配方标题</span><input id="recipe-title" type="text"></label>
+            <label><span>总时长</span><input id="recipe-duration" type="number" min="0" inputmode="numeric"></label>
+            <label><span>交付深度</span><select id="recipe-profile"><option value="slides">课件</option><option value="slides+lab">课件 + 练习</option><option value="full">完整交付</option></select></label>
+            <button class="secondary-button" id="add-group" type="button">新增分组</button>
+          </div>
+        </section>
+        <div class="course-metrics" id="course-metrics"></div>
+        <div class="outline-list" id="outline-list"></div>
+      </div>
+    </section>
+
+    <aside class="inspector panel" aria-label="预览、来源与诊断">
+      <nav class="view-tabs inspector-tabs" aria-label="检查范围">
+        <button class="tab is-active" data-inspector="preview" type="button">预览</button>
+        <button class="tab" data-inspector="settings" type="button">设置</button>
+        <button class="tab" data-inspector="source" type="button">来源</button>
+        <button class="tab" data-inspector="diagnostics" type="button">诊断</button>
+      </nav>
+      <div id="inspector-content" class="inspector-content">
+        <div class="empty-state compact"><p>选择一个内容实例查看页面和来源。</p></div>
+      </div>
+    </aside>
+  </main>
+  <template id="status-template"><span class="status-dot"></span></template>
+  <script src="/app.js" defer></script>
+</body>
+</html>

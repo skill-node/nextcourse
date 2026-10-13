@@ -9,6 +9,7 @@
  *   nextcourse doctor                   自检：Node / 引擎资产 / Chrome / 工作目录
  *   nextcourse docs   [name]            打印内置文档
  *   nextcourse list                     列出所有课程及状态
+ *   nextcourse studio                   启动本地课程组合工作台
  *   nextcourse new    <name> [--scale]  初始化新课程目录
  *   nextcourse compose <name> [--recipe] 预览候选或从已接受 lock 生成视图
  *   nextcourse validate <name>          纯校验组合课（不写报告或生成物）
@@ -295,6 +296,21 @@ const commands = {
             console.log(`  ${e.name.padEnd(24)} ${flags}`);
         }
         console.log('');
+    },
+
+    studio() {
+        const portValue = optionValue('--port');
+        const port = portValue == null ? 4317 : Number(portValue);
+        if (!Number.isInteger(port) || port < 0 || port > 65535) die('Usage: nextcourse studio [--port <0-65535>]');
+        const { createStudioServer } = require('./studio/server');
+        const studio = createStudioServer({ workRoot: WORK_ROOT });
+        studio.listen(port).then(({ url }) => {
+            console.log('\nNextCourse Studio（课程组合编辑）');
+            console.log('─'.repeat(60));
+            console.log(`  工作区  ${WORK_ROOT}`);
+            console.log(`  地址    ${url}`);
+            console.log('  仅监听  127.0.0.1；按 Ctrl+C 停止\n');
+        }).catch(error => die(`Studio 启动失败：${error.message}`));
     },
 
     new() {
@@ -615,6 +631,7 @@ NextCourse V${VERSION.split('.')[0]} — 课程开发工具
   nextcourse doctor                   自检：Node / 引擎资产 / Chrome / 工作目录
   nextcourse docs   [name]            打印内置文档（design-system / agent / cli / domains）
   nextcourse list                     列出所有课程及状态
+  nextcourse studio [--port <port>]   启动本地课程组合工作台（默认 4317）
   nextcourse new    <name> [--scale M|L]
                                       初始化新课程目录（不带 --scale = S 档轻量分享课）
   nextcourse compose <name> [--recipe <id>] [--dry-run]

@@ -43,6 +43,26 @@ NextCourse — 课程列表
 
 ---
 
+#### `studio` — local course composition workspace
+
+```bash
+nextcourse studio [--port 4317]
+```
+
+Starts a local web workspace bound to `127.0.0.1`. It reads the workspace, switches
+courses and recipes, shows the public library, previews generated pages in a sandbox,
+and exposes provenance and diagnostics. An independent deck can be explicitly converted
+to a baseline composition while its original slides remain untouched. Modules, occurrences,
+and pages can be ordered with drag handles or keyboard-accessible buttons; a public sequence can be inserted and atomically expanded as a complete module. An in-memory draft supports unit insertion,
+removal, copying, ordering, cross-group moves, grouping, explicit page order and exclusion, case swaps,
+duration, outcome mapping, and update policy. Save validates the complete manifest,
+detects concurrent external edits, atomically replaces `course.compose.json`, and keeps
+the previous version under `.nextcourse/history/compose/` for recovery. Saving never
+accepts a new lock or rebuilds implicitly. Studio does not edit page copy, HTML, CSS,
+images, or speaker notes. The terminal prints a URL with a random session token; stop it with `Ctrl+C`.
+
+---
+
 #### `new` — scaffold a new course
 
 ```bash

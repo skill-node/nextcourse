@@ -258,6 +258,7 @@ CLI 你也可以直接用：
 
 ```bash
 nextcourse doctor                 # 自检：Node / 引擎资产 / Chrome / 工作目录
+nextcourse studio                         # 本地课程组合工作台
 nextcourse compose <name> --dry-run      # 预览组合课的来源、版本与诊断
 nextcourse validate <name>               # 纯校验组合课，不写报告或生成物
 nextcourse trace <name> <id>             # 查看实例／实体／页面的来源链

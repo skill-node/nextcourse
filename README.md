@@ -296,6 +296,7 @@ The CLI is also yours to drive directly:
 
 ```bash
 nextcourse doctor                 # self-check: Node, engine assets, Chrome, working dir
+nextcourse studio                         # local course composition workspace
 nextcourse compose <name> --dry-run      # preview a composed course's sources and versions
 nextcourse validate <name>               # read-only validation; writes no reports or views
 nextcourse trace <name> <id>             # trace an occurrence, entity, or current page

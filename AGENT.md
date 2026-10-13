@@ -43,6 +43,7 @@ nextcourse/
 ├── package.js            ← 交付包生成（nextcourse package 内部调用）
 ├── render-md.js          ← 受控子集 md→html 渲染器（零依赖，package --render 用）
 ├── course-model.js       ← meta / blueprint / slides 解析层（check 与 package 共用）
+├── studio/               ← 本地组合工作台：领域视图适配、回环服务与静态界面
 ├── lint-slides.js        ← 样式校验（nextcourse lint 内部调用）
 ├── animate-slides.js     ← 入场动画批量打入/剥离（nextcourse animate 内部调用）
 ├── export.js             ← 离线打包（nextcourse export 内部调用）
@@ -103,6 +104,7 @@ course.meta.md / slides/ 这几样真正要看的东西淹掉。生成物各归�
 
 ```bash
 nextcourse list                     # 列出所有课程及状态
+nextcourse studio [--port 4317]     # 启动仅监听回环地址的本地组合工作台
 nextcourse new    <name> [--scale M|L]  # 初始化新课程目录（不带 --scale = S 档）
 nextcourse compose <name> [--recipe <id>] [--dry-run]  # 预览候选；已有 lock 只重建
 nextcourse validate <name> [--json]                    # 纯校验，不写对齐矩阵
@@ -126,6 +128,7 @@ nextcourse shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（
 | 命令 | 说明 |
 |------|------|
 | `list` | 显示 courses/ 下所有课程，标注 meta/slides/deck/export 完成状态 |
+| `studio` | 启动只监听回环地址的本地工作台；查看并编辑组合配方，草稿经并发校验后原子保存，不编辑页面正文 |
 | `new <name>` | 创建 courses/\<name\>/ 目录结构 + course.meta.md 模板；`--scale M\|L` 另生成 course.blueprint.md 并在 frontmatter 补 scale/duration/class_size |
 | `compose <name>` | `--dry-run` 预览公开引用候选；候选经 `sync --apply` 接受后，只从匹配 lock 生成 `.build/<recipe>/` 视图，不接受上游更新 |
 | `validate / trace / impact` | 共用只读领域 API；可用 `--json` 给 UI 消费，不调用会写对齐矩阵的旧 `check` |
