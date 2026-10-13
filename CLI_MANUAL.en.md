@@ -134,6 +134,12 @@ whose compose, lock and source baselines still match. Frozen items remain pinned
 an upstream change to a variant produces three-way review data and is never overwritten.
 `--json` exposes the same machine-readable results intended for the local studio.
 
+A recipe may also select its own Markdown design sources with
+`designSources: { "meta": "design/short.meta.md", "blueprint": "design/short.blueprint.md" }`.
+The view uses the standard `course.meta.md` and `course.blueprint.md` filenames; the
+sources remain untouched. Omit this field to keep root-level sources. Rebuilding after
+local design edits refreshes the view instead of reusing stale metadata.
+
 ---
 
 #### `lint` — check slides against the design system

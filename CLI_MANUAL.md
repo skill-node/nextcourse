@@ -116,6 +116,10 @@ nextcourse check --workspace [--json]
 compose、lock、源文件基线全部匹配时，`--apply` 才原子更新 lock；冻结项保持原版本，变体遇到
 上游变化会给出旧基线／新上游／本地文件三方信息并拒绝覆盖。`--json` 是 CLI 与工作台共用的机器接口。
 
+每份配方还可通过 `designSources: { "meta": "design/short.meta.md", "blueprint": "design/short.blueprint.md" }`
+选择独立设计源；省略时沿用课程根目录源。构建视图统一使用 `course.meta.md` 与 `course.blueprint.md` 文件名，
+设计源本身保持不变。编辑设计源后重新 build 会刷新视图，避免旧缓存继续使用上一份元数据。
+
 ---
 
 #### `lint` — 校验幻灯片样式规范

@@ -178,6 +178,14 @@
       "additionalProperties": false,
       "required": ["selection", "groups"],
       "properties": {
+        "designSources": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "meta": { "$ref": "#/$defs/relativePath" },
+            "blueprint": { "$ref": "#/$defs/relativePath" }
+          }
+        },
         "selection": { "const": "explicit" },
         "title": { "type": "string", "minLength": 1 },
         "durationMinutes": { "type": "integer", "minimum": 0 },

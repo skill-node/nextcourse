@@ -22,6 +22,10 @@ nextcourse doctor
 只改当前课程时写入本地页或变体并更新 compose，再正式 `compose` / `render`。
 `nextcourse animate` 也不会修改组合产物。
 
+组合课先选定 recipe：默认锁在 `course.lock.json`，其他配方可在 `course.locks/<recipe>.lock.json`，不得用另一配方的锁。
+若 recipe 声明 `designSources.meta`／`designSources.blueprint`，读取和修改其指向的课程内 Markdown；
+省略时才用根 `course.meta.md`／`course.blueprint.md`。`.build/<recipe>/` 的 Markdown 也是生成物，不作为创作源。
+
 ## 对话语言
 
 **跟随用户的语言**，本文档是中文写的不代表对话和产出要用中文。幻灯片正文、讲师备注（`aside class="notes"`）、`slide-plan.md` 一律跟随 `course.meta.md` 的语言；class 名和组件名是设计系统的一部分，永远是英文。

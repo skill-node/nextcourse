@@ -9,6 +9,7 @@ const { DIAGNOSTIC_CODES: C, diagnostic } = require('./diagnostics');
 const { resolveInside } = require('./resolver');
 const { loadSnapshot } = require('./lock');
 const { recipeLockPath, lockMatchesRecipe } = require('./recipe-lock');
+const { recipeDesignSources } = require('./design-sources');
 
 function readJson(filePath, diagnostics, displayPath) {
     try {
@@ -224,12 +225,13 @@ function verifyGeneratedView(outputDir) {
     return { clean: true };
 }
 
-function reusableGeneratedView(outputDir, lock, groups, pageRecords, localAssets) {
+function reusableGeneratedView(outputDir, lock, groups, pageRecords, localAssets, designSources) {
     const manifestPath = path.join(outputDir, 'build.manifest.json');
     let manifest;
     try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); }
     catch { return false; }
     if (manifest.composeHash !== lock.composeHash || manifest.sourceManifestHash !== lock.sourceManifestHash) return false;
+    if (JSON.stringify(manifest.designSources || []) !== JSON.stringify(designSources)) return false;
     const pages = pageRecords.map(({ html, ...page }) => page);
     if (JSON.stringify(manifest.groups) !== JSON.stringify(groups) || JSON.stringify(manifest.pages) !== JSON.stringify(pages)) return false;
     const existingLocal = new Map((manifest.assets || []).filter(asset => asset.origin === 'local').map(asset => [asset.source, asset.hash]));
@@ -326,16 +328,21 @@ function materializeRecipe(workRoot, courseName, recipeId, options = {}) {
                     diagnostics.push(diagnostic(C.REFERENCE_NOT_FOUND, `Local unit not found: ${item.local.path}.`, `${pointer}/local/path`));
                     continue;
                 }
-                let unit;
-                try { unit = JSON.parse(fs.readFileSync(descriptorPath, 'utf8')); }
-                catch (error) {
-                    diagnostics.push(diagnostic(C.DOCUMENT_INVALID, `Cannot parse local unit: ${error.message}`, item.local.path));
-                    continue;
+                if (entityParts(item.local.id)?.kind === 'page') {
+                    const page = localPage(courseDir, item.local.id, item.local.path, diagnostics);
+                    if (page) pages = [{ ...page, sourcePath: item.local.path }];
+                } else {
+                    let unit;
+                    try { unit = JSON.parse(fs.readFileSync(descriptorPath, 'utf8')); }
+                    catch (error) {
+                        diagnostics.push(diagnostic(C.DOCUMENT_INVALID, `Cannot parse local unit: ${error.message}`, item.local.path));
+                        continue;
+                    }
+                    pages = pagesFromUnitDescriptor(unit, item.local.path, (page, sourcePath) => {
+                        const local = localPage(courseDir, page.id, sourcePath, diagnostics);
+                        return local && { ...local, contentMode: 'local' };
+                    }, diagnostics);
                 }
-                pages = pagesFromUnitDescriptor(unit, item.local.path, (page, sourcePath) => {
-                    const local = localPage(courseDir, page.id, sourcePath, diagnostics);
-                    return local && { ...local, contentMode: 'local' };
-                }, diagnostics);
             } else {
                 const reference = references.get(item.id);
                 if (!reference) {
@@ -438,6 +445,11 @@ function materializeRecipe(workRoot, courseName, recipeId, options = {}) {
     }
     if (diagnostics.some(item => item.severity === 'error')) return { materialized: false, diagnostics };
 
+    const design = recipeDesignSources(courseDir, recipe);
+    diagnostics.push(...design.diagnostics);
+    if (!design.valid) return { materialized: false, diagnostics };
+    const designSources = design.files.map(({ absolutePath, ...file }) => file);
+
     const buildRoot = path.join(courseDir, '.build');
     const outputDir = path.join(buildRoot, selectedRecipe);
     if (fs.existsSync(outputDir) && !options.force) {
@@ -446,7 +458,7 @@ function materializeRecipe(workRoot, courseName, recipeId, options = {}) {
             diagnostics.push(diagnostic(C.GENERATED_DRIFT, drift.reason, path.relative(root, outputDir).split(path.sep).join('/')));
             return { materialized: false, diagnostics };
         }
-        if (reusableGeneratedView(outputDir, lock, groups, pageRecords, localAssets)) {
+        if (reusableGeneratedView(outputDir, lock, groups, pageRecords, localAssets, designSources)) {
             return {
                 materialized: true,
                 reused: true,
@@ -461,12 +473,10 @@ function materializeRecipe(workRoot, courseName, recipeId, options = {}) {
     const temporary = fs.mkdtempSync(path.join(buildRoot, `.tmp-${selectedRecipe}-`));
     const outputs = [];
     try {
-        for (const sourceName of ['course.meta.md', 'course.blueprint.md']) {
-            const sourcePath = path.join(courseDir, sourceName);
-            if (!fs.existsSync(sourcePath)) continue;
-            const destination = path.join(temporary, sourceName);
-            fs.copyFileSync(sourcePath, destination);
-            outputs.push({ path: sourceName, hash: sha256(fs.readFileSync(destination)) });
+        for (const source of design.files) {
+            const destination = path.join(temporary, source.output);
+            fs.copyFileSync(source.absolutePath, destination);
+            outputs.push({ path: source.output, hash: sha256(fs.readFileSync(destination)) });
         }
         fs.mkdirSync(path.join(temporary, 'slides'), { recursive: true });
         for (const page of pageRecords) {
@@ -507,6 +517,7 @@ function materializeRecipe(workRoot, courseName, recipeId, options = {}) {
             recipeId: selectedRecipe,
             composeHash: lock.composeHash,
             sourceManifestHash: lock.sourceManifestHash,
+            designSources,
             groups,
             pages: pageRecords.map(({ html, ...page }) => page),
             assets: copiedAssets,

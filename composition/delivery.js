@@ -8,6 +8,7 @@ const { validateCase, validateComposeManifest, validateLockManifest } = require(
 const { DIAGNOSTIC_CODES: C, diagnostic } = require('./diagnostics');
 const { loadSnapshot } = require('./lock');
 const { recipeLockPath, lockMatchesRecipe } = require('./recipe-lock');
+const { recipeDesignSources } = require('./design-sources');
 const { resolveInside } = require('./resolver');
 const { wrapDocument, accentFromTheme } = require('../render-md');
 
@@ -194,9 +195,12 @@ function planDeliveryPackage(workRoot, courseName, recipeId) {
     if (recipe && ['slides+lab', 'full'].includes(recipe.deliveryProfile) && cases.size === 0) {
         diagnostics.push(diagnostic(C.CASE_ANSWER_MISSING, 'slides+lab/full delivery requires at least one locked case.', `/recipes/${selectedRecipe}`));
     }
+    const design = recipe && recipeDesignSources(courseDir, recipe);
+    if (design) diagnostics.push(...design.diagnostics);
     return {
         valid: diagnostics.every(entry => entry.severity !== 'error'),
         diagnostics,
+        metaPath: design && design.files.find(file => file.output === 'course.meta.md')?.absolutePath,
         root,
         coursesRoot,
         courseDir,
@@ -253,9 +257,8 @@ function facilitatorGuide(plan, title) {
     return `${out.join('\n')}\n`;
 }
 
-function metaTitle(courseDir, fallback) {
-    const metaPath = path.join(courseDir, 'course.meta.md');
-    if (!fs.existsSync(metaPath)) return fallback;
+function metaTitle(metaPath, fallback) {
+    if (!(metaPath && fs.existsSync(metaPath))) return fallback;
     const match = fs.readFileSync(metaPath, 'utf8').match(/^title:\s*["']?(.+?)["']?\s*$/m);
     return match ? match[1] : fallback;
 }
@@ -332,7 +335,7 @@ function packageComposedCourse(workRoot, packageRoot, courseName, recipeId, opti
         diagnostics.push(diagnostic(C.GENERATED_DRIFT, existing.reason, path.relative(plan.root, outputRoot).split(path.sep).join('/')));
         return { packaged: false, diagnostics, plan };
     }
-    const title = metaTitle(plan.courseDir, courseName);
+    const title = metaTitle(plan.metaPath, courseName);
     const sourceRoot = path.join(plan.courseDir, 'package-src', plan.recipeId);
     const writtenSources = [];
     const studentSource = path.join(sourceRoot, 'student', '2_workbook.md');
@@ -349,8 +352,8 @@ function packageComposedCourse(workRoot, packageRoot, courseName, recipeId, opti
         if (options.render) {
             const cssPath = path.join(packageRoot, 'shared_styles', 'package-doc.css');
             const css = fs.readFileSync(cssPath, 'utf8');
-            const metaPath = path.join(plan.courseDir, 'course.meta.md');
-            const theme = fs.existsSync(metaPath) ? ((fs.readFileSync(metaPath, 'utf8').match(/^theme:\s*["']?(.+?)["']?\s*$/m) || [])[1] || 'standard-default') : 'standard-default';
+            const metaPath = plan.metaPath;
+            const theme = (metaPath && fs.existsSync(metaPath)) ? ((fs.readFileSync(metaPath, 'utf8').match(/^theme:\s*["']?(.+?)["']?\s*$/m) || [])[1] || 'standard-default') : 'standard-default';
             const accent = accentFromTheme(packageRoot, theme);
             renderAudienceSources(path.join(sourceRoot, 'student'), path.join(temporary, 'student'), title, css, accent, outputs);
             renderAudienceSources(path.join(sourceRoot, 'facilitator'), path.join(temporary, 'facilitator'), title, css, accent, outputs);

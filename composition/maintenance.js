@@ -8,6 +8,7 @@ const { validateComposeManifest, validateLockManifest, validateUnit } = require(
 const { DIAGNOSTIC_CODES: C, diagnostic } = require('./diagnostics');
 const { planRecipeLock, applyLockPlan, loadSnapshot } = require('./lock');
 const { recipeLockPath, lockMatchesRecipe } = require('./recipe-lock');
+const { recipeDesignSources } = require('./design-sources');
 const { resolveInside, resolveExport } = require('./resolver');
 const { verifyGeneratedView } = require('./materialize');
 const { planDeliveryPackage } = require('./delivery');
@@ -123,13 +124,18 @@ function instructionalDiagnostics(courseDir, coursesRoot, recipe, lock, diagnost
             }
 
             let pages = unit.pages.slice();
-            if (item.pages && Array.isArray(item.pages.include)) {
-                const included = new Set(item.pages.include);
-                pages = pages.filter(page => included.has(page.id));
-            }
-            if (item.pages && Array.isArray(item.pages.omit)) {
-                const omitted = new Set(item.pages.omit);
-                pages = pages.filter(page => !omitted.has(page.id));
+            if (Array.isArray(item.pagePlan)) {
+                const finalIds = new Set(item.pagePlan);
+                pages = pages.filter(page => finalIds.has(page.id));
+            } else {
+                if (item.pages && Array.isArray(item.pages.include)) {
+                    const included = new Set(item.pages.include);
+                    pages = pages.filter(page => included.has(page.id));
+                }
+                if (item.pages && Array.isArray(item.pages.omit)) {
+                    const omitted = new Set(item.pages.omit);
+                    pages = pages.filter(page => !omitted.has(page.id));
+                }
             }
             const evidenceRoles = new Set(['practice', 'assessment']);
             if (unit.outcomes.length && !pages.some(page => evidenceRoles.has(page.role))) {
@@ -176,6 +182,8 @@ function validateRecipe(workRoot, courseName, recipeId) {
     diagnostics.push(...composeValidation.diagnostics, ...lockValidation.diagnostics);
     const selected = selectedRecipe(composeRead.value, recipeId, diagnostics);
     const lock = lockRead.value;
+    const design = selected.recipe && recipeDesignSources(courseDir, selected.recipe);
+    if (design) diagnostics.push(...design.diagnostics);
     if (lock.courseId !== composeRead.value.courseId) {
         diagnostics.push(diagnostic(C.COURSE_ID_INVALID, 'Lock and compose courseId values differ.', '/courseId'));
     }
@@ -225,6 +233,8 @@ function validateRecipe(workRoot, courseName, recipeId) {
             const manifest = readBuildManifest(courseDir, selected.id);
             if (!manifest || manifest.composeHash !== lock.composeHash || manifest.sourceManifestHash !== lock.sourceManifestHash) {
                 reason = 'generated view was built from a different lock baseline';
+            } else if (design && JSON.stringify(manifest.designSources || []) !== JSON.stringify(design.files.map(({ absolutePath, ...file }) => file))) {
+                reason = 'local design source changed since the generated view was built';
             }
         }
         generated = { present: true, clean: drift.clean && !reason, reason };

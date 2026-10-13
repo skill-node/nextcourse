@@ -44,6 +44,10 @@ Phase 4: 模块架构      → 模块 = 主题 + 时长 + 活动 + 产出物 + �
 `course.exports.json`。输出一张“本课成果 → 候选公开单元 → 本地补充”的复用地图；
 没有显式 export 的内容不能当作共享接口，不根据题目相似就复制文件。普通课程不创建 compose 文件。
 
+组合课先选定 recipe：默认锁在 `course.lock.json`，其他配方可在 `course.locks/<recipe>.lock.json`，不得用另一配方的锁。
+若 recipe 声明 `designSources.meta`／`designSources.blueprint`，读取和修改其指向的课程内 Markdown；
+省略时才用根 `course.meta.md`／`course.blueprint.md`。`.build/<recipe>/` 的 Markdown 也是生成物，不作为创作源。
+
 ---
 
 ## Phase 0：规格与需求诊断

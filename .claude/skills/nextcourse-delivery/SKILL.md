@@ -30,6 +30,10 @@ nextcourse doctor
 `full` 必须先备齐八份源。不要把交付 Markdown 写进 `.build/`，也不要覆盖已有手册；
 离线导出默认只带 student 包，讲师答案须显式选择 facilitator audience。
 
+组合课先选定 recipe：默认锁在 `course.lock.json`，其他配方可在 `course.locks/<recipe>.lock.json`，不得用另一配方的锁。
+若 recipe 声明 `designSources.meta`／`designSources.blueprint`，读取和修改其指向的课程内 Markdown；
+省略时才用根 `course.meta.md`／`course.blueprint.md`。`.build/<recipe>/` 的 Markdown 也是生成物，不作为创作源。
+
 ## 对话语言
 
 跟随用户的语言，与 `nextcourse-design` 一致。字段名与文件名保持英文，内容跟随用户语言。

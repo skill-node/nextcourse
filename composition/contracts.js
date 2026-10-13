@@ -179,6 +179,14 @@ function validateComposeManifest(doc) {
         if (recipe.deliveryProfile !== undefined && !DELIVERY_PROFILES.includes(recipe.deliveryProfile)) {
             diagnostics.push(diagnostic(C.RECIPE_INVALID, `deliveryProfile must be one of: ${DELIVERY_PROFILES.join(', ')}.`, `${recipePath}/deliveryProfile`));
         }
+        if (recipe.designSources !== undefined) {
+            if (!isObject(recipe.designSources)) diagnostics.push(diagnostic(C.RECIPE_INVALID, 'designSources must be an object.', `${recipePath}/designSources`));
+            else for (const [key, value] of Object.entries(recipe.designSources)) {
+                if (!['meta', 'blueprint'].includes(key)) diagnostics.push(diagnostic(C.RECIPE_INVALID, `Unknown design source: ${key}.`, `${recipePath}/designSources/${key}`));
+                validatePath(value, `${recipePath}/designSources/${key}`, diagnostics);
+                if (typeof value !== 'string' || !value.endsWith('.md')) diagnostics.push(diagnostic(C.RECIPE_INVALID, 'Design sources must be Markdown files.', `${recipePath}/designSources/${key}`));
+            }
+        }
         const groups = new Set();
         const occurrences = new Set();
         recipe.groups.forEach((group, groupIndex) => {
@@ -258,6 +266,7 @@ function validateComposeManifest(doc) {
                 }
                 if (item.contentMode === 'local') {
                     validateEntity(item.local && item.local.id, `${itemPath}/local/id`, diagnostics, { ownerId: doc.courseId });
+                    if (item.local && !['unit', 'page'].includes(entityParts(item.local.id)?.kind)) diagnostics.push(diagnostic(C.ITEM_INVALID, 'Local slide items require a unit or page ID.', `${itemPath}/local/id`));
                     validatePath(item.local && item.local.path, `${itemPath}/local/path`, diagnostics);
                     if (item.ref !== undefined) diagnostics.push(diagnostic(C.ITEM_INVALID, 'Local items cannot retain an active ref.', `${itemPath}/ref`));
                 } else {

@@ -10,6 +10,7 @@ const { validateComposeManifest, validateLockManifest, validateUnit } = require(
 const { DIAGNOSTIC_CODES: C, diagnostic } = require('./diagnostics');
 
 const { recipeHash, recipeLockPath } = require('./recipe-lock');
+const { recipeDesignSources } = require('./design-sources');
 
 const ENGINE_VERSION = require('../package.json').version;
 
@@ -120,11 +121,19 @@ function planRecipeLock(workRoot, courseName, recipeId) {
         return { resolution, reference };
     }
 
+    const design = recipeDesignSources(courseDir, recipe);
+    diagnostics.push(...design.diagnostics);
+    for (const file of design.files) inputs.push({
+        path: file.absolutePath,
+        workspacePath: path.relative(catalog.root, file.absolutePath).split(path.sep).join('/'),
+        hash: file.hash,
+    });
+
     for (const group of recipe.groups) {
         if (group.sourceSequence) addReference(`${group.id}.sequence`, group.sourceSequence.ref, group.sourceSequence.version);
         for (const item of group.items) {
             if (item.contentMode === 'local') {
-                const local = addLocalInput(item.local.path, `/recipes/${selectedRecipe}/items/${item.id}/local/path`);
+                const local = addLocalInput(item.local.path, `/recipes/${selectedRecipe}/items/${item.id}/local/path`, item.local.id.includes(':page:'));
                 if (local) {
                     if (item.local.id.includes(':unit:')) {
                         try {
@@ -222,7 +231,7 @@ function planRecipeLock(workRoot, courseName, recipeId) {
     const valid = !diagnostics.some(item => item.severity === 'error');
     const lockPath = recipeLockPath(courseDir, compose, selectedRecipe, true);
     const baselineLockHash = fs.existsSync(lockPath) ? sha256(fs.readFileSync(lockPath)) : null;
-    const planIdentity = JSON.stringify({ recipeId: selectedRecipe, composeHash: composeRead.hash, sourceManifestHash, references, lockPath: path.relative(courseDir, lockPath), baselineLockHash });
+    const planIdentity = JSON.stringify({ recipeId: selectedRecipe, composeHash: composeRead.hash, sourceManifestHash, references, lockPath: path.relative(courseDir, lockPath), baselineLockHash, inputBaseline: allInputs.map(input => ({ path: input.workspacePath, hash: input.hash })) });
     return {
         valid,
         planId: sha256(Buffer.from(planIdentity, 'utf8')),
