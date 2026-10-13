@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "courseId": "prompt-engineering",
+  "exports": [
+    {
+      "id": "prompt-engineering:unit:prompt-basics",
+      "kind": "unit",
+      "version": "1.0.0",
+      "title": "提示词基础",
+      "source": "units/prompt-basics/unit.json"
+    },
+    {
+      "id": "prompt-engineering:asset:prompt-checklist",
+      "kind": "asset",
+      "version": "1.0.0",
+      "title": "提示词检查表",
+      "source": "units/prompt-basics/assets/checklist.txt"
+    },
+    {
+      "id": "prompt-engineering:page:prompt-practice",
+      "kind": "page",
+      "version": "1.0.0",
+      "title": "提示词练习页",
+      "source": "units/prompt-basics/slides/02-practice.html"
+    },
+    {
+      "id": "prompt-engineering:case:rewrite-request",
+      "kind": "case",
+      "version": "1.0.0",
+      "title": "改写模糊需求",
+      "source": "units/prompt-basics/cases/rewrite-request/case.json"
+    }
+  ]
+}

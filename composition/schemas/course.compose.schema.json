@@ -29,6 +29,18 @@
       "type": "string",
       "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?:page:[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"
     },
+    "caseId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?:case:[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"
+    },
+    "sequenceId": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?:sequence:[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$"
+    },
     "relativePath": {
       "type": "string",
       "minLength": 1,
@@ -83,6 +95,18 @@
             "uniqueItems": true
           }
         },
+        "caseOverrides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "to"],
+            "properties": {
+              "from": { "$ref": "#/$defs/caseId" },
+              "to": { "$ref": "#/$defs/caseId" }
+            }
+          }
+        },
         "local": {
           "type": "object",
           "additionalProperties": false,
@@ -102,6 +126,11 @@
           }
         },
         "pages": { "$ref": "#/$defs/pages" },
+        "pagePlan": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/pageId" },
+          "uniqueItems": true
+        },
         "operations": { "type": "array", "items": { "$ref": "#/$defs/operation" } }
       },
       "allOf": [
@@ -132,6 +161,15 @@
           ]
         },
         "plannedMinutes": { "type": "integer", "minimum": 0 },
+        "sourceSequence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ref", "version"],
+          "properties": {
+            "ref": { "$ref": "#/$defs/sequenceId" },
+            "version": { "$ref": "#/$defs/version" }
+          }
+        },
         "items": { "type": "array", "items": { "$ref": "#/$defs/item" } }
       }
     },
@@ -141,6 +179,7 @@
       "required": ["selection", "groups"],
       "properties": {
         "selection": { "const": "explicit" },
+        "title": { "type": "string", "minLength": 1 },
         "durationMinutes": { "type": "integer", "minimum": 0 },
         "deliveryProfile": { "enum": ["slides", "slides+lab", "full"] },
         "groups": { "type": "array", "items": { "$ref": "#/$defs/group" } }

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "prompt-engineering:case:rewrite-request",
+  "version": "1.0.0",
+  "title": "改写一条模糊需求",
+  "input": "一条缺少背景和验收标准的办公室任务请求。",
+  "task": "使用任务、背景、参考三要素重写请求，并用检查表自评。",
+  "expectedOutput": "一条可执行、可验收的提示词和一份自检记录。",
+  "materials": [
+    {
+      "id": "brief",
+      "title": "练习任务卡",
+      "path": "student/brief.html",
+      "role": "worksheet",
+      "audience": "student"
+    },
+    {
+      "id": "sample-data",
+      "title": "练习数据",
+      "path": "student/data/sample.json",
+      "role": "input",
+      "audience": "student"
+    },
+    {
+      "id": "answer",
+      "title": "讲师参考答案",
+      "path": "facilitator/answer.md",
+      "role": "answer",
+      "audience": "facilitator"
+    },
+    {
+      "id": "rubric",
+      "title": "验收量规",
+      "path": "shared/rubric.md",
+      "role": "rubric",
+      "audience": "both"
+    }
+  ],
+  "answerMaterial": "answer",
+  "rubricMaterial": "rubric",
+  "generator": {
+    "script": "generate.js",
+    "parameters": { "records": 1 },
+    "seed": "fixture-1",
+    "outputs": [
+      {
+        "path": "student/data/sample.json",
+        "hash": "sha256:55e3a298ce306ff857473c3420a95ab64d1dd311e7ffa44b5ffbffd0514150a0"
+      }
+    ]
+  }
+}

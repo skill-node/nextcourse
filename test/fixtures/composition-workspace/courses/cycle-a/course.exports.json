@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "courseId": "cycle-a",
+  "exports": [
+    {
+      "id": "cycle-a:unit:loop",
+      "kind": "unit",
+      "version": "1.0.0",
+      "title": "循环 A",
+      "target": {
+        "ref": "cycle-b:unit:loop",
+        "version": "1.0.0"
+      }
+    }
+  ]
+}

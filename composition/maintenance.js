@@ -35,8 +35,19 @@ function selectedRecipe(compose, recipeId, diagnostics) {
 function recipeOccurrences(recipe) {
     const occurrences = new Map();
     for (const group of (recipe && recipe.groups) || []) {
+        if (group.sourceSequence) {
+            occurrences.set(`${group.id}.sequence`, {
+                item: { ref: group.sourceSequence.ref, contentMode: 'reference', updatePolicy: 'manual' },
+                group,
+                operation: null,
+                sourceSequence: group.sourceSequence,
+            });
+        }
         for (const item of group.items || []) {
             occurrences.set(item.id, { item, group, operation: null });
+            for (let index = 0; index < (item.caseOverrides || []).length; index++) {
+                occurrences.set(`${item.id}.case-override${index + 1}`, { item, group, operation: null, caseOverride: item.caseOverrides[index] });
+            }
             for (let index = 0; index < (item.operations || []).length; index++) {
                 const operation = item.operations[index];
                 if (operation.with && operation.with.ref) {
@@ -50,7 +61,7 @@ function recipeOccurrences(recipe) {
 
 function occurrenceContext(occurrences, occurrenceId) {
     if (occurrences.has(occurrenceId)) return occurrences.get(occurrenceId);
-    const derived = String(occurrenceId).match(/^(.*)\.(?:asset|case)\d+$/);
+    const derived = String(occurrenceId).match(/^(.*)\.(?:asset|case|case-override)\d+$/);
     return derived ? occurrences.get(derived[1]) || null : null;
 }
 
@@ -176,7 +187,7 @@ function validateRecipe(workRoot, courseName, recipeId) {
     const expected = recipeOccurrences(selected.recipe);
     const actual = new Map((lock.references || []).map(reference => [reference.occurrenceId, reference]));
     for (const [occurrenceId, context] of expected) {
-        if (context.item.contentMode !== 'local' || context.operation) {
+        if (context.item.contentMode !== 'local' || context.operation || context.caseOverride) {
             if (!actual.has(occurrenceId)) diagnostics.push(diagnostic(C.LOCK_REFERENCE_INVALID, `Lock is missing ${occurrenceId}.`, `/references/${occurrenceId}`));
         }
     }

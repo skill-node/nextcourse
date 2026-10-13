@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "prompt-engineering:unit:prompt-basics",
+  "version": "1.0.0",
+  "title": "提示词基础",
+  "durationMinutes": 20,
+  "outcomes": [
+    {
+      "id": "write-clear-prompt",
+      "do": "把模糊需求改写成包含任务、背景和参考的提示词",
+      "bloom": "apply",
+      "evidence": "完成一轮改写并依据检查表自评"
+    }
+  ],
+  "prerequisites": [],
+  "pages": [
+    {
+      "id": "prompt-engineering:page:prompt-framework",
+      "path": "slides/01-framework.html",
+      "estimatedMinutes": 8,
+      "role": "concept"
+    },
+    {
+      "id": "prompt-engineering:page:prompt-practice",
+      "path": "slides/02-practice.html",
+      "estimatedMinutes": 12,
+      "role": "practice"
+    }
+  ],
+  "cases": ["prompt-engineering:case:rewrite-request"],
+  "assets": ["prompt-engineering:asset:prompt-checklist"]
+}

@@ -9,4 +9,5 @@ module.exports = {
     ...require('./materialize'),
     ...require('./maintenance'),
     ...require('./delivery'),
+    ...require('./editor'),
 };

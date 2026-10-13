@@ -45,6 +45,7 @@ test('all published schema documents are valid JSON with schemaVersion 1', () =>
         'course.compose.schema.json',
         'course.exports.schema.json',
         'course.lock.schema.json',
+        'sequence.schema.json',
         'unit.schema.json',
     ]);
     for (const file of files) {

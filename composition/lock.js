@@ -84,14 +84,14 @@ function planRecipeLock(workRoot, courseName, recipeId) {
         return { absolutePath, bytes };
     }
 
-    function addReference(occurrenceId, ref) {
+    function addReference(occurrenceId, ref, requestedVersion = null) {
         const itemDiagnostics = [];
-        const resolution = resolveExport(catalog, ref, null, { diagnostics: itemDiagnostics });
+        const resolution = resolveExport(catalog, ref, requestedVersion, { diagnostics: itemDiagnostics });
         diagnostics.push(...itemDiagnostics.map(entry => ({ ...entry, occurrenceId })));
         if (resolution.ref && resolution.version) {
             bindings.push({ occurrenceId, ref: resolution.ref, version: resolution.version, exportPath: resolution.exportPath || [] });
         }
-        if (!resolution.resolved) return;
+        if (!resolution.resolved) return { resolution, reference: null };
         inputs.push(...resolution.manifestInputs);
         inputs.push(...resolution.files.map(file => ({ path: file.absolutePath, workspacePath: file.workspacePath, hash: file.hash })));
         const digest = resolution.contentHash.slice('sha256:'.length);
@@ -101,7 +101,7 @@ function planRecipeLock(workRoot, courseName, recipeId) {
             snapshotPath,
             files: resolution.files,
         });
-        references.push({
+        const reference = {
             occurrenceId,
             ref: resolution.ref,
             version: resolution.version,
@@ -113,10 +113,13 @@ function planRecipeLock(workRoot, courseName, recipeId) {
             assets: resolution.assets,
             cases: resolution.cases,
             deliveryFiles: resolution.deliveryFiles,
-        });
+        };
+        references.push(reference);
+        return { resolution, reference };
     }
 
     for (const group of recipe.groups) {
+        if (group.sourceSequence) addReference(`${group.id}.sequence`, group.sourceSequence.ref, group.sourceSequence.version);
         for (const item of group.items) {
             if (item.contentMode === 'local') {
                 const local = addLocalInput(item.local.path, `/recipes/${selectedRecipe}/items/${item.id}/local/path`);
@@ -131,18 +134,49 @@ function planRecipeLock(workRoot, courseName, recipeId) {
                                 const pagePath = path.posix.normalize(path.posix.join(descriptorDir, page.path));
                                 addLocalInput(pagePath, `${item.local.path}/pages/${page.id}`, true);
                             }
-                            for (const [field, refs] of [['assets', localUnit.assets || []], ['cases', localUnit.cases || []]]) {
-                                refs.forEach((dependencyRef, dependencyIndex) => {
-                                    addReference(`${item.id}.${field.slice(0, -1)}${dependencyIndex + 1}`, dependencyRef);
-                                });
-                            }
+                            (localUnit.assets || []).forEach((dependencyRef, dependencyIndex) => {
+                                addReference(`${item.id}.asset${dependencyIndex + 1}`, dependencyRef);
+                            });
+                            const usedOverrides = new Set();
+                            (localUnit.cases || []).forEach((dependencyRef, dependencyIndex) => {
+                                const overrideIndex = (item.caseOverrides || []).findIndex(entry => entry.from === dependencyRef);
+                                if (overrideIndex === -1) addReference(`${item.id}.case${dependencyIndex + 1}`, dependencyRef);
+                                else {
+                                    usedOverrides.add(overrideIndex);
+                                    addReference(`${item.id}.case-override${overrideIndex + 1}`, item.caseOverrides[overrideIndex].to);
+                                }
+                            });
+                            (item.caseOverrides || []).forEach((override, overrideIndex) => {
+                                if (!usedOverrides.has(overrideIndex)) diagnostics.push(diagnostic(
+                                    C.ITEM_INVALID,
+                                    `Case ${override.from} is not used by ${item.local.id}.`,
+                                    `/recipes/${selectedRecipe}/items/${item.id}/caseOverrides/${overrideIndex}/from`
+                                ));
+                            });
                         } catch (error) {
                             diagnostics.push(diagnostic(C.DOCUMENT_INVALID, `Cannot parse local unit: ${error.message}`, item.local.path));
                         }
                     }
                 }
             } else {
-                addReference(item.id, item.ref);
+                const added = addReference(item.id, item.ref);
+                if (added && added.resolution && added.resolution.kind === 'unit') {
+                    for (let caseIndex = 0; caseIndex < (item.caseOverrides || []).length; caseIndex++) {
+                        const override = item.caseOverrides[caseIndex];
+                        if (!(added.resolution.cases || []).includes(override.from)) {
+                            diagnostics.push(diagnostic(
+                                C.ITEM_INVALID,
+                                `Case ${override.from} is not used by ${item.ref}.`,
+                                `/recipes/${selectedRecipe}/items/${item.id}/caseOverrides/${caseIndex}/from`
+                            ));
+                            continue;
+                        }
+                        if (added.reference) added.reference.cases = (added.reference.cases || []).filter(caseId => caseId !== override.from);
+                        addReference(`${item.id}.case-override${caseIndex + 1}`, override.to);
+                    }
+                } else if ((item.caseOverrides || []).length) {
+                    diagnostics.push(diagnostic(C.ITEM_INVALID, 'Case overrides require a unit occurrence.', `/recipes/${selectedRecipe}/items/${item.id}/caseOverrides`));
+                }
                 if (item.variant) addLocalInput(item.variant.path, `/recipes/${selectedRecipe}/items/${item.id}/variant/path`, true);
             }
 

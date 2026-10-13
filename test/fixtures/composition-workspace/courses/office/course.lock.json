@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "courseId": "office",
+  "recipeId": "workshop",
+  "engineVersion": "4.1.0",
+  "composeHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "sourceManifestHash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "references": [
+    {
+      "occurrenceId": "office-prompt",
+      "ref": "prompt-engineering:unit:prompt-basics",
+      "version": "1.0.0",
+      "contentHash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "snapshotPath": ".nextcourse/objects/sha256/2222222222222222222222222222222222222222222222222222222222222222",
+      "sourcePath": "prompt-engineering/units/prompt-basics/unit.json",
+      "exportPath": [
+        "workbuddy:unit:prompt-basics",
+        "ai-foundations:unit:prompt-basics",
+        "prompt-engineering:unit:prompt-basics"
+      ],
+      "dependencyPath": [
+        "workbuddy:unit:prompt-basics",
+        "ai-foundations:unit:prompt-basics",
+        "prompt-engineering:unit:prompt-basics"
+      ],
+      "assets": [],
+      "cases": []
+    }
+  ]
+}

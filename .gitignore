@@ -10,7 +10,7 @@ node_modules/
 # 整个目录不入库 —— 里面是真实交付课程, 含客户素材。
 # 随仓库分发的示例课程放在 examples/ 而不是这里: 本机的 courses/ 往往自带
 # 一个独立的备份 git 仓库, 外层仓库只能把它记成 gitlink, 收不进文件。
-courses/
+/courses/
 
 # 示例课程的产物不入库 (render / export 生成, 跑一次就有)。
 # 例外: examples/*/package/html/ **刻意入库** —— 那是客户实际拿到的交付物,
@@ -64,3 +64,7 @@ Thumbs.db
 # 那份副本会静默漂移 (2026-08-10 清掉的那份还写着旧项目名 CourseFlow)。
 .agents/
 .codex/
+
+# Local browser automation state
+.playwright-cli/
+.playwright-mcp/

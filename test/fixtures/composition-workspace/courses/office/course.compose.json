@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "courseId": "office",
+  "defaultRecipe": "workshop",
+  "recipes": {
+    "workshop": {
+      "selection": "explicit",
+      "durationMinutes": 45,
+      "deliveryProfile": "slides+lab",
+      "groups": [
+        {
+          "id": "prompt",
+          "title": "把办公室需求说清楚",
+          "plannedMinutes": 35,
+          "items": [
+            {
+              "id": "office-prompt",
+              "ref": "workbuddy:unit:prompt-basics",
+              "contentMode": "reference",
+              "updatePolicy": "manual",
+              "plannedMinutes": 25,
+              "pages": {
+                "include": [
+                  "prompt-engineering:page:prompt-framework",
+                  "prompt-engineering:page:prompt-practice"
+                ]
+              },
+              "operations": [
+                {
+                  "op": "replace",
+                  "target": "prompt-engineering:page:prompt-practice",
+                  "with": {
+                    "id": "office:page:prompt-practice",
+                    "path": "variants/office-prompt.html"
+                  }
+                }
+              ],
+              "outcomeMap": {
+                "write-clear-prompt": ["LO1"]
+              }
+            },
+            {
+              "id": "office-review",
+              "contentMode": "local",
+              "updatePolicy": "frozen",
+              "plannedMinutes": 10,
+              "local": {
+                "id": "office:unit:review",
+                "path": "units/review/unit.json"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "page-variant": {
+      "selection": "explicit",
+      "durationMinutes": 15,
+      "deliveryProfile": "slides",
+      "groups": [
+        {
+          "id": "variant",
+          "title": "本课页面变体",
+          "items": [
+            {
+              "id": "office-prompt-page",
+              "ref": "prompt-engineering:page:prompt-practice",
+              "contentMode": "variant",
+              "updatePolicy": "manual",
+              "variant": {
+                "path": "variants/office-prompt.html",
+                "baselineHash": "sha256:673391d49f7b37213263309afa659167e4182d5de7473802bd603b990579eb71"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "diamond": {
+      "selection": "explicit",
+      "durationMinutes": 60,
+      "deliveryProfile": "slides",
+      "groups": [
+        {
+          "id": "three-paths",
+          "title": "同一内容的三条路径",
+          "items": [
+            {
+              "id": "via-workbuddy",
+              "ref": "workbuddy:unit:prompt-basics",
+              "contentMode": "reference",
+              "updatePolicy": "manual"
+            },
+            {
+              "id": "via-ai",
+              "ref": "ai-foundations:unit:prompt-basics",
+              "contentMode": "reference",
+              "updatePolicy": "manual"
+            },
+            {
+              "id": "direct-prompt",
+              "ref": "prompt-engineering:unit:prompt-basics",
+              "contentMode": "reference",
+              "updatePolicy": "manual"
+            }
+          ]
+        }
+      ]
+    },
+    "external-operation": {
+      "selection": "explicit",
+      "durationMinutes": 20,
+      "deliveryProfile": "slides",
+      "groups": [
+        {
+          "id": "external-insert",
+          "title": "插入外部公开页面",
+          "moduleNumber": null,
+          "items": [
+            {
+              "id": "local-with-external-insert",
+              "contentMode": "local",
+              "updatePolicy": "frozen",
+              "local": {
+                "id": "office:unit:review",
+                "path": "units/review/unit.json"
+              },
+              "operations": [
+                {
+                  "op": "insert_before",
+                  "target": "office:page:review-output",
+                  "with": {
+                    "ref": "prompt-engineering:page:prompt-practice"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "version-conflict": {
+      "selection": "explicit",
+      "durationMinutes": 40,
+      "deliveryProfile": "slides",
+      "groups": [
+        {
+          "id": "two-versions",
+          "title": "同一实体的两个版本",
+          "items": [
+            {
+              "id": "prompt-v1",
+              "ref": "version-one:unit:prompt-basics",
+              "contentMode": "reference",
+              "updatePolicy": "manual"
+            },
+            {
+              "id": "prompt-v2",
+              "ref": "version-two:unit:prompt-basics",
+              "contentMode": "reference",
+              "updatePolicy": "manual"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

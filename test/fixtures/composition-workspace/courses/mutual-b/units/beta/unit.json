@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "mutual-b:unit:beta",
+  "version": "1.0.0",
+  "title": "Beta",
+  "durationMinutes": 5,
+  "outcomes": [
+    { "id": "beta", "do": "说明 Beta", "bloom": "understand", "evidence": "口头复述" }
+  ],
+  "prerequisites": [],
+  "pages": [
+    { "id": "mutual-b:page:beta", "path": "slides/01.html", "estimatedMinutes": 5, "role": "concept" }
+  ],
+  "cases": [],
+  "assets": []
+}

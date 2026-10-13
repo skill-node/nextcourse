@@ -170,6 +170,9 @@ function validateComposeManifest(doc) {
         if (recipe.selection !== 'explicit') {
             diagnostics.push(diagnostic(C.RECIPE_INVALID, 'selection must be explicit; v1 never auto-trims content.', `${recipePath}/selection`));
         }
+        if (recipe.title !== undefined && (typeof recipe.title !== 'string' || !recipe.title.trim())) {
+            diagnostics.push(diagnostic(C.RECIPE_INVALID, 'Recipe title must be a non-empty string.', `${recipePath}/title`));
+        }
         if (recipe.durationMinutes !== undefined && (!Number.isInteger(recipe.durationMinutes) || recipe.durationMinutes < 0)) {
             diagnostics.push(diagnostic(C.RECIPE_INVALID, 'durationMinutes must be a non-negative integer.', `${recipePath}/durationMinutes`));
         }
@@ -193,6 +196,14 @@ function validateComposeManifest(doc) {
             }
             if (group.plannedMinutes !== undefined && (!Number.isInteger(group.plannedMinutes) || group.plannedMinutes < 0)) {
                 diagnostics.push(diagnostic(C.RECIPE_INVALID, 'plannedMinutes must be a non-negative integer.', `${groupPath}/plannedMinutes`));
+            }
+            if (group.sourceSequence !== undefined) {
+                if (!isObject(group.sourceSequence)) {
+                    diagnostics.push(diagnostic(C.RECIPE_INVALID, 'sourceSequence must identify the reusable sequence and exact version.', `${groupPath}/sourceSequence`));
+                } else {
+                    validateEntity(group.sourceSequence.ref, `${groupPath}/sourceSequence/ref`, diagnostics, { kind: 'sequence' });
+                    validateVersion(group.sourceSequence.version, `${groupPath}/sourceSequence/version`, diagnostics);
+                }
             }
             if (groups.has(group.id)) diagnostics.push(diagnostic(C.GROUP_DUPLICATE, `Duplicate group ${group.id}.`, `${groupPath}/id`));
             groups.add(group.id);
@@ -222,6 +233,29 @@ function validateComposeManifest(doc) {
                         }
                     }
                 }
+                if (item.caseOverrides !== undefined) {
+                    if (!Array.isArray(item.caseOverrides)) {
+                        diagnostics.push(diagnostic(C.ITEM_INVALID, 'caseOverrides must be an array.', `${itemPath}/caseOverrides`));
+                    } else {
+                        const replaced = new Set();
+                        item.caseOverrides.forEach((override, overrideIndex) => {
+                            const overridePath = `${itemPath}/caseOverrides/${overrideIndex}`;
+                            if (!isObject(override)) {
+                                diagnostics.push(diagnostic(C.ITEM_INVALID, 'Case override must be an object.', overridePath));
+                                return;
+                            }
+                            validateEntity(override.from, `${overridePath}/from`, diagnostics, { kind: 'case' });
+                            validateEntity(override.to, `${overridePath}/to`, diagnostics, { kind: 'case' });
+                            if (override.from === override.to) {
+                                diagnostics.push(diagnostic(C.ITEM_INVALID, 'Case override must select a different case.', overridePath));
+                            }
+                            if (replaced.has(override.from)) {
+                                diagnostics.push(diagnostic(C.ITEM_INVALID, `Case ${override.from} is replaced more than once.`, `${overridePath}/from`));
+                            }
+                            replaced.add(override.from);
+                        });
+                    }
+                }
                 if (item.contentMode === 'local') {
                     validateEntity(item.local && item.local.id, `${itemPath}/local/id`, diagnostics, { ownerId: doc.courseId });
                     validatePath(item.local && item.local.path, `${itemPath}/local/path`, diagnostics);
@@ -249,6 +283,18 @@ function validateComposeManifest(doc) {
                             continue;
                         }
                         values.forEach((id, pageIndex) => validateEntity(id, `${itemPath}/pages/${key}/${pageIndex}`, diagnostics, { kind: 'page' }));
+                    }
+                }
+                if (item.pagePlan !== undefined) {
+                    if (!Array.isArray(item.pagePlan)) {
+                        diagnostics.push(diagnostic(C.ITEM_INVALID, 'pagePlan must be an ordered array of stable page IDs.', `${itemPath}/pagePlan`));
+                    } else {
+                        const planned = new Set();
+                        item.pagePlan.forEach((id, pageIndex) => {
+                            validateEntity(id, `${itemPath}/pagePlan/${pageIndex}`, diagnostics, { kind: 'page' });
+                            if (planned.has(id)) diagnostics.push(diagnostic(C.ITEM_INVALID, `pagePlan contains duplicate page ${id}.`, `${itemPath}/pagePlan/${pageIndex}`));
+                            planned.add(id);
+                        });
                     }
                 }
                 if (item.operations !== undefined && !Array.isArray(item.operations)) {
@@ -386,6 +432,43 @@ function validateUnit(doc) {
     return result(diagnostics);
 }
 
+function validateSequence(doc) {
+    const diagnostics = [];
+    if (!isObject(doc)) {
+        diagnostics.push(diagnostic(C.DOCUMENT_INVALID, 'Sequence must be a JSON object.', ''));
+        return result(diagnostics);
+    }
+    if (doc.schemaVersion !== SCHEMA_VERSION) diagnostics.push(diagnostic(C.SCHEMA_VERSION_UNSUPPORTED, `schemaVersion must be ${SCHEMA_VERSION}.`, '/schemaVersion'));
+    validateEntity(doc.id, '/id', diagnostics, { kind: 'sequence' });
+    validateVersion(doc.version, '/version', diagnostics);
+    if (typeof doc.title !== 'string' || !doc.title.trim()) diagnostics.push(diagnostic(C.DOCUMENT_INVALID, 'Sequence title is required.', '/title'));
+    if (doc.durationMinutes !== undefined && (!Number.isInteger(doc.durationMinutes) || doc.durationMinutes < 0)) {
+        diagnostics.push(diagnostic(C.DOCUMENT_INVALID, 'durationMinutes must be a non-negative integer.', '/durationMinutes'));
+    }
+    if (!Array.isArray(doc.items) || doc.items.length === 0) {
+        diagnostics.push(diagnostic(C.DOCUMENT_INVALID, 'Sequence requires at least one unit or page.', '/items'));
+    } else {
+        const ids = new Set();
+        doc.items.forEach((item, index) => {
+            const pointer = `/items/${index}`;
+            if (!isObject(item)) {
+                diagnostics.push(diagnostic(C.DOCUMENT_INVALID, 'Sequence item must be an object.', pointer));
+                return;
+            }
+            const parts = validateEntity(item.ref, `${pointer}/ref`, diagnostics);
+            if (parts && !['unit', 'page'].includes(parts.kind)) diagnostics.push(diagnostic(C.ENTITY_KIND_MISMATCH, 'Sequence items must reference units or pages.', `${pointer}/ref`));
+            if (item.id !== undefined && !INSTANCE_ID_RE.test(item.id || '')) diagnostics.push(diagnostic(C.DOCUMENT_INVALID, 'Sequence item id must be a stable lowercase identifier.', `${pointer}/id`));
+            const identity = item.id || item.ref;
+            if (ids.has(identity)) diagnostics.push(diagnostic(C.ENTITY_DUPLICATE, `Duplicate sequence item ${identity}.`, pointer));
+            ids.add(identity);
+            if (item.plannedMinutes !== undefined && (!Number.isInteger(item.plannedMinutes) || item.plannedMinutes < 0)) {
+                diagnostics.push(diagnostic(C.DOCUMENT_INVALID, 'plannedMinutes must be a non-negative integer.', `${pointer}/plannedMinutes`));
+            }
+        });
+    }
+    return result(diagnostics);
+}
+
 function validateCase(doc) {
     const diagnostics = [];
     if (!isObject(doc)) {
@@ -481,5 +564,6 @@ module.exports = {
     validateComposeManifest,
     validateLockManifest,
     validateUnit,
+    validateSequence,
     validateCase,
 };

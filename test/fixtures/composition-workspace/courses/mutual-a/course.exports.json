@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "courseId": "mutual-a",
+  "exports": [
+    {
+      "id": "mutual-a:unit:alpha",
+      "kind": "unit",
+      "version": "1.0.0",
+      "title": "Alpha",
+      "source": "units/alpha/unit.json"
+    },
+    {
+      "id": "mutual-a:unit:beta",
+      "kind": "unit",
+      "version": "1.0.0",
+      "title": "Beta from B",
+      "target": {
+        "ref": "mutual-b:unit:beta",
+        "version": "1.0.0"
+      }
+    }
+  ]
+}

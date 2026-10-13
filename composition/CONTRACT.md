@@ -11,13 +11,14 @@
 - 公开实体的 `version` 是精确 SemVer。版本表示发布过的接口修订；构建可复现性最终由 lock 中的内容哈希和快照保证。
 - 目录名、章节号、`slide-25` 和构建后的页码都不是持久身份。
 
-## 五类文件
+## 六类文件
 
 | 文件 | 权威范围 |
 |---|---|
 | `course.exports.json` | 本课允许其他课程引用的接口；`source` 是本课源，`target` 是显式再导出，两者只能选一个 |
 | `course.compose.json` | 本课配方、实例、顺序、局部变体与显式选页；这是内容选择的唯一权威 |
 | `course.lock.json` | 一个配方解析后的精确版本、完整接口链、哈希与不可变快照位置 |
+| 序列描述文件 | 可复用模块的标题、总时长及有序 unit/page 引用；由 sequence export 的 `source` 指向 |
 | 单元描述文件 | 单元成果、前置、时长、页面、案例与资产闭包；由 export 的 `source` 指向 |
 | 案例描述文件 | 案例输入、任务、预期产出、答案／量规、材料 audience 与可复现生成记录 |
 
@@ -35,6 +36,16 @@ JSON Schema 位于 `composition/schemas/`。首版组合清单只允许显式选
 不能退回按文件名或当前页码猜测。
 操作的新页面可以是本地完整页面，也可以是公开 page export；外部页面会以派生 occurrence 写入 lock 和快照。
 组的 `moduleNumber` 可显式指定正整数，包装组可设为 `null`；省略时按组序从 1 编号。
+配方可用 `title` 保存面向人的名称。实例的 `caseOverrides` 以稳定 case ID 声明 `from → to`；
+替换案例会形成独立的派生 lock occurrence，只改变当前配方的交付材料，不修改共享单元描述文件。
+
+`pagePlan` 是 occurrence 最终页面集合与顺序的一等字段。存在时，先把 `operations` 应用到完整源页面，
+再按 `pagePlan` 的稳定 page ID 精确选取和排序；缺少或重复解析都报错。未写 `pagePlan` 的旧配方继续按
+`pages.include / pages.omit → operations` 的既有顺序解释，保持 v1 向后兼容。
+
+公开 `sequence` 使用 `sequence.schema.json`，只按顺序引用公开 unit/page，不内嵌页面正文。编辑 API 的
+`insert_sequence` 在一个草稿操作中把它展开为新 group 及多个 occurrence，并在 group 的
+`sourceSequence` 保留精确来源与版本；lock 同时锁定序列描述和展开后的各内容引用。
 
 ## 锁与快照
 
@@ -112,3 +123,19 @@ CLI 的 `--json` 直接序列化同一结果；旧 `check <name>` 写对齐矩�
 输入哈希和确定性 plan ID。`applyCourseUpdate` 只接受同一 plan ID，应用前再次核对 compose、lock、
 公开清单、外部源与本地输入；任一变化都报 `PLAN_STALE`。同版本内容漂移、变体上游变化和解析冲突
 不会覆盖旧 lock；`frozen` occurrence 保留旧引用。普通 build / render 始终只消费当前 lock。
+
+## 组合编辑 API
+
+`editor.js` 是 CLI／agent 与可选 Studio 客户端共用的确定性编辑层，不依赖 Web 服务或浏览器。`openRecipeDraft` 读取完整 compose 和字节哈希，
+`applyRecipeDraftOperation` 只接受结构化操作，在内存副本上执行并对完整清单重新校验；支持配方／分组设置、
+分组新增／删除／排序／拆分／合并、实例插入／删除／复制／排序／跨组移动、引用替换、选页、案例替换、
+页面显式排序、时长、成果映射与更新策略。`undoRecipeDraft` 撤销未保存操作。
+
+`planIndependentComposition / createCompositionFromIndependent` 把普通 `slides/` 课程转换为可编辑的基线配方：
+按可信的大纲映射或页面 `module-N` 分组，为每页固化稳定 ID，写入一个本地适配单元和 `pagePlan`；原 HTML
+及独立课程设计源保持不变。`course.compose.json` 最后发布，因此未完成的转换不会把课程误标为组合课。
+
+`saveRecipeDraft` 要求磁盘字节仍匹配打开草稿时的基线哈希；外部编辑会返回 `EDIT_CONFLICT`，不会用最后保存者覆盖。
+有效草稿先把旧版按内容哈希保存到课程内 `.nextcourse/history/compose/`，再在同目录写临时文件、同步并原子替换
+`course.compose.json`。`restoreComposeHistory` 使用同一并发基线与原子写规则，恢复前也保存当前版本。
+保存与恢复都只修改组合清单，不接受 lock、不重建课件，也不写共享源正文。

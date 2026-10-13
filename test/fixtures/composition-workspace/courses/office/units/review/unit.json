@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "office:unit:review",
+  "version": "1.0.0",
+  "title": "办公室任务验收",
+  "durationMinutes": 10,
+  "outcomes": [
+    {
+      "id": "review-output",
+      "do": "检查任务产物",
+      "bloom": "evaluate",
+      "evidence": "依据检查表指出一个问题"
+    }
+  ],
+  "prerequisites": [],
+  "pages": [
+    {
+      "id": "office:page:review-output",
+      "path": "slides/01-review.html",
+      "estimatedMinutes": 10,
+      "role": "assessment"
+    }
+  ],
+  "cases": [],
+  "assets": []
+}

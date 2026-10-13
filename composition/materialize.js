@@ -110,6 +110,26 @@ function applyOperations(pages, operations, courseDir, diagnostics, pointer, res
     return selected;
 }
 
+function applyPagePlan(pages, pagePlan, diagnostics, pointer) {
+    if (!Array.isArray(pagePlan)) return pages;
+    const byId = new Map();
+    for (const page of pages) {
+        if (!byId.has(page.id)) byId.set(page.id, []);
+        byId.get(page.id).push(page);
+    }
+    const planned = [];
+    for (let index = 0; index < pagePlan.length; index++) {
+        const id = pagePlan[index];
+        const matches = byId.get(id) || [];
+        if (matches.length !== 1) {
+            diagnostics.push(diagnostic(C.REFERENCE_NOT_FOUND, `Planned page must resolve once: ${id}.`, `${pointer}/${index}`));
+            continue;
+        }
+        planned.push(matches[0]);
+    }
+    return planned;
+}
+
 function addModuleClass(html, moduleNumber) {
     if (moduleNumber === null) return String(html);
     const moduleClass = `module-${moduleNumber}`;
@@ -376,9 +396,15 @@ function materializeRecipe(workRoot, courseName, recipeId, options = {}) {
                     pages = [{ ...variant, contentMode: 'variant', ref: reference.ref, version: reference.version, baselineHash: reference.contentHash }];
                 }
             }
-            pages = selectPages(pages, item.pages, diagnostics, `${pointer}/pages`);
-            pages = applyOperations(pages, item.operations, courseDir, diagnostics, pointer, (operationIndex, ref) =>
-                externalOperationPage(`${item.id}.op${operationIndex + 1}`, ref, `${pointer}/operations/${operationIndex}/with/ref`));
+            if (Array.isArray(item.pagePlan)) {
+                pages = applyOperations(pages, item.operations, courseDir, diagnostics, pointer, (operationIndex, ref) =>
+                    externalOperationPage(`${item.id}.op${operationIndex + 1}`, ref, `${pointer}/operations/${operationIndex}/with/ref`));
+                pages = applyPagePlan(pages, item.pagePlan, diagnostics, `${pointer}/pagePlan`);
+            } else {
+                pages = selectPages(pages, item.pages, diagnostics, `${pointer}/pages`);
+                pages = applyOperations(pages, item.operations, courseDir, diagnostics, pointer, (operationIndex, ref) =>
+                    externalOperationPage(`${item.id}.op${operationIndex + 1}`, ref, `${pointer}/operations/${operationIndex}/with/ref`));
+            }
             for (const page of pages) {
                 pageNumber++;
                 const outputPath = `slides/slide-${String(pageNumber).padStart(2, '0')}.html`;

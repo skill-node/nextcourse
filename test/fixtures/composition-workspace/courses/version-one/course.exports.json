@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "courseId": "version-one",
+  "exports": [
+    {
+      "id": "version-one:unit:prompt-basics",
+      "kind": "unit",
+      "version": "1.0.0",
+      "title": "提示词基础 v1 入口",
+      "target": {
+        "ref": "prompt-engineering:unit:prompt-basics",
+        "version": "1.0.0"
+      }
+    }
+  ]
+}

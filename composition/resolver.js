@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { sha256 } = require('./baseline');
-const { entityParts, validateUnit, validateCase } = require('./contracts');
+const { entityParts, validateUnit, validateSequence, validateCase } = require('./contracts');
 const { DIAGNOSTIC_CODES: C, diagnostic } = require('./diagnostics');
 
 function relativeToWork(catalog, absolutePath) {
@@ -133,6 +133,7 @@ function resolveExport(catalog, ref, requestedVersion, options = {}) {
     let assets = [];
     let cases = [];
     let deliveryFiles = [];
+    let descriptor = null;
     const manifestInputs = [{ path: entry.manifestPath, workspacePath: relativeToWork(catalog, entry.manifestPath), hash: entry.manifestHash }];
 
     if (entry.kind === 'unit') {
@@ -175,6 +176,33 @@ function resolveExport(catalog, ref, requestedVersion, options = {}) {
                     deliveryFiles.push(...(dependency.deliveryFiles || dependency.files.map(file => `${file.courseId}/${file.path}`)));
                 }
             }
+        }
+    } else if (entry.kind === 'sequence') {
+        try {
+            descriptor = JSON.parse(fs.readFileSync(source.absolutePath, 'utf8'));
+        } catch (error) {
+            diagnostics.push(diagnostic(C.DOCUMENT_INVALID, `Cannot parse sequence ${entry.id}: ${error.message}`, source.workspacePath));
+            return { resolved: false, ref, version: entry.version, diagnostics, exportPath: [entry.id], dependencyPath: [entry.id] };
+        }
+        const validation = validateSequence(descriptor);
+        diagnostics.push(...validation.diagnostics.map(item => ({ ...item, source: source.workspacePath })));
+        if (!validation.valid) return { resolved: false, ref, version: entry.version, diagnostics, exportPath: [entry.id], dependencyPath: [entry.id] };
+        if (descriptor.id !== entry.id || descriptor.version !== entry.version) {
+            diagnostics.push(diagnostic(
+                C.EXPORT_TARGET_INVALID,
+                `Export ${entry.id}@${entry.version} does not match sequence ${descriptor.id}@${descriptor.version}.`,
+                source.workspacePath
+            ));
+            return { resolved: false, ref, version: entry.version, diagnostics, exportPath: [entry.id], dependencyPath: [entry.id] };
+        }
+        for (const sequenceItem of descriptor.items) {
+            const dependency = resolveExport(catalog, sequenceItem.ref, null, { diagnostics, stack: nextStack });
+            if (!dependency.resolved) continue;
+            files = mergeFiles(files, dependency.files);
+            manifestInputs.push(...dependency.manifestInputs);
+            assets.push(...(dependency.assets || []));
+            cases.push(...(dependency.cases || []));
+            deliveryFiles.push(...(dependency.deliveryFiles || []));
         }
     } else if (entry.kind === 'case') {
         let caseDoc;
@@ -244,6 +272,7 @@ function resolveExport(catalog, ref, requestedVersion, options = {}) {
         assets: [...new Set(assets)],
         cases: [...new Set(cases)],
         deliveryFiles: [...new Set(deliveryFiles)].sort(),
+        descriptor,
         manifestInputs: [...uniqueManifests.values()],
         exportPath: [entry.id],
         dependencyPath: [entry.id],

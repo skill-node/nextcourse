@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "courseId": "ai-foundations",
+  "exports": [
+    {
+      "id": "ai-foundations:unit:prompt-basics",
+      "kind": "unit",
+      "version": "1.0.0",
+      "title": "提示词基础",
+      "target": {
+        "ref": "prompt-engineering:unit:prompt-basics",
+        "version": "1.0.0"
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "courseId": "workbuddy",
+  "exports": [
+    {
+      "id": "workbuddy:unit:prompt-basics",
+      "kind": "unit",
+      "version": "1.0.0",
+      "title": "把话说对",
+      "target": {
+        "ref": "ai-foundations:unit:prompt-basics",
+        "version": "1.0.0"
+      }
+    }
+  ]
+}
