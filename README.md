@@ -426,3 +426,6 @@ be useful to you. Issues and forks welcome; no roadmap promised.
 
 Built by Kurtlee — an HR director of twenty years who builds AI products. More at
 [nextskill.cc](https://nextskill.cc).
+
+
+Formal delivery uses `nextcourse deliver <name> [outdir]`. It builds, checks and runs Playwright browser/print acceptance before publishing. `export` enforces acceptance too; `export --draft` is for internal development only. Run `nextcourse doctor --delivery` to check optional Playwright-core, Chrome and Poppler dependencies. Real course sources, delivery output and acceptance evidence remain outside the public code repository.

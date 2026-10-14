@@ -19,12 +19,14 @@
 const fs   = require('fs');
 const path = require('path');
 
-const { PKG_ROOT, pkg, courseDir, assetBase, requireCourse } = require('./paths');
+const { PKG_ROOT, COURSES_DIR, pkg, courseDir, assetBase, requireCourse } = require('./paths');
 const { createDeliveryEntry } = require('./delivery-navigation');
+const { runAudit, writeReceipt } = require('./delivery-audit');
 
 // ─── 参数 ────────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
 const WITH_PACKAGE = args.includes('--with-package');
+const DRAFT = args.includes('--draft');
 function optionValue(flag) {
     const direct = args.find(value => value.startsWith(`${flag}=`));
     if (direct) return direct.slice(flag.length + 1);
@@ -60,9 +62,15 @@ if (!fs.existsSync(DECK_PATH)) {
 }
 
 // 输出目录: 默认 courses/<name>/export/
-const EXPORT_DIR = outputBase
-    ? path.join(path.resolve(outputBase), courseName)
-    : path.join(COURSE_DIR, 'export');
+const DESTINATION = outputBase
+    ? path.join(path.resolve(outputBase), courseName + (DRAFT ? '-draft' : ''))
+    : path.join(COURSE_DIR, DRAFT ? 'export-draft' : 'export');
+if (DESTINATION === COURSE_DIR || fs.existsSync(path.join(DESTINATION,'course.meta.md')) || fs.existsSync(path.join(DESTINATION,'.git'))) {
+    console.error('ERROR: Export destination is a source directory. Choose another output directory.');process.exit(1);
+}
+fs.mkdirSync(path.dirname(DESTINATION),{recursive:true});
+const EXPORT_DIR = fs.mkdtempSync(path.join(path.dirname(DESTINATION),'.nextcourse-export-'));
+
 
 // ─── 工具函数 ────────────────────────────────────────────────────────────────
 function copyDir(src, dest, include = () => true, base = src) {
@@ -93,11 +101,7 @@ function dirSize(dir) {
     return size;
 }
 
-// ─── 1. 清空并重建输出目录 ───────────────────────────────────────────────────
-if (fs.existsSync(EXPORT_DIR)) {
-    fs.rmSync(EXPORT_DIR, { recursive: true, force: true });
-}
-fs.mkdirSync(EXPORT_DIR, { recursive: true });
+// Build into a private staging directory. Replace the final delivery only after acceptance.
 
 // ─── 2. 处理 deck.html → index.html (修正所有相对路径) ──────────────────────
 // deck.html 里指向引擎资产的前缀由 build.js 按 {{ASSET_BASE}} 算出 —— 课程在仓库里
@@ -231,21 +235,34 @@ if (WITH_PACKAGE) {
     fileCount += packagedDocs;
 }
 
-// ─── 4. 结果报告 ─────────────────────────────────────────────────────────────
-const sizeMB = (dirSize(EXPORT_DIR) / 1024 / 1024).toFixed(1);
-const countFiles = dir => fs.readdirSync(dir,{withFileTypes:true}).reduce((n,e)=>n+(e.isDirectory()?countFiles(path.join(dir,e.name)):1),0);
-fileCount = countFiles(EXPORT_DIR);
-
-console.log(`\nNextCourse Export — ${courseName}`);
-console.log(`${'─'.repeat(50)}`);
-console.log(`  输出目录 : ${EXPORT_DIR}`);
-console.log(`  文件总数 : ${fileCount}`);
-console.log(`  打包大小 : ${sizeMB} MB`);
-if (WITH_PACKAGE) console.log(`  交付资料 : ${packagedDocs} 个文件（${audience}）`);
-console.log(`\n  ✓  完成。`);
-console.log(`     将整个 "${path.basename(EXPORT_DIR)}" 文件夹`);
-console.log(`     拷贝到 U 盘 / 云盘 / 任意电脑`);
-console.log(`     双击 index.html 打开交付目录或课件（无需联网）`);
-if (WITH_PACKAGE) {
-    console.log('     课件、配套资料与技术说明统一列在 index.html\n');
-} else console.log('');
+// ─── 4. Acceptance and atomic publication ──────────────────────────────────
+async function finish() {
+    const evidence = path.join(COURSES_DIR,courseName,'.review',path.basename(COURSE_DIR),'delivery-audit-'+Date.now());
+    if (!DRAFT) {
+        console.log('\n  Running Playwright browser and print acceptance…');
+        const report = await runAudit(EXPORT_DIR,evidence,{onProgress:message=>console.log('  '+message)});
+        if (report.status !== 'passed') {
+            console.error(`\nERROR: Delivery not published. Acceptance failed.\n${report.errors.join('\n')}\nEvidence: ${evidence}\nUnpublished staging: ${EXPORT_DIR}`);
+            process.exitCode=1;return;
+        }
+        writeReceipt(EXPORT_DIR,report);
+    } else {
+        fs.writeFileSync(path.join(EXPORT_DIR,'delivery.draft.json'),JSON.stringify({status:'draft',deliverable:false,reason:'Browser and print acceptance not run.'},null,2)+'\n');
+    }
+    const backup = DESTINATION+'.previous-'+Date.now();
+    let hadPrevious=false;
+    try {
+        if(fs.existsSync(DESTINATION)){fs.renameSync(DESTINATION,backup);hadPrevious=true;}
+        fs.renameSync(EXPORT_DIR,DESTINATION);
+    } catch(error) {
+        if(hadPrevious && !fs.existsSync(DESTINATION))fs.renameSync(backup,DESTINATION);
+        throw error;
+    }
+    if(hadPrevious)fs.rmSync(backup,{recursive:true,force:true});
+    const sizeMB=(dirSize(DESTINATION)/1024/1024).toFixed(1);
+    console.log(`\nNextCourse Export — ${courseName}\n  输出目录 : ${DESTINATION}\n  打包大小 : ${sizeMB} MB`);
+    if(DRAFT)console.log('  DRAFT — 未验收，不能交付；正式导出去掉 --draft。');
+    else console.log('  ✓ 浏览器与打印自动验收通过，交付包已发布。');
+    if(!DRAFT)console.log('  交付凭据 : delivery.receipt.json\n  验收证据 : '+evidence);
+}
+finish().catch(error=>{console.error('ERROR: '+error.message);process.exitCode=1;});

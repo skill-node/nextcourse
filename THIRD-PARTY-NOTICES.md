@@ -1,7 +1,9 @@
 # Third-Party Notices
 
-NextCourse itself is MIT-licensed (see [LICENSE](./LICENSE)). It has **zero npm
-dependencies** — the CLI runs on Node built-ins alone.
+NextCourse itself is MIT-licensed (see [LICENSE](./LICENSE)). Ordinary authoring and
+building have **zero required npm runtime dependencies**. Browser/print acceptance
+uses optional Playwright-core tooling (Apache-2.0) and installed Chrome/Chromium
+and Poppler; these tools are not copied into exported courses.
 
 What it *does* bundle is a presentation engine and a set of fonts, vendored into
 `lib/` so that an exported course plays on a machine with no network and nothing

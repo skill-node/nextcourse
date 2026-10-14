@@ -394,6 +394,18 @@ cohort. Fill the blueprint via `nextcourse-delivery`, then run this again.
 
 ---
 
+#### `deliver` and `audit` — acceptance before delivery
+
+`nextcourse deliver <name> [outdir] [--recipe <id>] [--audience student|facilitator]` builds, checks teaching structure, regenerates the applicable package, and runs real Playwright browser and print acceptance. Publication is atomic and only occurs on success; a failed run preserves the previous delivery. Slides-only courses skip document packaging. `deliver` rejects `--draft`.
+
+`export` now enforces the same acceptance gate by default. `export --draft` writes only to `export-draft/` or `<name>-draft/`, carries a draft marker and is not deliverable. `export --with-package` refreshes the package rather than copying stale documents.
+
+`nextcourse audit <name> [--recipe <id>] [--delivery <directory>] [--json]` checks an existing output. A passed `delivery.receipt.json` binds the exact file inventory and content hash; any byte change invalidates it. Private screenshots, PDF proofs and reports are stored in the actual course `.review/` directory.
+
+Run `doctor --delivery` before starting. Acceptance requires the optional `playwright-core` module, a local Chrome/Chromium/Edge or Playwright Chromium, and Poppler (`pdfinfo`, `pdftotext`, `pdftoppm`). Install `playwright-core` in the workspace if needed; `NEXTCOURSE_PLAYWRIGHT_MODULE` can point to an installed module and `CHROME_PATH` selects the browser. Ordinary authoring/build remains free of required runtime dependencies. Browser contexts have no user profile, use delivery-only in-memory routing and block external requests; no file server is started.
+
+Checks cover links, student isolation, runtime/resource errors, desktop/mobile width, disclosures and keyboard, native print expansion/restoration, blank pages, text loss/clipping, split table rows, orphan headings, and slide overflow/navigation. The agent completes engineering acceptance and visual QA before asking the user to review teaching content.
+
 #### `export` — package as an offline-playable folder
 
 With `--with-package`, the exported `index.html` is a collapsible delivery catalog and the presentation moves to `deck.html`. A composed facilitator export contains `design/html/`, `facilitator/`, an independent `student/` directory, and `technical/`. The catalog groups slides, course design, teaching material, student material and technical notes. Document labels come from readable titles rather than filename stems; trainer notes remain Markdown. Facilitator export automatically refreshes the notes.

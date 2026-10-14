@@ -184,3 +184,10 @@ ls courses/<课程名>/course.blueprint.md
 | 全部命令 | `nextcourse docs cli` |
 
 > 沉淀新组件要改引擎自带的 `shared_styles/components.css` 和设计系统文档 —— 那是 NextCourse 仓库里的事，用 npm 装的用户改不了自己那份（会被下次升级覆盖）。有好布局请提 issue 或 PR 回 skill-node/nextcourse。
+
+
+## 最终交付关卡
+
+生成课件后使用 `nextcourse deliver <课程名>` 完成构建、教学检查与真实浏览器验收；组合课传 `--recipe`，讲师包传 `--audience facilitator`。M/L或lab/full会同时重建配套包和验证文档打印；仅课件课则验收课件导航与溢出。
+
+先运行 `nextcourse doctor --delivery` 确认Playwright-core、浏览器与Poppler可用。`export`也默认强制验收；`export --draft`是内部开发草稿，不作为交付。只有带有效 `delivery.receipt.json` 的输出才交用户审课。截图和打印证据在课程 `.review/`，代理完成版面检查，不等待用户先指出工程问题。

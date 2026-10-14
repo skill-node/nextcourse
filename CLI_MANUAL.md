@@ -351,9 +351,32 @@ md 里的 h1 就写功能名即可，课程名由渲染器补。
 ---
 
 
+#### `deliver` — 完整开发与验收后交付
+
+```sh
+nextcourse doctor --delivery
+nextcourse deliver <name> [outdir] [--recipe <id>] [--audience student|facilitator]
+```
+
+自动执行build、教学check、按profile生成package及浏览器／打印验收。独立S或slides仅交付课件，M/L或lab/full自动携带资料。检查通过才替换正式目录；失败保留上一版。`deliver`不能带`--draft`。
+
+验收使用Playwright-core和本地Chrome／Chromium／Edge（或Playwright安装的Chromium），PDF验证使用Poppler的pdfinfo、pdftotext、pdftoppm。Playwright-core是可选验收工具，不是常规构建的必需运行时依赖；工作区可通过`npm install --no-save playwright-core`安装。macOS可安装`poppler`，Linux可安装`poppler-utils`。`CHROME_PATH`指定浏览器，`NEXTCOURSE_PLAYWRIGHT_MODULE`指定已安装模块。
+
+独立无账号浏览器通过内存路由读取交付目录；没有文件服务器、不使用file导航，阻断外部请求。检查所有HTML文档的桌面／窄屏、资源和脚本、折叠与键盘、展开收起、原生打印、打印展开／恢复、空白页、文字完整与边界、表格行、孤悬标题，以及全部课件溢出／导航。
+
+成功附`delivery.receipt.json`，绑定输出文件清单与哈希；输出被改动就失效。实际课程`.review/<recipe>/delivery-audit-*/`保存报告、截图与QA PDF，不进入正式包或公开代码仓。人工课程审核在工程验收后进行。
+
+#### `audit` — 验收已有输出
+
+```sh
+nextcourse audit <name> [--recipe <id>] [--delivery <directory>] [--json]
+```
+
+默认检查当前课程视图的export目录；可用`--delivery`选择已有整包。通过更新该包凭据；失败不产生通过凭据，返回非零。开发包默认`export-draft`，正式`export`。
+
 #### `export` — 打包为可离线演示文件夹
 
-> 加 `--with-package` 可把交付包一起打进离线包。组合课默认 `--audience student`，不会带答案；
+> `export`默认运行浏览器与打印验收，通过才发布；`--draft`只生成开发草稿。加 `--with-package` 可把交付包一起打进离线包。组合课默认 `--audience student`，不会带答案；
 > 讲师包必须显式加 `--audience facilitator`（需先跑过 `package --render`）。
 
 ```bash
@@ -373,7 +396,8 @@ npm run export <course-name> [outdir]
 
 **可选参数：**
 - `outdir` — 输出目录（默认为 `courses/<course-name>/export/`）
-- `--with-package` — 携带已渲染交付包
+- `--with-package` — 自动更新并携带交付包
+- `--draft` — 只输出到独立草稿目录，跳过验收，明确不能交付
 - `--audience student|facilitator` — 组合课交付对象，默认 `student`
 
 **输出结构：**

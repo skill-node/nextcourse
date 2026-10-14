@@ -28,3 +28,19 @@ jobs:
           node-version: '20'
       - run: npm test
       - run: git diff --check
+
+  browser-audit:
+    name: Delivery browser and print gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx playwright-core install --with-deps chromium
+      - run: sudo apt-get update && sudo apt-get install -y poppler-utils fonts-noto-cjk
+      - run: NEXTCOURSE_BROWSER_TESTS=1 node --test test/delivery-audit.test.js

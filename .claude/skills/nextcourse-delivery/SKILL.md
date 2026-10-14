@@ -20,7 +20,7 @@ nextcourse-delivery <课程名>
 ## 开工前：确认引擎在
 
 ```bash
-nextcourse doctor
+nextcourse doctor --delivery
 ```
 
 没这个命令就装：`npm i -g nextcourse`（或每次用 `npx -y nextcourse`）。doctor 报出的**工作目录**下面必须能找到 `courses/<课程名>/`，找不到就先 `cd` 到课程所在的目录。
@@ -229,15 +229,26 @@ nextcourse package <name> --render   # 生成 package/*.md 并渲染 package/htm
 和 `deck.html` 完全一样的心智模型：**HTML 永远不手改**，改 `package/*.md` 再重新
 `--render`。已存在的 md 默认不会被覆盖（手改优先），要重新生成才加 `--force`。
 
-### 打印验收（硬性，不是锦上添花）
+### 浏览器与打印验收（CLI强制关卡）
 
-交付包的 HTML 客户多半会导出 PDF 或直接打印。渲染完**必须**在 Chrome 打印预览里过一遍：
+正式交付使用：
 
-① 背景色 / 表头底色全部保留　② 每页边距一致、内容不贴边　③ 无空白页
-④ 表格与活动卡无腰斩　⑤ 标题不落在页尾　⑥ 强制分页点生效　⑦ 导出 PDF 与预览一致
+```bash
+nextcourse deliver <name> [outdir] --recipe <recipe> --audience facilitator
+```
 
-任何一条不过是引擎那套打印样式的问题，不要在单个 HTML 里打补丁 —— 提 issue 回 skill-node/nextcourse。
-需要在某处强制分页，在 md 里写 `<!-- pagebreak -->`；需要手写填空区写 `<!-- fill:3 -->`。
+独立课程省略 `--recipe`。`deliver` 根据档位／profile选择课件或配套包，依次构建、教学检查、生成配套资料、运行Playwright浏览器和打印验收，全部通过后原子替换交付目录。已有Markdown不覆盖。
+
+普通 `export` 同样默认强制验收；`export --with-package` 自动重新构建并打包配套资料。
+`export --draft` 只供开发，输出到独立 `export-draft/` 或 `<name>-draft/`，没有通过凭据，不得交给用户当最终包。`deliver` 不接受 `--draft`。
+
+开工前执行 `nextcourse doctor --delivery`。验收需要Playwright-core、Chrome／Chromium／Edge和Poppler（pdfinfo、pdftotext、pdftoppm）。工作区未安装Playwright-core时按标准npm流程安装；也可用 `NEXTCOURSE_PLAYWRIGHT_MODULE` 指向已安装模块。禁止把缺工具或浏览器启动失败记成验收通过。
+
+CLI检查相对链接、资源与脚本错误、学员隔离、折叠／键盘操作、展开收起、桌面／窄屏溢出、打印展开与状态恢复、PDF页数与空白页、文字完整性／裁切、表格行跨页、标题孤悬及全部课件溢出／导航。独立浏览器不使用用户账号或浏览器资料，不启动文件服务；通过仅限交付目录的内存路由加载页面，阻断外部请求。
+
+成功生成 `delivery.receipt.json`，绑定整包字节哈希。失败返回非零，保留诊断与上一份正式包。截图、打印PDF和report.json保存在实际课程的 `.review/<recipe>/`，不发给学员或上传公开GitHub。交付字节变化会使凭据失效，必须重新验收。
+
+代理检查截图／打印PDF以确认排版后再交用户审课；不用用户的课程内容审核代替工程检查。用户只负责内容、节奏与教学适用性。标准生成流程中的失败由代理修复源或共享样式并重建，禁止手改生成HTML。
 
 ---
 
@@ -247,7 +258,7 @@ nextcourse package <name> --render   # 生成 package/*.md 并渲染 package/htm
 交付层已完成：
   设计蓝图   courses/<name>/course.blueprint.md   （六~十一节已补）
   交付包 md  courses/<name>/package/*.md          （源文件，改这里）
-  客户交付物 courses/<name>/package/html/         （双击 0_index.html）
+  验收交付物 export/index.html                    （附通过的delivery.receipt.json）
 
 下一步：
   nextcourse-slides <name>                     还没做幻灯片的话

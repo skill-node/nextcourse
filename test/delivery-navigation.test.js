@@ -25,8 +25,8 @@ test('formal facilitator export has one catalog, readable answers, phased releas
  const pkg=packageComposedCourse(dir,ROOT,'office','workshop',{render:true});assert(pkg.packaged,JSON.stringify(pkg.diagnostics));
  const original=fs.readFileSync(path.join(source,'delivery.json'));
  const cli=(...args)=>spawnSync(process.execPath,[path.join(ROOT,'nextcourse.js'),...args],{cwd:dir,env:{...process.env,NEXTCOURSE_HOME:dir},encoding:'utf8'});
- let r=cli('export','office','--recipe','workshop','--with-package','--audience','facilitator');assert.equal(r.status,0,r.stdout+r.stderr);
- const out=path.join(dir,'courses/office/.build/workshop/export');
+ let r=cli('export','office','--draft','--recipe','workshop','--with-package','--audience','facilitator');assert.equal(r.status,0,r.stdout+r.stderr);
+ const out=path.join(dir,'courses/office/.build/workshop/export-draft');
  const index=fs.readFileSync(path.join(out,'index.html'),'utf8');
  for(const title of ['课件','课程蓝图','授课资料','学员资料','课件技术说明','逐页讲师备注','第1阶段发放'])assert(index.includes(title),title);
  assert(!/>facilitator-guide</.test(index));
@@ -39,7 +39,7 @@ test('formal facilitator export has one catalog, readable answers, phased releas
  assert(!fs.readFileSync(path.join(out,'student/index.html'),'utf8').includes('facilitator/answer'));
  const guide=fs.readFileSync(path.join(out,'facilitator/html/1_facilitator-guide.html'),'utf8');
  assert(guide.includes('facilitator/answer.html'));assert(!guide.includes('href="../materials/prompt-engineering/rewrite-request/facilitator/answer.md"'));
- r=cli('export','office','--recipe','workshop','--with-package');assert.equal(r.status,0,r.stdout+r.stderr);
+ r=cli('export','office','--draft','--recipe','workshop','--with-package');assert.equal(r.status,0,r.stdout+r.stderr);
  assert(!fs.existsSync(path.join(out,'facilitator')));
  assert(!fs.readFileSync(path.join(out,'index.html'),'utf8').includes('逐页讲师备注'));
  assert(!fs.existsSync(path.join(out,'package/materials/prompt-engineering/rewrite-request/facilitator/answer.html')));

@@ -303,6 +303,8 @@ html, body {
         color: var(--doc-ink-soft);
         word-break: break-all;
     }
-    code, pre { border-radius: 0; }
+    code, pre { border-radius: 0; overflow-wrap: anywhere; }
+    pre { white-space: pre-wrap; overflow: visible; word-break: break-word; }
+    pre code { white-space: inherit; }
     .fill-lines .rule { height: 2.4rem; }
 }

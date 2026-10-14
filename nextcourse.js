@@ -67,7 +67,7 @@ function run(script, args = [], extraEnv = {}) {
         [pkg(script), ...args],
         { stdio: 'inherit', env: { ...process.env, ...extraEnv } }
     );
-    return result.status ?? 0;
+    return result.status ?? 1;
 }
 
 function die(msg) {
@@ -125,6 +125,19 @@ function resolvedContext(name, recipeId) {
             NEXTCOURSE_CONTEXT_NAME: name,
         },
     };
+}
+
+function prepareDelivery(name,context,withPackage) {
+    for(const script of ['build.js','check.js']) {
+        const code=run(script,[name],context.env);if(code!==0)process.exit(code);
+    }
+    if(withPackage) {
+        if(context.composed) {
+            const result=packageComposedCourse(WORK_ROOT,PKG_ROOT,name,context.recipeId,{render:true});
+            if(!result.packaged){printDiagnostics(result.diagnostics);process.exit(1);}
+        } else {const code=run('package.js',[name,'--render'],context.env);if(code!==0)process.exit(code);}
+        if(optionValue('--audience')==='facilitator')commands.notes();
+    }
 }
 
 // ─── 命令 ────────────────────────────────────────────────────────────────────
@@ -295,7 +308,7 @@ const commands = {
                 hasMeta     ? '✓ meta'           : '✗ meta',
                 slideCount  ? `✓ ${slideCount} slides` : '✗ slides',
                 hasDeck     ? '✓ deck'            : '· deck',
-                hasExport   ? '✓ export'          : '· export',
+                hasExport ? (require('./delivery-audit').verifyReceipt(path.join(dir,'export')) ? '✓ accepted export' : '⚠ unverified export') : '· export',
             ].join('  ');
             console.log(`  ${e.name.padEnd(24)} ${flags}`);
         }
@@ -472,14 +485,30 @@ outcomes:
         process.exit(run('build.js', [name], context.env));
     },
 
+    audit() {
+        const name = requireName('audit');
+        const context = resolvedContext(name, optionValue('--recipe'));
+        process.exit(run('audit.js',[name,...withoutOption(rest.slice(1),'--recipe')],context.env));
+    },
+
+    deliver() {
+        const name = requireName('deliver');
+        if(rest.includes('--draft'))die('deliver does not accept --draft; use export --draft for development only.');
+        const context = resolvedContext(name, optionValue('--recipe'));
+        const model=require('./course-model').loadCourse(WORK_ROOT,name,{directory:context.dir});
+        if(!model)die('Course metadata is missing.');
+        const profile=context.composed ? JSON.parse(fs.readFileSync(path.join(COURSES_DIR,name,'course.compose.json'))).recipes[context.recipeId].deliveryProfile : null;
+        const withPackage=rest.includes('--with-package') || (context.composed ? profile!=='slides' : ['M','L'].includes(model.scale));
+        prepareDelivery(name,context,withPackage);
+        const args=withoutOption(rest.slice(1),'--recipe').filter(arg=>arg!=='--with-package');
+        if(withPackage)args.push('--with-package');
+        process.exit(run('export.js',[name,...args],context.env));
+    },
+
     export() {
         const name = requireName('export');
         const context = resolvedContext(name, optionValue('--recipe'));
-        if (context.composed) {
-            const buildCode = run('build.js', [name], context.env);
-            if (buildCode !== 0) process.exit(buildCode);
-        }
-        if (rest.includes('--with-package') && optionValue('--audience') === 'facilitator') commands.notes();
+        prepareDelivery(name,context,rest.includes('--with-package'));
         process.exit(run('export.js', [name, ...withoutOption(rest.slice(1), '--recipe')], context.env));
     },
 
@@ -575,7 +604,10 @@ outcomes:
             : meh(`课程目录   还没有 —— nextcourse new <name> 会建`));
         console.log(chrome
             ? ok(`Chrome     ${chrome}`)
-            : meh('Chrome     未找到 —— shot（截图/溢出检测）与 pdf（导出）不可用，其余命令不受影响'));
+            : meh('Chrome     未找到 —— shot（截图/溢出检测）与 pdf（导出）不可用，普通设计与构建可用，最终交付需要浏览器'));
+
+        const acceptance = require('./delivery-audit').checkDependencies();
+        console.log(acceptance.ready ? ok('交付验收   Playwright + Chrome + Poppler 就绪') : meh('交付验收   不可用：'+acceptance.missing.join('; ')));
 
         // 资产完整性: npm 打包漏文件的话，这里会先炸而不是等到 build 出一个没样式的 deck
         const missing = ['lib/dist/reveal.js', 'shared_styles/tokens.css', 'templates/master_template.html']
@@ -584,7 +616,7 @@ outcomes:
             ? no(`引擎资产缺失: ${missing.join(', ')}`)
             : ok('引擎资产   完整'));
         console.log('');
-        process.exit(nodeMajor >= 20 && missing.length === 0 ? 0 : 1);
+        process.exit(nodeMajor >= 20 && missing.length === 0 && (!rest.includes('--delivery') || acceptance.ready) ? 0 : 1);
     },
 
     // 把内置文档打到 stdout。技能靠这个读设计系统, 不必把几万字复制进提示词。
@@ -647,10 +679,10 @@ NextCourse V${VERSION.split('.')[0]} — 课程开发工具
                                       导出 PDF：一页一张幻灯片，配色版式原样保留（需本机 Chrome）
                                       --theme print-light 出学员可打印的浅色版
                                       slide 上写 data-print="off" 的页不进 PDF
-  nextcourse export <name> [outdir] [--with-package] [--audience student|facilitator]
+  nextcourse export <name> [outdir] [--with-package] [--audience student|facilitator] [--draft]
                                       打包为可离线演示文件夹
   nextcourse notes  <name>            导出讲师手册 handout.md（各页演讲备注）
-  nextcourse shot   <name> [--check]  溢出检测 + 逐页截图到 .review/（需本机 Chrome）
+  nextcourse audit  <name> [--recipe <id>] [--delivery <directory>] [--json]\n                            浏览器交互／窄屏／课件溢出／打印PDF验收\n  nextcourse deliver <name> [outdir] [--recipe <id>] [--audience student|facilitator]\n                            构建、检查、打包、验收通过后原子交付\n  nextcourse shot   <name> [--check]  溢出检测 + 逐页截图到 .review/（需本机 Chrome）
   nextcourse themes                   生成配色/字体展板 theme-gallery/index.html
 
 工作流（从零开始）:

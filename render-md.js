@@ -134,7 +134,11 @@ function render(md) {
         if (!line.trim()) { i++; continue; }
 
         // 指令注释
-        if (RE.pagebreak.test(line)) { out.push('<div class="page-break-before"></div>'); i++; continue; }
+        if (RE.pagebreak.test(line)) {
+            const following = lines.slice(i+1).join('\n').replace(/<!--\s*fill:\s*\d+\s*-->/gi,'FORM').replace(/<!--[\s\S]*?-->/g,'').trim();
+            if(following)out.push('<div class="page-break-before"></div>');
+            i++;continue;
+        }
         const fill = line.match(RE.fill);
         if (fill) {
             out.push(`<div class="fill-lines">${'<span class="rule"></span>'.repeat(Number(fill[1]))}</div>`);

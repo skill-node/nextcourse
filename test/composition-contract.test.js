@@ -692,17 +692,17 @@ test('composed package CLI and audience-aware export default to a student-safe b
     assert.equal(packageRun.status, 0, `${packageRun.stdout}\n${packageRun.stderr}`);
     const buildRun = cli('build', 'office', '--recipe', 'workshop');
     assert.equal(buildRun.status, 0, `${buildRun.stdout}\n${buildRun.stderr}`);
-    const exportRun = cli('export', 'office', '--recipe', 'workshop', '--with-package');
+    const exportRun = cli('export', 'office', '--draft', '--recipe', 'workshop', '--with-package');
     assert.equal(exportRun.status, 0, `${exportRun.stdout}\n${exportRun.stderr}`);
-    const exportRoot = path.join(temporaryRoot, 'courses', 'office', '.build', 'workshop', 'export');
+    const exportRoot = path.join(temporaryRoot, 'courses', 'office', '.build', 'workshop', 'export-draft');
     assert(fs.existsSync(path.join(exportRoot, 'package', 'html', '0_index.html')));
     assert(fs.existsSync(path.join(exportRoot, 'package', 'materials', 'prompt-engineering', 'rewrite-request', 'student', 'data', 'sample.json')));
     assert(!fs.existsSync(path.join(exportRoot, 'package', 'materials', 'prompt-engineering', 'rewrite-request', 'facilitator', 'answer.md')));
 
     const facilitatorBase = path.join(temporaryRoot, 'facilitator-export');
-    const facilitatorRun = cli('export', 'office', facilitatorBase, '--recipe', 'workshop', '--with-package', '--audience', 'facilitator');
+    const facilitatorRun = cli('export', 'office', '--draft', facilitatorBase, '--recipe', 'workshop', '--with-package', '--audience', 'facilitator');
     assert.equal(facilitatorRun.status, 0, `${facilitatorRun.stdout}\n${facilitatorRun.stderr}`);
-    assert(fs.existsSync(path.join(facilitatorBase, 'office', 'facilitator', 'materials', 'prompt-engineering', 'rewrite-request', 'facilitator', 'answer.md')));
+    assert(fs.existsSync(path.join(facilitatorBase, 'office-draft', 'facilitator', 'materials', 'prompt-engineering', 'rewrite-request', 'facilitator', 'answer.md')));
 });
 
 test('source baselines are deterministic and exclude generated artifacts', () => {

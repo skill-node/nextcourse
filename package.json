@@ -30,6 +30,8 @@
     "animate-slides.js",
     "render-md.js",
     "delivery-navigation.js",
+    "delivery-audit.js",
+    "audit.js",
     "course-model.js",
     "composition/",
     "shot.js",
@@ -55,17 +57,17 @@
     "trace": "node nextcourse.js trace",
     "impact": "node nextcourse.js impact",
     "sync": "node nextcourse.js sync",
-    "list":   "node nextcourse.js list",
-    "check":  "node nextcourse.js check",
-    "lint":   "node nextcourse.js lint",
+    "list": "node nextcourse.js list",
+    "check": "node nextcourse.js check",
+    "lint": "node nextcourse.js lint",
     "animate": "node nextcourse.js animate",
-    "build":  "node nextcourse.js build",
+    "build": "node nextcourse.js build",
     "render": "node nextcourse.js render",
     "package": "node nextcourse.js package",
     "export": "node nextcourse.js export",
-    "pdf":    "node nextcourse.js pdf",
-    "notes":  "node nextcourse.js notes",
-    "shot":   "node nextcourse.js shot",
+    "pdf": "node nextcourse.js pdf",
+    "notes": "node nextcourse.js notes",
+    "shot": "node nextcourse.js shot",
     "themes": "node nextcourse.js themes"
   },
   "keywords": [
@@ -87,5 +89,8 @@
     "agent"
   ],
   "author": "Kurtlee (https://nextskill.cc)",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "playwright-core": "^1.61.1"
+  }
 }

@@ -377,3 +377,6 @@ NextCourse 为了让导出的课件能离线播放，打包了 Reveal.js、Font 
 
 作者 Kurtlee —— 20 年 HR 总监，亲手把 AI 写成产品。更多见
 [nextskill.cc](https://nextskill.cc)。
+
+
+正式交付使用 `nextcourse deliver <name> [outdir]`：构建、教学检查、按profile打包、Playwright浏览器／打印验收，通过才发布。`export`同样强制验收，`export --draft`仅供内部开发。先运行 `doctor --delivery` 检查可选Playwright-core、浏览器与Poppler。真实课程、交付包与验收证据不进入公开代码仓。
