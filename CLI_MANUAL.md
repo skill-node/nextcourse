@@ -318,9 +318,7 @@ nextcourse package <course-name> [--render] [--force]
 | `package/8_content-dev.md` | 项目组 —— SME 访谈、案例库、数据包、排期 |
 | `package/exercises/README.md` | 项目组 —— 练习数据包规则与待建清单 |
 
-**文件名前缀就是交付顺序。** 客户拿到的是一个文件夹，文件管理器按名字排序，
-所以排序即动线：1–4 是开班当天桌上要有的，5–8 是设计与项目层的证据，
-封面渲染成 `html/0_index.html` 永远排第一，封面里的文档列表也带同一套序号。
+**文件名前缀保留为稳定路径。** 阅读目录使用中文文档名称，按课程蓝图、授课资料、学员资料与技术说明分组；不直接把英文文件名当显示名称。封面仍为 `html/0_index.html`。
 序号定义在 `package.js` 的 `DOCS`（每项一个 `no`），要调整顺序就改那里，
 老课程里没有序号的旧文件会在下次运行时**自动改名**，手改过的内容不会丢。
 
@@ -370,7 +368,7 @@ npm run export <course-name> [outdir]
 - 第三方协议文本一并拷入（Reveal.js 的 `lib/LICENSE`、各字体的 `<slug>.LICENSE.txt`、
   FontAwesome 的 `LICENSE.txt`）—— MIT 与 SIL OFL 都要求副本随分发物走，
   交付包是独立副本，见 [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md)
-- 双击 `index.html` 即可演示，无需联网、无需安装
+- 不带 `--with-package` 时，`index.html` 直接演示；带交付包时，`index.html` 为统一交付目录，课件在 `deck.html`，无需联网、无需安装
 - 大小取决于字体：含中文字体子集的课约 9–10 MB（自带的 29 页示例课 9.4 MB / 174 个文件）
 
 **可选参数：**
@@ -386,6 +384,27 @@ export/
 ├── shared_styles/      （本课用到的模板 / 配色 / 字体集）
 └── lib/                （Reveal.js + 字体 + 各自的协议文本）
 ```
+
+带 `--with-package --audience facilitator` 的组合课输出：
+
+```text
+export/
+├── index.html          # 五区折叠目录
+├── deck.html           # 课堂课件，保留演讲者视图
+├── design/html/        # 课程蓝图与大纲
+├── facilitator/        # 讲师资料、答案、逐页备注与分阶段发放
+├── student/            # 可独立发放的学员资料与输入
+├── technical/          # 版本、使用与修改说明
+├── assets/
+├── shared_styles/
+└── lib/
+```
+
+目录按“课件、课程蓝图、授课资料、学员资料、课件技术说明”组织，支持展开／收起和打印展开。
+案例任务、答案与量规的 Markdown 同时生成可阅读 HTML；原始材料保留。讲师导出自动生成逐页备注，仍为 Markdown。
+学员导出仍默认安全，使用 `package/` 保存学员资料，不附讲师蓝图、答案或备注。带分阶段案例时按时点发放，不能开场发送完整学员包。
+
+组合交付源可增加 `package-src/<recipe>/delivery.json`：`cases` 以当前锁内案例 ID 为键，支持 `stage`、`description` 和 `releases`（正整数 `stage`、`when`、学员材料 `paths`）。路径必须指向该案例允许发给学员的材料；元数据不修改案例契约或页面锁。目录与发放文件由引擎生成，禁止手改生成目录。
 
 > 字体缺协议文本会直接让 `export` 失败。新增字体时按
 > [THIRD-PARTY-NOTICES.md](./THIRD-PARTY-NOTICES.md)「If you add a font」补上

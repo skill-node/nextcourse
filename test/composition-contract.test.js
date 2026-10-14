@@ -702,7 +702,7 @@ test('composed package CLI and audience-aware export default to a student-safe b
     const facilitatorBase = path.join(temporaryRoot, 'facilitator-export');
     const facilitatorRun = cli('export', 'office', facilitatorBase, '--recipe', 'workshop', '--with-package', '--audience', 'facilitator');
     assert.equal(facilitatorRun.status, 0, `${facilitatorRun.stdout}\n${facilitatorRun.stderr}`);
-    assert(fs.existsSync(path.join(facilitatorBase, 'office', 'package', 'materials', 'prompt-engineering', 'rewrite-request', 'facilitator', 'answer.md')));
+    assert(fs.existsSync(path.join(facilitatorBase, 'office', 'facilitator', 'materials', 'prompt-engineering', 'rewrite-request', 'facilitator', 'answer.md')));
 });
 
 test('source baselines are deterministic and exclude generated artifacts', () => {

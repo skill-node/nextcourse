@@ -211,6 +211,19 @@ nextcourse package <name> --render   # 生成 package/*.md 并渲染 package/htm
 **每份文档的 h1 只写功能名**（「讲师手册」「考核量规」），课程名由渲染器放到下一行小字，
 `<title>` 同样只写功能名。手写或手改 md 时照这个来，别把课程名写回 h1。
 
+### 正式交付入口
+
+`nextcourse export <name> --with-package --audience facilitator` 用于组合课完整讲师交付。
+`index.html` 按课件、课程蓝图、授课资料、学员资料、课件技术说明分组折叠；课件位于 `deck.html`。
+默认 student 导出不带讲师答案。实际文件名保持兼容，目录使用简单直接的文档名称；逐页备注保留 Markdown。
+
+有分阶段案例时，在 `package-src/<recipe>/delivery.json` 写当前锁内案例 ID 对应的 `stage`、`description` 与
+`releases`（正整数 `stage`、`when`、学员材料 `paths`）。不要在开场发完整学员包。讲师资料说明学员版差异与发放时点。
+7_alignment 放课程蓝图，显示为“学习目标、教学与考核对应表”；8_content-dev 用于开发／本地化参考。
+工程报告、锁与哈希不混入授课资料；技术说明单列最后。需要展示 SME 访谈时给出可定位的提纲文件或链接，不只在蓝图提一句。
+
+蓝图内嵌独立文档时，保留一~八大节为 h2，文档小节降为 h3，活动条目降为 h4，避免目录层级扁平化。
+
 ### md 是源，HTML 是交付物
 
 和 `deck.html` 完全一样的心智模型：**HTML 永远不手改**，改 `package/*.md` 再重新

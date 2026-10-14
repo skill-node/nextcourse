@@ -11,6 +11,7 @@ const { recipeLockPath, lockMatchesRecipe } = require('./recipe-lock');
 const { recipeDesignSources } = require('./design-sources');
 const { resolveInside } = require('./resolver');
 const { wrapDocument, accentFromTheme } = require('../render-md');
+const { documentInfo, rewriteMarkdownLinks, writeCatalog } = require('../delivery-navigation');
 
 function readJson(filePath, diagnostics, displayPath) {
     try {
@@ -306,24 +307,97 @@ function copyAudienceMaterials(plan, audience, destination, outputs) {
     }
 }
 
-function renderAudienceSources(sourceDir, audienceDir, title, css, accent, outputs) {
+function renderAudienceSources(sourceDir, audienceDir, title, css, accent, outputs, plan, metadata) {
+    const audience = path.basename(audienceDir);
     const htmlDir = path.join(audienceDir, 'html');
     fs.mkdirSync(htmlDir, { recursive: true });
-    const files = fs.existsSync(sourceDir) ? fs.readdirSync(sourceDir).filter(file => file.endsWith('.md')).sort() : [];
+    const files = fs.existsSync(sourceDir) ? fs.readdirSync(sourceDir).filter(file => file.endsWith('.md')).sort((a,b)=>a.localeCompare(b,'en',{numeric:true})) : [];
+    const rendered = [];
+    // Material task/answer/rubric Markdown uses the existing document renderer.
+    for (const record of plan.cases) {
+        const descriptorDir = path.posix.dirname(record.sourcePath.slice(record.sourcePath.indexOf('/') + 1));
+        for (const file of audience === 'student' ? record.studentFiles : record.facilitatorFiles) {
+            if (!file.sourcePath.endsWith('.md')) continue;
+            const coursePath = file.sourcePath.slice(file.sourcePath.indexOf('/') + 1);
+            const relative = path.posix.join('materials', casePackagePath(record.id), path.posix.relative(descriptorDir, coursePath));
+            const md = fs.readFileSync(file.absolutePath, 'utf8');
+            rendered.push({ output: path.join(audienceDir, relative.replace(/\.md$/, '.html')), md, title: (md.match(/^#\s+(.+)$/m)||[])[1] || record.title });
+        }
+    }
+    const documents = [];
     for (const file of files) {
         const md = fs.readFileSync(path.join(sourceDir, file), 'utf8');
-        if (/\]\(\.\.\/\.\.\/|\]\([^)]*facilitator\//i.test(md) && path.basename(sourceDir) === 'student') {
+        if (/\]\(\.\.\/\.\.\/|\]\([^)]*facilitator\//i.test(md) && audience === 'student') {
             throw new Error(`Student Markdown links outside its material package: ${file}`);
         }
-        const docTitle = (md.match(/^#\s+(.*)$/m) || [, file.replace(/\.md$/, '')])[1];
-        const outputPath = path.join(htmlDir, file.replace(/\.md$/, '.html'));
-        fs.writeFileSync(outputPath, wrapDocument({ title: docTitle, subtitle: title, md, css, accent }), 'utf8');
-        outputs.push({ path: path.relative(path.dirname(audienceDir), outputPath).split(path.sep).join('/'), hash: sha256(fs.readFileSync(outputPath)) });
+        const info = documentInfo(file, md, audience);
+        documents.push({ ...info, href: `html/${file.replace(/\.md$/, '.html')}`, location: `${audience}/html/${file.replace(/\.md$/, '.html')}` });
+        rendered.push({ output: path.join(htmlDir, file.replace(/\.md$/, '.html')), md, title: info.title });
     }
-    const indexMd = ['# 交付包', '', ...files.map(file => `- [${file.replace(/^\d+_/, '').replace(/\.md$/, '')}](./${file.replace(/\.md$/, '.html')})`), ''].join('\n');
-    const indexPath = path.join(htmlDir, '0_index.html');
-    fs.writeFileSync(indexPath, wrapDocument({ title: '交付包', subtitle: title, md: indexMd, css, accent, toc: false }), 'utf8');
-    outputs.push({ path: path.relative(path.dirname(audienceDir), indexPath).split(path.sep).join('/'), hash: sha256(fs.readFileSync(indexPath)) });
+    for (const row of rendered) fs.writeFileSync(row.output, wrapDocument({title:row.title, subtitle:title, md:row.md, css, accent}));
+    for (const row of rendered) {
+        fs.writeFileSync(row.output, wrapDocument({title:row.title, subtitle:title, md:rewriteMarkdownLinks(row.md,row.output,audienceDir), css, accent}));
+        outputs.push({path: path.relative(path.dirname(audienceDir), row.output).split(path.sep).join('/'), hash:sha256(fs.readFileSync(row.output))});
+    }
+    const maintenanceFiles = [];
+    const isMaintenance = (record, relative, audienceValue) => {
+        if (audience !== 'facilitator' || audienceValue === 'student' || audienceValue === 'both') return false;
+        const script = record.doc.generator?.script;
+        const scriptDir = script && path.posix.dirname(script);
+        return (metadata.cases?.[record.id]?.maintenancePaths || []).includes(relative) || relative === script || (scriptDir && scriptDir !== '.' && relative.startsWith(scriptDir+'/'));
+    };
+    for (const record of plan.cases) {
+        const descriptorDir = path.posix.dirname(record.sourcePath.slice(record.sourcePath.indexOf('/')+1));
+        for (const file of record.facilitatorFiles) {
+            const relative = path.posix.relative(descriptorDir,file.sourcePath.slice(file.sourcePath.indexOf('/')+1));
+            const declared = record.doc.materials.find(m=>m.path===relative);
+            if (isMaintenance(record,relative,declared?.audience || 'facilitator')) {
+                const target = `materials/${casePackagePath(record.id)}/${relative}`;
+                maintenanceFiles.push(target);
+                if (relative.endsWith('.md')) maintenanceFiles.push(target.replace(/\.md$/,'.html'));
+            }
+        }
+    }
+    const roleNames = { input:'练习输入', worksheet:'任务说明', answer:'讲师参考答案', rubric:'案例评分量规', reference:'参考材料', output:'产出示例' };
+    const cases = plan.cases.slice().sort((a,b)=>a.id.localeCompare(b.id,'en')).map(record => {
+        const spec = metadata.cases?.[record.id] || {};
+        const rows = record.doc.materials.filter(m => (audience !== 'student' || m.audience !== 'facilitator') && !isMaintenance(record,m.path,m.audience)).map(m => {
+            const href = `materials/${casePackagePath(record.id)}/${m.path.replace(/\.md$/, '.html')}`;
+            const basename = path.posix.basename(m.path);
+            const materialMd = m.path.endsWith('.md') ? fs.readFileSync(path.join(audienceDir,'materials',casePackagePath(record.id),m.path),'utf8') : '';
+            const humanTitle = (materialMd.match(/^#\s+(.+)$/m)||[])[1] || m.title;
+            const label = /^(?:task|answer|rubric)\.md$/.test(basename) ? ({'task.md':'任务说明','answer.md':'讲师参考答案','rubric.md':'评分量规'})[basename] : humanTitle;
+            return {title:label, href, description:roleNames[m.role]||'案例材料', location:`${audience}/${href}`};
+        });
+        if (audience === 'facilitator') for (const release of spec.releases || []) {
+            for (const rel of release.paths) {
+                const material = record.doc.materials.find(m=>m.path === rel && m.audience !== 'facilitator');
+                if (!material) throw new Error(`Release path is not a student material: ${record.id}/${rel}`);
+                const source = path.join(audienceDir,'materials',casePackagePath(record.id),rel);
+                const target = path.join(audienceDir,'release',casePackagePath(record.id),`stage-${release.stage}`,path.posix.basename(rel));
+                fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(source,target);
+                outputs.push({path:path.relative(path.dirname(audienceDir),target).split(path.sep).join('/'),hash:sha256(fs.readFileSync(target))});
+                rows.push({title:`第${release.stage}阶段发放：${path.posix.basename(rel)}`, href:path.relative(audienceDir,target).split(path.sep).join('/'), description:release.when, location:path.relative(path.dirname(audienceDir),target).split(path.sep).join('/')});
+            }
+        }
+        return { title:record.title, description:[spec.stage,spec.description].filter(Boolean).join(' · '), rows };
+    });
+    const stageOrder = d => d.stage.startsWith('课前') ? 0 : d.stage==='课中' ? 1 : 2;
+    documents.sort((a,b)=>stageOrder(a)-stageOrder(b));
+    const catalog = {documents,cases,maintenanceFiles};
+    const catalogPath = path.join(audienceDir,'catalog.json');
+    fs.writeFileSync(catalogPath,JSON.stringify(catalog,null,2)+'\n');
+    outputs.push({path:path.relative(path.dirname(audienceDir),catalogPath).split(path.sep).join('/'),hash:sha256(fs.readFileSync(catalogPath))});
+    const sections = [
+        {title:audience==='student'?'学员资料':'授课资料',open:true,rows:documents.filter(d=>d.kind!=='design' && d.kind!=='technical')},
+        {title:'课件技术说明',rows:documents.filter(d=>d.kind==='technical')},
+        {title:'课程设计参考',rows:documents.filter(d=>d.kind==='design')},
+        {title:audience==='student'?'案例与练习材料':'案例、答案与发放材料',open:true,rows:cases},
+    ];
+    for (const [file,prefix] of [[path.join(audienceDir,'index.html'),''],[path.join(htmlDir,'0_index.html'),'../']]) {
+        writeCatalog({file,title:audience==='student'?'学员资料':'授课资料',subtitle:title,sections,css,prefix,intro:audience==='student'?'按讲师指定时点使用材料；课后按任务要求提交作品。':'讲师版包含参考答案与量规。给学员发放时使用独立学员目录；分阶段案例按指定时点逐项发放。'});
+        outputs.push({path:path.relative(path.dirname(audienceDir),file).split(path.sep).join('/'),hash:sha256(fs.readFileSync(file))});
+    }
 }
 
 function packageComposedCourse(workRoot, packageRoot, courseName, recipeId, options = {}) {
@@ -349,6 +423,14 @@ function packageComposedCourse(workRoot, packageRoot, courseName, recipeId, opti
     const temporary = fs.mkdtempSync(path.join(buildRoot, '.tmp-package-'));
     const outputs = [];
     try {
+        const metadataPath = path.join(sourceRoot, 'delivery.json');
+        const metadata = fs.existsSync(metadataPath) ? JSON.parse(fs.readFileSync(metadataPath,'utf8')) : {};
+        for (const [id,spec] of Object.entries(metadata.cases || {})) {
+            if (!plan.cases.some(c=>c.id===id)) throw new Error(`Unknown delivery case ${id}`);
+            if (!spec || typeof spec !== 'object' || (spec.releases && !Array.isArray(spec.releases))) throw new Error(`Invalid delivery schedule ${id}`);
+            if (spec.maintenancePaths && (!Array.isArray(spec.maintenancePaths) || spec.maintenancePaths.some(p=>!plan.cases.find(c=>c.id===id).doc.materials.some(m=>m.path===p && m.audience==='facilitator')))) throw new Error(`Invalid facilitator maintenance path ${id}`);
+            for (const release of spec.releases || []) if (!Number.isSafeInteger(release.stage) || release.stage<1 || !Array.isArray(release.paths) || !release.paths.length || release.paths.some(p=>typeof p!=='string')) throw new Error(`Invalid release stage ${id}`);
+        }
         copyAudienceMaterials(plan, 'student', temporary, outputs);
         copyAudienceMaterials(plan, 'facilitator', temporary, outputs);
         if (options.render) {
@@ -357,10 +439,11 @@ function packageComposedCourse(workRoot, packageRoot, courseName, recipeId, opti
             const metaPath = plan.metaPath;
             const theme = (metaPath && fs.existsSync(metaPath)) ? ((fs.readFileSync(metaPath, 'utf8').match(/^theme:\s*["']?(.+?)["']?\s*$/m) || [])[1] || 'standard-default') : 'standard-default';
             const accent = accentFromTheme(packageRoot, theme);
-            renderAudienceSources(path.join(sourceRoot, 'student'), path.join(temporary, 'student'), title, css, accent, outputs);
-            renderAudienceSources(path.join(sourceRoot, 'facilitator'), path.join(temporary, 'facilitator'), title, css, accent, outputs);
+            renderAudienceSources(path.join(sourceRoot, 'student'), path.join(temporary, 'student'), title, css, accent, outputs, plan, metadata);
+            renderAudienceSources(path.join(sourceRoot, 'facilitator'), path.join(temporary, 'facilitator'), title, css, accent, outputs, plan, metadata);
         }
         const sourceHashes = [];
+        if (fs.existsSync(path.join(sourceRoot,'delivery.json'))) sourceHashes.push({path:'delivery.json',hash:sha256(fs.readFileSync(path.join(sourceRoot,'delivery.json')))});
         for (const audience of ['student', 'facilitator']) {
             const dir = path.join(sourceRoot, audience);
             for (const file of fs.readdirSync(dir).filter(entry => entry.endsWith('.md')).sort()) {

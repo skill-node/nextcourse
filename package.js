@@ -34,6 +34,7 @@ const fs   = require('fs');
 const path = require('path');
 const { loadCourse, mapSlidesToModules, isBlank, label, ALIGNMENT_FILE } = require('./course-model');
 const { wrapDocument, accentFromTheme } = require('./render-md');
+const { documentInfo, writeCatalog } = require('./delivery-navigation');
 
 const { PKG_ROOT, WORK_ROOT, pkg, requireCourse } = require('./paths');
 
@@ -566,41 +567,16 @@ if (RENDER) {
         rendered.push(f.replace(/\.md$/, '.html'));
     }
 
-    // 客户打开的第一扇门
-    const indexMd = [
-        `# 交付包`,
-        '',
-        `> ${v(meta.duration, '')}${meta.class_size ? ` · ${v(meta.class_size)}` : ''} · ${modules.length} 个模块 · ${outcomes.length} 条学习成果`,
-        '',
-        '## 文档',
-        '',
-        // 链接文字带上文件名里的序号, 客户在目录里和在本页看到的是同一个顺序
-        ...mdFiles.map(f => {
-            const known = DOCS.find(d => path.basename(d.file) === f);
-            const kind = known ? known.kind
-                : (f === ALIGNMENT_FILE ? '对齐矩阵' : f.replace(/^\d+_/, '').replace(/\.md$/, ''));
-            const no = (f.match(/^(\d+)_/) || [, ''])[1];
-            return `- [${no ? `${no} · ` : ''}${kind}](./${f.replace(/\.md$/, '.html')})`;
-        }),
-        '',
-        '## 课程模块',
-        '',
-        '| # | 模块 | 时长 | 学员产出 |',
-        '|---|---|---|---|',
-        ...modules.map(m => `| ${m.no} | ${label(m.name)} | ${v(m.duration, '—')} | ${v(m.deliverable, '—')} |`),
-        '',
-        '---',
-        '',
-        '本页与各文档由 NextCourse 生成。**HTML 不要手改**——改对应的 `package/*.md` 后重新运行',
-        '`nextcourse package <课程名> --render`。',
-        '',
-    ].join('\n');
-    // 0_ 前缀让封面在文件管理器里永远排第一 —— 客户拿到的是文件夹, 排序就是动线
-    fs.writeFileSync(
-        path.join(htmlDir, '0_index.html'),
-        wrapDocument({ title: '交付包', subtitle: title, md: indexMd, css, accent, toc: false }),
-        'utf8'
-    );
+    // One display taxonomy shared with composed packages; filenames stay stable.
+    const rows = mdFiles.map(f => ({...documentInfo(f,fs.readFileSync(path.join(PKG_DIR,f),'utf8'),'facilitator'),href:'./'+f.replace(/\.md$/,'.html')}));
+    const technicalMd = '# 课件技术说明\n\nHTML 用于阅读和打印，Markdown 用于维护。修改 package/*.md 后重新运行 nextcourse package <课程名> --render；重新导出整包使用 nextcourse export <课程名> --with-package。';
+    fs.writeFileSync(path.join(htmlDir,'technical.html'),wrapDocument({title:'课件技术说明',subtitle:title,md:technicalMd,css,accent}));
+    writeCatalog({file:path.join(htmlDir,'0_index.html'),title:'课程交付资料',subtitle:title,css,sections:[
+        {title:'课程蓝图',rows:rows.filter(r=>r.kind==='design')},
+        {title:'授课资料',open:true,rows:rows.filter(r=>r.kind==='teaching')},
+        {title:'学员资料',rows:rows.filter(r=>r.kind==='student')},
+        {title:'课件技术说明',rows:[{title:'内容修改与重建说明',href:'./technical.html'}]},
+    ],intro:'按用途查阅课程设计、授课与学员资料。'});
     rendered.push('0_index.html');
 }
 

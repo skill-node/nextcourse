@@ -396,6 +396,10 @@ cohort. Fill the blueprint via `nextcourse-delivery`, then run this again.
 
 #### `export` — package as an offline-playable folder
 
+With `--with-package`, the exported `index.html` is a collapsible delivery catalog and the presentation moves to `deck.html`. A composed facilitator export contains `design/html/`, `facilitator/`, an independent `student/` directory, and `technical/`. The catalog groups slides, course design, teaching material, student material and technical notes. Document labels come from readable titles rather than filename stems; trainer notes remain Markdown. Facilitator export automatically refreshes the notes.
+
+Optional `package-src/<recipe>/delivery.json` records case timing and phased releases. `cases` is keyed by locked case ID; each entry can contain `stage`, `description` and `releases` with a positive integer `stage`, `when` and student-material `paths`. Release paths cannot distribute trainer answers. Default student export retains its student-safe `package/` directory and excludes trainer design documents and notes.
+
 > Add `--with-package` to include rendered delivery material. Composed export defaults
 > to `--audience student`; use `--audience facilitator` explicitly for the trainer bundle.
 

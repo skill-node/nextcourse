@@ -20,6 +20,7 @@ const fs   = require('fs');
 const path = require('path');
 
 const { PKG_ROOT, pkg, courseDir, assetBase, requireCourse } = require('./paths');
+const { createDeliveryEntry } = require('./delivery-navigation');
 
 // ─── 参数 ────────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
@@ -64,15 +65,16 @@ const EXPORT_DIR = outputBase
     : path.join(COURSE_DIR, 'export');
 
 // ─── 工具函数 ────────────────────────────────────────────────────────────────
-function copyDir(src, dest) {
+function copyDir(src, dest, include = () => true, base = src) {
     if (!fs.existsSync(src)) return 0;
     fs.mkdirSync(dest, { recursive: true });
     let count = 0;
     for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
         const srcPath  = path.join(src, entry.name);
         const destPath = path.join(dest, entry.name);
+        if (!include(path.relative(base,srcPath).split(path.sep).join('/'))) continue;
         if (entry.isDirectory()) {
-            count += copyDir(srcPath, destPath);
+            count += copyDir(srcPath, destPath, include, base);
         } else {
             fs.copyFileSync(srcPath, destPath);
             count++;
@@ -115,7 +117,7 @@ for (const prefix of new Set([BASE, '../..'])) {
 }
 html = html.replace(/\.\.\/assets\//g, './assets/');
 
-fs.writeFileSync(path.join(EXPORT_DIR, 'index.html'), html, 'utf8');
+fs.writeFileSync(path.join(EXPORT_DIR, WITH_PACKAGE ? 'deck.html' : 'index.html'), html, 'utf8');
 
 // ─── 3. 拷贝依赖 (只拷贝演示实际需要的文件) ──────────────────────────────────
 let fileCount = 1; // index.html
@@ -206,27 +208,44 @@ if (WITH_PACKAGE) {
         console.error(`ERROR: package HTML 不存在。先运行 'nextcourse package ${courseName} --render'`);
         process.exit(1);
     }
-    packagedDocs = copyDir(pkgHtml, isComposedPackage ? path.join(EXPORT_DIR, 'package', 'html') : path.join(EXPORT_DIR, 'package'));
-    if (isComposedPackage) {
-        packagedDocs += copyDir(path.join(audiencePackage, 'materials'), path.join(EXPORT_DIR, 'package', 'materials'));
+    if (isComposedPackage && audience === 'facilitator') {
+        for (const role of ['facilitator','student']) {
+            const source = path.join(COURSE_DIR,'package',role);
+            const catalog = JSON.parse(fs.readFileSync(path.join(source,'catalog.json'),'utf8'));
+            const excluded = new Set(catalog.maintenanceFiles || []);
+            for (const entry of ['html','materials','release','index.html','catalog.json']) {
+                const src = path.join(source,entry), dest = path.join(EXPORT_DIR,role,entry);
+                if (!fs.existsSync(src)) continue;
+                if (fs.statSync(src).isDirectory()) packagedDocs += copyDir(src,dest,relative=>!excluded.has(entry+'/'+relative));
+                else { fs.mkdirSync(path.dirname(dest),{recursive:true});fs.copyFileSync(src,dest);packagedDocs++; }
+            }
+        }
+    } else {
+        packagedDocs = copyDir(pkgHtml, isComposedPackage ? path.join(EXPORT_DIR, 'package', 'html') : path.join(EXPORT_DIR, 'package'));
+        if (isComposedPackage) {
+            packagedDocs += copyDir(path.join(audiencePackage, 'materials'), path.join(EXPORT_DIR, 'package', 'materials'));
+            fs.copyFileSync(path.join(audiencePackage,'catalog.json'),path.join(EXPORT_DIR,'package/catalog.json'));
+        }
     }
+    createDeliveryEntry({courseDir:COURSE_DIR,outputDir:EXPORT_DIR,packageRoot:PKG_ROOT,audience,composed:isComposedPackage});
     fileCount += packagedDocs;
 }
 
 // ─── 4. 结果报告 ─────────────────────────────────────────────────────────────
 const sizeMB = (dirSize(EXPORT_DIR) / 1024 / 1024).toFixed(1);
+const countFiles = dir => fs.readdirSync(dir,{withFileTypes:true}).reduce((n,e)=>n+(e.isDirectory()?countFiles(path.join(dir,e.name)):1),0);
+fileCount = countFiles(EXPORT_DIR);
 
 console.log(`\nNextCourse Export — ${courseName}`);
 console.log(`${'─'.repeat(50)}`);
 console.log(`  输出目录 : ${EXPORT_DIR}`);
 console.log(`  文件总数 : ${fileCount}`);
 console.log(`  打包大小 : ${sizeMB} MB`);
-if (WITH_PACKAGE) console.log(`  交付包   : package/ ${packagedDocs} 个文件（${audience}）`);
+if (WITH_PACKAGE) console.log(`  交付资料 : ${packagedDocs} 个文件（${audience}）`);
 console.log(`\n  ✓  完成。`);
 console.log(`     将整个 "${path.basename(EXPORT_DIR)}" 文件夹`);
 console.log(`     拷贝到 U 盘 / 云盘 / 任意电脑`);
-console.log(`     双击 index.html 即可演示（无需联网）`);
+console.log(`     双击 index.html 打开交付目录或课件（无需联网）`);
 if (WITH_PACKAGE) {
-    const composedEntry = fs.existsSync(path.join(EXPORT_DIR, 'package', 'html', '0_index.html'));
-    console.log(`     交付文档在 ${composedEntry ? 'package/html/0_index.html' : 'package/0_index.html'}\n`);
+    console.log('     课件、配套资料与技术说明统一列在 index.html\n');
 } else console.log('');

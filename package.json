@@ -29,6 +29,7 @@
     "lint-slides.js",
     "animate-slides.js",
     "render-md.js",
+    "delivery-navigation.js",
     "course-model.js",
     "composition/",
     "shot.js",

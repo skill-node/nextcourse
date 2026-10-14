@@ -479,6 +479,7 @@ outcomes:
             const buildCode = run('build.js', [name], context.env);
             if (buildCode !== 0) process.exit(buildCode);
         }
+        if (rest.includes('--with-package') && optionValue('--audience') === 'facilitator') commands.notes();
         process.exit(run('export.js', [name, ...withoutOption(rest.slice(1), '--recipe')], context.env));
     },
 
@@ -524,10 +525,10 @@ outcomes:
 
         const stripTags = s => s.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
         const out = [
-            `# ${title} — 讲师手册`,
+            `# ${title} — 逐页讲师备注`,
             '',
             '> 由 `nextcourse notes` 自动生成，来源为各 slide 的演讲备注（aside.notes）。',
-            '> 修改备注请编辑 slides/slide-XX.html 后重新生成，不要直接改本文件。',
+            '> 修改备注请编辑课程的页面源或本地变体，然后重新构建并生成备注；本文件是生成物。',
             '',
         ];
         let noteCount = 0;

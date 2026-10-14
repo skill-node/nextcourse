@@ -136,7 +136,7 @@ nextcourse shot   <name> [--check]  # 溢出检测 + 逐页截图到 .review/（
 | `build <name>` | 读 course.meta.md frontmatter + 拼接 slides/ → 生成 deck.html |
 | `render <name>` | lint 通过后再 build，是日常最常用的命令 |
 | `package <name>` | 独立 M/L 保持旧 `package/` 流程；组合 `slides+lab` 从锁定案例生成 `package-src/<recipe>/{student,facilitator}` 草稿并分 audience 构建，绝不覆盖现有 Markdown；`full` 要求完整八份源 |
-| `export <name>` | 生成离线演示包；组合课 `--with-package` 默认只带 student，讲师答案须显式 `--audience facilitator` |
+| `export <name>` | 生成离线包；带 `--with-package` 时 index.html 是交付目录、deck.html 是课件。组合课默认 student-safe；显式 facilitator 包含讲师、独立学员目录、蓝图与技术说明，并自动更新逐页备注 |
 | `notes <name>` | 抽取各页 h2 + aside.notes，生成讲师手册 courses/\<name\>/handout.md |
 | `pdf <name>` | 用本机 Chrome headless 把 deck.html 印成 PDF，一页一张幻灯片、配色与版式原样保留，默认落在 courses/\<name\>/pdf/deck.pdf。发给学员看的课件用它，**别让用户在浏览器里 Cmd+P**——reveal 自带的 A4 打印样式会把整套配色刷成白底黑字。`--theme print-light` 出学员可打印的纸面浅色版（输出名自动带后缀，不覆盖授课版）；`--size WxH` 换纸张尺寸（默认 1600x900）；`--keep` 留下可手改的 deck.print.html，配 `--source <file>` 从手改稿打印。slide 的 `<section>` 上写 `data-print="off"` 可让该页不进 PDF（演示页 / 敏感案例），页码自动连号 |
 | `shot <name>` | 用本机 Chrome headless 做溢出检测并逐页截图到 .review/，供视觉自查（`--check` 只检测不截图） |
