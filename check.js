@@ -36,7 +36,7 @@ if (!courseName) {
 
 requireCourse(courseName, 'check');
 
-const course = loadCourse(WORK_ROOT, courseName);
+const course = loadCourse(WORK_ROOT, courseName, { directory: courseDir(courseName) });
 if (!course) {
     console.error(`ERROR: course.meta.md not found at ${path.join(courseDir(courseName), 'course.meta.md')}`);
     process.exit(1);
@@ -229,7 +229,11 @@ if (modules.length) {
 
 let alignmentPath = null;
 if (isMPlus && hasBlueprint && outcomes.length) {
-    const pkgDir = path.join(course.dir, 'package');
+    // A composed package is manifest-owned. Diagnostic output must not create
+    // or mutate that generated package, nor overwrite its authored source.
+    const composedContext = process.env.NEXTCOURSE_CONTEXT_DIR
+        && (!process.env.NEXTCOURSE_CONTEXT_NAME || process.env.NEXTCOURSE_CONTEXT_NAME === courseName);
+    const pkgDir = path.join(course.dir, composedContext ? 'checks' : 'package');
     fs.mkdirSync(pkgDir, { recursive: true });
     const cell = v => (isBlank(v) ? '—' : String(v).replace(/\|/g, '\\|'));
     const rows = outcomes.map(o => {

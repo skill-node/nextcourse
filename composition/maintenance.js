@@ -488,7 +488,7 @@ function planCourseUpdate(workRoot, courseName, recipeId) {
         const candidateSnapshot = candidateReference && candidateSnapshots.get(candidateReference.contentHash);
         let status = !oldReference ? 'added' : !candidateReference ? 'removed' : changed ? 'update' : 'unchanged';
         let conflict = null;
-        if (changed && oldReference && candidateReference && oldReference.version === candidateReference.version
+        if (changed && oldReference && candidateReference && oldReference.ref === candidateReference.ref && oldReference.version === candidateReference.version
             && oldReference.contentHash !== candidateReference.contentHash && !frozen) {
             conflict = 'version-not-bumped';
         }

@@ -306,8 +306,10 @@ nextcourse check <course-name>
 | Duration | Module durations vs the declared total; overrunning is an error |
 | Completeness | Missing mandatory blueprint sections at M/L |
 
-It also writes `package/7_alignment.md` — the alignment matrix
+For independent courses it also writes `package/7_alignment.md` — the alignment matrix
 (outcome × module × activity × deliverable × evidence).
+
+Composed courses use the selected `--recipe` design view and write the diagnostic matrix to `.build/<recipe>/checks/7_alignment.md`. This keeps checks outside the manifest-owned delivery package and preserves authored `package-src/<recipe>/` Markdown.
 
 **Exit code**: `1` when there are errors, `0` when only warnings. S-scale courses are
 not forced into closure; they get a single informational line.

@@ -173,10 +173,11 @@ function parseTables(lines) {
 /**
  * @param {string} root  仓库根目录
  * @param {string} name  课程名
+ * @param {object} options  可选的已解析课程目录（CLI 的组合配方视图）
  * @returns {object|null} null 表示课程或 meta 不存在
  */
-function loadCourse(root, name) {
-    const dir      = path.join(root, 'courses', name);
+function loadCourse(root, name, options = {}) {
+    const dir      = options.directory ? path.resolve(options.directory) : path.join(root, 'courses', name);
     const metaPath = path.join(dir, 'course.meta.md');
     if (!fs.existsSync(metaPath)) return null;
 

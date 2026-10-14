@@ -266,6 +266,8 @@ nextcourse check <course-name>
 
 同时生成 `package/7_alignment.md` 对齐矩阵（成果 × 模块 × 活动 × 产出 × 证据）。
 
+组合课按 `--recipe` 读取已解析的设计视图，对齐检查报告写入 `.build/<recipe>/checks/7_alignment.md`；不写入受 manifest 管理的交付包，也不覆盖 `package-src/<recipe>/` 的人工源。
+
 **退出码**：有 error 时 `1`，只有 warning 时 `0`。S 档不强制闭环，只提示一行。
 
 **示例输出：**
